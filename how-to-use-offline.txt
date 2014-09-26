@@ -1,0 +1,6 @@
+
+
+Just open the file index.html in this directory. By default, it should open in your browser (don't get confused - it's still offline).
+
+
+Öffne einfach die Datei index.html in diesem Verzeichnis. Standardmäßig sollte sie in Deinem Browser geöffnet werden (nicht verwirren lassen - die Seite funktioniert trotzdem offline).

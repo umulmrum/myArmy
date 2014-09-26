@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+
+ Copyright 2012-2014 Stefan Kruppa
+ 
+ This file is part of myArmy.
+
+ myArmy is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as 
+ published by the Free Software Foundation, either version 3 of 
+ the License, or (at your option) any later version.
+
+ myArmy is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public 
+ License along with myArmy.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<html>
+	<head>
+		<title>myArmy</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta charset="UTF-8">
+		<meta name="description" content="Tabletop army creation tool">
+		<meta name="keywords" content="Warhammer,40k,myarmy,army,armee,create,erstellen,Tabletop">
+		<meta name="author" content="Stefan Kruppa">
+		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<meta name="HandheldFriendly" content="true" />
+		<meta name="MobileOptimized" content="width" />
+		
+		<link rel="stylesheet" type="text/css" href="css/myArmy.css">
+	</head>
+	<body>
+		<div id="all">
+			<div id="header">
+				<div id="appBar" class="commonHighlight">
+					<span id="menuButtonContainer"></span>
+					<span class="menuItem languageSelect"></span>
+				</div>
+				<div id="mobileAppBar" class="commonHighlight">
+					<span id="appMenuButton" class="menuButton appMenuButton"></span>
+					<span id="slotMenuButton" class="menuButton slotMenuButton"></span>
+					<span class="languageSelect"></span>
+				</div>
+				<div id="infoBar">
+					<span id="totalPoints"></span> <span id="armyLabel"></span>
+				</div>
+			</div>
+			<div id="container"></div>
+		</div>
+	
+		<div id="appMenu" class="menu invisible"></div>
+		<div id="slotMenu" class="menu invisible"></div>
+		<div id="extraContainer"></div>
+		
+		<script src="vendor/jquery-1.11.1.min.js"></script>
+		<script src="js/myArmy.js"></script>
+		<script>
+			$(window).load(function() {
+				init();
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,472 @@
+/*
+ * Copyright 2012-2014 Stefan Kruppa
+ * 
+ * This file is part of myArmy.
+ *
+ * myArmy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as 
+ * published by the Free Software Foundation, either version 3 of 
+ * the License, or (at your option) any later version.
+ *
+ * myArmy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public 
+ * License along with myArmy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+ 
+/*****************************
+ *     HTML elements
+ *****************************/
+body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	/*font-family: verdana, arial, helvetica, geneva, sans-serif;*/
+	font-family: arial, sans-serif;
+	font-size: 1em;
+	-webkit-transform: none;
+	width: 100%;
+}
+
+select {
+	padding: 2px;
+	border: 1px solid #BBBBBB;
+	background-color: white;
+}
+
+a {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+option {
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
+ul, ol, li {
+	padding: 0;
+	list-style-type: none;
+}
+	
+ul, ol {
+	padding-left: 3px;	
+}
+
+/****************************
+ *     misc
+ ****************************/
+
+.decoratedList {
+	padding: 20px;
+}
+
+.decoratedList li {
+	list-style-type: square;
+}
+
+
+.maxAppendix {
+	font-size: 0.75em;
+}
+
+.selected {
+	font-weight: bold;
+}
+
+.good {
+	color: black;
+}
+
+.ok {
+	color: gray;
+}
+
+.bad {
+	color: red;
+}
+
+.emphasizedBad {
+	text-decoration: underline;
+}
+
+select.bad {
+	color: inherit;
+	border-color: red;
+}
+
+.inactive {
+	color: #999999;
+}
+
+.inactive a {
+	color: #999999;
+}
+
+.invisible {
+	display: none !important;
+}
+
+.clear {
+	clear: both;
+}
+
+.table {
+	display: table;
+	table-layout: fixed;
+}
+
+.table > span {
+	display: table-cell;
+}
+
+.tableRow {
+	display: table-row;
+}
+
+.popup {
+	width: 100%;
+	display: none;
+}
+
+.commonHighlight {
+	background-color: #3E5F81;
+	color: white !important;
+}
+
+/*****************************
+ *     tabs
+ *****************************/
+
+.tabRow {
+	border-left: 1px solid #BBBBBB;
+	display: table;
+	table-layout: fixed;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	width: 100%;
+}
+
+.tab {
+	color: #666666;
+	cursor: pointer;
+	display: table-cell;
+	line-height: 1.7em;
+	text-align: center;
+	border-right: 1px solid #BBBBBB;
+}
+
+.selectedTab {
+	font-weight: bold;
+	color: #3E5F81;
+	border-style: none solid;
+	border-color: #3E5F81;
+	border-width: 0 3px;
+}
+
+/*****************************
+ *     buttons
+ *****************************/
+
+.menuButton {
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+	width: 50px;
+	height: 30px;
+	background-color: white;
+	color: #3E5F81;
+	border: 1px solid #3E5F81;
+	border-left: 0;
+	line-height: 30px;
+	font-weight: bold;
+	cursor: pointer;
+	background-repeat: no-repeat;
+}
+
+.selectedMenuButton {
+	border-bottom-color: white;
+}
+
+.button,.incDecButton,.mediumButton {
+	display: inline-block;
+	text-align: center;
+	border: 1px solid #BBBBBB;
+	cursor: pointer;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	margin-left: 1px;
+	margin-right: 1px;
+}
+
+.button:active,.incDecButton:active,.mediumButton:active {
+	background-color: #E8F2FF;
+}
+
+.incDecButton {
+	width: 2em;
+}
+
+.incDecContent {
+	width: 2em;
+	display: inline-block;
+	text-align: center;
+}
+
+.mediumButton {
+	width: 10em;
+}
+
+.imageButton {
+	background-repeat: no-repeat;
+	display: inline-block;
+	width: 1em;
+}
+
+.entryButton {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	cursor: pointer;
+}
+
+/*****************************
+ *     app
+ *****************************/
+ 
+ #all {
+	width: 100%;
+}
+
+#curtain, #curtain div {
+  position: fixed;
+  _position: absolute;
+  z-index: 1024;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  _height: expression(document.body.offsetHeight + "px");
+  background-color: white;
+  opacity: 0.5;
+}
+
+#curtain div {
+	z-index: 1025;
+	background: url(img/ajax-loader.gif);
+  _background: url(img/ajax-loader.gif);
+  opacity: 1;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+ 
+/*****************************
+ *     header
+ *****************************/
+
+#header {
+	position: fixed;
+	width: 100%;
+	z-index: 255;
+	/*display: table;*/
+}
+
+#appBar {
+	display: block;	
+}
+
+#mobileAppBar {
+	display: none;
+}
+
+#infoBar {
+	background-color: white;
+	border-bottom: 1px solid #BBBBBB;
+}
+
+#infoBar > span {
+	display: inline-block;
+	margin-left: 3px;
+}
+
+#menuButtonContainer {
+	display: table-cell;
+}
+
+.menuItem {
+	display: table-cell;
+	vertical-align: middle;
+	padding-left: 3px;
+}
+
+.menuUserInfo {
+	position: absolute;
+	right: 6px;
+	top: 6px;
+}
+
+.languageSelect {
+	display: table-cell;
+	vertical-align: middle;	
+}
+
+.languageSelectElement {
+  display: inline-block;
+  height: 15px;
+  width: 25px;
+  margin: 4px;
+}
+
+.en {
+	background-image: url(img/en.png);
+}
+
+.de {
+	background-image: url(img/de.png);
+}
+
+#totalPoints {
+	width: 6.3em;
+	text-align: right;
+	display: inline-block;
+}
+
+#optionCountOkButton {
+	margin-left: 10px;
+}
+
+/*****************************
+ *     container
+ *****************************/
+
+#container {
+	padding: 5px;
+	padding-top: 3.5em;
+	width: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.container {
+	width: 100%;
+	padding-left: 3px;
+	display: table;
+	table-layout: fixed;
+}
+
+.containerChild {
+	display: table-row;
+}
+
+#extraContainer {
+	display: none;	
+}
+
+/*****************************
+ *     print
+ *****************************/
+@media print {
+	#all {
+		display: none !important;
+	}
+	#extraContainer {
+		display: block !important;
+	}
+}
+
+/*****************************
+ *     small devices
+ *****************************/
+@media screen and (max-width: 580px) {
+	body {
+		font-size: 1.2em;
+	}
+	
+	#header {
+		position: static;
+		display: block;
+	}
+	
+	#appBar {
+		display: none;	
+	}
+	
+	#mobileAppBar {
+		display: block;
+		width: 100%;
+		z-index: 1000;
+		position: relative;
+	}
+	
+	.appMenuButton {
+		background-image: url('img/gear32.png');
+		background-position: 7px;
+	}
+
+	.slotMenuButton {
+		background-image: url('img/turnright32.png');
+		background-position: 10px;
+	}
+	
+	#appMenu {
+		width: 60px;
+	}
+	
+	#slotMenu {
+		left: 51px;
+	}
+	
+	#slotMenu span {
+		width: auto;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+	
+	.menu {
+		z-index: 254;
+		position: absolute;
+		top: 51px;
+	}
+	
+	.menu .menuButton {
+		display: block;
+		text-align: left;
+		border: 1px solid #3E5F81;
+		border-top: 0;
+	}
+	
+	.menu .selectedMenuButton {
+		border-bottom: 1px solid #3E5F81;
+	}
+	
+	#container {
+		padding-top: 10px;
+		padding-bottom: 0;
+		padding-left: 0;
+		padding-right: 0;
+	}
+	
+	.containerChild {
+		display: block;
+	}
+	
+	.menuButton {
+		height: 50px;
+		line-height: 60px;
+	}
+
+	.incDecButton {
+		height: 2em;
+		line-height: 2em;
+	}
+	
+	.tableRow {
+		display: inherit;
+	}
+	
+}

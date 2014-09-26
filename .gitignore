@@ -1,0 +1,8 @@
+css/myArmy.css
+data/*
+/extensions/*
+!/extensions/designer/
+!/extensions/help/
+!/extensions/mainmenu/
+!/extensions/summary/
+js/myArmy.js

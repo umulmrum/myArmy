@@ -1,0 +1,62 @@
+/*
+ * Copyright 2012-2014 Stefan Kruppa
+ * 
+ * This file is part of myArmy.
+ *
+ * myArmy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as 
+ * published by the Free Software Foundation, either version 3 of 
+ * the License, or (at your option) any later version.
+ *
+ * myArmy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public 
+ * License along with myArmy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+.mainmenuButton { /* background-position: -1144px center; */
+	background-image: url('img/note32.png');
+	background-position: 7px;
+}
+
+/*****************************
+ *     main menu
+ *****************************/
+ 
+.pageContent {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	line-height: 1.8em;
+}
+
+.detachmentBox {
+	background-color: #EEEEEE;
+	border: 1px solid #DADADA;
+	margin-bottom: 3px;
+	padding: 2px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+}
+
+.detachmentBox select:first-child {
+	margin-right: 3px;
+}
+
+
+/*****************************
+ *     small devices
+ *****************************/
+@media screen and (max-width: 580px) {
+	
+	.detachmentBox select {
+		display: block;
+		width: 100%;
+	}
+
+}

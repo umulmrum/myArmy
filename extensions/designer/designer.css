@@ -1,0 +1,251 @@
+/*
+ * Copyright 2012-2014 Stefan Kruppa
+ * 
+ * This file is part of myArmy.
+ *
+ * myArmy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as 
+ * published by the Free Software Foundation, either version 3 of 
+ * the License, or (at your option) any later version.
+ *
+ * myArmy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public 
+ * License along with myArmy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+.designButton { /* background-position: -856px center; */
+	background-image: url('img/notepencil32.png');
+	background-position: 11px;
+}
+
+.chooserButton { /* background-position: 6px center; */
+	background-image: url('img/plus32.png');
+	background-position: 9px;
+}
+
+
+.deleteButton {
+	background-image: url("img/cross.png");
+}
+
+.cloneButton {
+	background-image: url("img/page_white_copy.png");
+}
+
+.collapseButton {
+	background-image: url("img/minus.png");
+}
+
+.expandButton {
+	background-image: url("img/plus.png");
+}
+
+/*****************************
+ *     design
+ *****************************/
+
+#chooserContainer {
+	width: 14em;
+}
+
+ .chooserListWrapper {
+	width: 15em;
+	display: table-cell;
+}
+
+.chooserList {
+	margin: 0;
+	margin-bottom: 1em;
+	margin-top: 3px;
+	padding-left: 0;
+}
+
+.chooserList li {
+	border-bottom: 1px dotted #BBBBBB;
+	line-height: 1.35em;
+}
+
+.chooserList li:last-child {
+	border-bottom: 0;
+}
+	
+.chooserList li:hover {
+	background-color: #E8F2FF;
+	cursor: pointer;
+}
+
+.chooserList li:active {
+	background-color: #3E5F81;
+	color: white;
+}
+
+.slotlistEntryWrapper {
+	width: 100%;
+	display: table-cell;
+}
+
+.slotHeadingContainer {
+	font-size: 1.2em;
+	font-weight: bold;
+	border-bottom: 1px solid black;
+	display: inline-block;
+	width: 100%;
+	white-space: nowrap;
+}
+
+.unitTabRow {
+	padding-left: 0;
+}
+
+.unitTab {
+
+}
+
+ .designerList {
+	margin-top: 0;
+}
+
+.entry {
+	margin: 5px;
+	margin-right: 8px;
+	width: 310px;
+	display: inline-block;
+	vertical-align: top;
+}
+
+.entryContent {
+	width: 280px;
+	display: table-cell;
+}
+
+.entryHeader {
+	width: 100%;
+	display: table;
+	line-height: 1.5em;
+}
+
+.entryHeader > span {
+	display: table-cell;
+}
+
+.entryArmyIndex {
+  width: 1em;
+}
+
+.entryName {
+	padding-left: 3px;
+}
+
+.entryArmyIndex, .entryArmyIndexWithModelCount {
+	border-right: 1px solid white;
+	padding-left: 6px;
+	padding-right: 3px;
+}
+
+.entryArmyIndexWithModelCount {
+	border-bottom: 1px solid white;
+}
+
+.entryPoints {
+	padding-right: 3px;
+	text-align: right;
+}
+
+.entryButtons {
+	width: 20px;
+	display: table-cell;
+	padding-left: 3px;
+}
+
+.entryCount {
+	margin-left: 5px;
+	margin-right: 5px;
+	width: 1.5em;
+	display: inline-block;
+	text-align: center;
+}
+
+.modelCountHeader > span {
+	padding-left: 3px;
+}
+
+.pointsPerModel {
+	font-size: 0.8em;
+}
+
+.optionContainer {
+	background-color: white;
+	border: 1px solid #BBBBBB;
+	border-top: 1px solid #DADADA;
+}
+
+.optionContainer table {
+	width: 100%;
+	border-spacing: 0;
+}
+
+.firstOption td {
+	border-top: 1px solid #DADADA;
+}
+
+.option {
+	font-size: 0.85em;
+	cursor: pointer;
+}
+
+.option:hover {
+	background-color: #E8F2FF;
+}
+
+.suboption {
+	font-size: 0.8em;
+	line-height: 1;
+}
+
+.optionCost {
+	text-align: right;
+}
+
+/*****************************
+ *     small devices
+ *****************************/
+@media screen and (max-width: 580px) {
+	
+	.chooserList {
+		line-height: 1.5em;
+		width: 100%;
+	}
+
+	.chooserList li {
+		line-height: 1.5em;
+	}
+
+	.chooserListWrapper {
+		width: 100%;
+		display: inherit;
+	}
+	
+	
+	.slotHeadingDesigner {
+		display: none !important;
+	}
+	
+	.slotlistEntryWrapper {
+		padding-left: 0;
+		display: inherit;
+	}
+	.entry {
+		margin: 0;
+		margin-bottom: 1em;
+	}
+	
+	.modelCountHeader span {
+		font-size: 0.85em;
+	}
+	
+}
