@@ -27,8 +27,8 @@ Contributing
 Please see the [technical documentation][5] on how to contribute.
 
 
-[1] http://myarmydocs.umulmrum.de/en/content/technical/gettingstarted/index.html
-[2] http://myarmydocs.umulmrum.de/en/content/user/index.html
-[3] http://myarmydocs.umulmrum.de/de/content/user/index.html
-[4] http://myarmydocs.umulmrum.de/en/content/technical/index.html
-[5] http://myarmydocs.umulmrum.de/en/content/technical/contributing/index.html
+[1]: http://myarmydocs.umulmrum.de/en/content/technical/gettingstarted/index.html
+[2]: http://myarmydocs.umulmrum.de/en/content/user/index.html
+[3]: http://myarmydocs.umulmrum.de/de/content/user/index.html
+[4]: http://myarmydocs.umulmrum.de/en/content/technical/index.html
+[5]: http://myarmydocs.umulmrum.de/en/content/technical/contributing/index.html
