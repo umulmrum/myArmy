@@ -109,7 +109,7 @@ function initDevice() {
 		_guiState.device = "android";
 	} else if(userAgent.indexOf("trident") != -1) {
 		_guiState.userAgent = "iedesktop";
-	} else if(userAgent.indexOf("iemobile") != -1) {
+	} else if((userAgent.indexOf("msie") != -1) && (userAgent.indexOf("mobile") != -1)) {
 		_guiState.device = "iemobile";
 	} else if(userAgent.indexOf("mozilla") != -1) {
 		_guiState.userAgent = "firefox";
@@ -119,7 +119,7 @@ function initDevice() {
 		_guiState.userAgent = "opera";
 	}
 	
-	if((_guiState.device == "appleMobile" || _guiState.device == "android" /*|| _guiState.device == "iemobile"*/) && _guiState.userAgent != "opera" && _guiState.userAgent != "firefox") {
+	if((_guiState.device == "appleMobile" || _guiState.device == "android" || _guiState.device == "iemobile") && _guiState.userAgent != "opera" && _guiState.userAgent != "firefox") {
 		_guiState.clickEvent = "touchend";
 		$(document).on("touchstart", saveCoords);
 //	} else if(_guiState.device == "iemobile") {
