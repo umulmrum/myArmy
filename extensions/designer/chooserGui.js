@@ -262,13 +262,6 @@ function ChooserGui() {
 //		this.refreshEntriesForSlot(slot);
 //	};
 	
-	this.refreshEntries = function() {
-		for ( var i in _systemState.slots) {
-			var slot = _systemState.slots[i];
-			this.refreshEntriesForSlot(slot);
-		}
-	};
-	
 	this.refreshSlotHeadings = function() {
 		for ( var i in _systemState.slots) {
 			// TODO possibly add dirty-check
@@ -367,11 +360,14 @@ function ChooserGui() {
 	
 	this.refreshEntriesForSlot = function(slot) {
 		var rowElement = _gui.getElement("#slotRow" + slot.slotId);
+		var menuElement = _gui.getElement("#slotMenuItem" + slot.slotId);
 		var hasElements = ($.inArray(true, traverseArmyData(this, this.refreshForArmyData, {slotId: slot.slotId}))) > -1;
 		if(hasElements) {
 			rowElement.removeClass("invisible");
+			menuElement.removeClass("invisible");
 		} else {
 			rowElement.addClass("invisible");
+			menuElement.addClass("invisible");
 		}
 		
 		var tabRow = rowElement.find(".tabRow");
