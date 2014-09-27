@@ -27,7 +27,7 @@ function loadScript(url) {
 }
 
 loadScript("core/options.js");
-loadScript("vendor/jquery.ba-hashchange-sk.js");
+loadScript("core/jquery.ba-hashchange-sk.js");
 loadScript("core/datastore.js");
 loadScript("core/model.js");
 loadScript("core/dispatcher.js");
