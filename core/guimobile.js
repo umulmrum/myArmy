@@ -80,12 +80,19 @@ function hideAllMenus() {
 	$(window).unbind(_guiState.clickEvent);
 }
 
+var _currentSlotId = -1;
+
 function showSlot(slotId) {
 	if(_guiState.currentContent != "design") {
 		_gui.showFragment("design");
 	}
-	_gui.getElement(".containerChild").addClass("invisible");
-	_gui.getElement("#slotRow" + slotId).removeClass("invisible");
+	_currentSlotId = slotId;
+	if(slotId == -1) {
+		_gui.getElement(".containerChild:not(.empty)").removeClass("invisible");
+	} else {
+		_gui.getElement(".containerChild").addClass("invisible");
+		_gui.getElement("#slotRow" + slotId).removeClass("invisible");
+	}
 	hideMenu("slotMenu");
 }
 

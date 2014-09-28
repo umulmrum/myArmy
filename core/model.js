@@ -64,6 +64,8 @@ function Slot(slotId, slotName, order) {
 	this.slotId = slotId;
 	this.slotName = slotName;
 	this.order = order;
+	
+	this.visible = true;
 }
 
 /**

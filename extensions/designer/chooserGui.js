@@ -108,6 +108,13 @@ function ChooserGui() {
 		if (_systemState.system == null) {
 			return;
 		}
+		
+		var slotMenuItem = span(_guiState.text["all"], "slotMenuItem-1", "menuButton");
+		slotMenuItem.on(_guiState.clickEvent, function(event) {
+			showSlot(-1);
+		});
+		slotMenu.append(slotMenuItem);
+		
 		var slotCount = 0;
 		var selectedPage = -1;
 
@@ -125,7 +132,7 @@ function ChooserGui() {
 			var slotId = slot.slotId;
 			var slotName = _guiState.text[slot.slotName];
 
-			var visible = $.inArray(true, traverseArmyData(this, this.checkSlotVisible, { slotId : slotId })) > -1;
+//			var visible = $.inArray(true, traverseArmyData(this, this.checkSlotVisible, { slotId : slotId })) > -1;
 
 			slotCount++;
 
@@ -145,20 +152,20 @@ function ChooserGui() {
 			var slotentryListWrapper = div(null, "entriesPerSlotWrapper" + slotId, "slotlistEntryWrapper");
 			slotentryListWrapper.append(span("&nbsp;", null, "slotHeadingContainer slotHeadingDesigner"));
 			slotentryListWrapper.append(ul(null, "slotentryDesignerList" + slotId, "designerList"));
-			if (!visible) {
-				slotRow.addClass("invisible");
+			if (!slot.visible) {
+				slotRow.addClass("invisible empty");
 			} else if (_guiState.isSmallDevice) {
 				if (selectedPage == -1) {
 					selectedPage = slotId;
 				} else {
-					slotRow.addClass("invisible");
+					slotRow.addClass("invisible empty");
 				}
 			}
 			slotRow.append(slotentryListWrapper);
 
-			var slotMenuItem = span(slotName, "slotMenuItem" + slotId, "menuButton");
-			if (!visible) {
-				slotMenuItem.addClass("invisible");
+			slotMenuItem = span(slotName, "slotMenuItem" + slotId, "menuButton");
+			if (!slot.visible) {
+//				slotMenuItem.addClass("invisible empty");
 			}
 			slotMenuItem.on(_guiState.clickEvent, {	slotId : slotId	}, function(event) {
 				showSlot(event.data.slotId);
@@ -170,10 +177,10 @@ function ChooserGui() {
 
 	};
 
-	this.checkSlotVisible = function(armyData, armyIndex, additionalParams) {
-		return !isUndefined(armyData.entityslotCount[additionalParams.slotId])
-				&& (armyData.entityslotCount[additionalParams.slotId] > 0);
-	};
+//	this.checkSlotVisible = function(armyData, armyIndex, additionalParams) {
+//		return !isUndefined(armyData.entityslotCount[additionalParams.slotId])
+//				&& (armyData.entityslotCount[additionalParams.slotId] > 0);
+//	};
 	
 	this.renderUnitSelectionTabs = function() {
 		$(".tabRow").remove();
@@ -209,8 +216,14 @@ function ChooserGui() {
 		}
 		
 		for ( var i in _systemState.slots) {
+			var slot = _systemState.slots[i];
+			if(slot.visible) {
+				_gui.getElement("#slotMenuItem" + slot.slotId).removeClass("invisible empty");
+			} else {
+				_gui.getElement("#slotMenuItem" + slot.slotId).addClass("invisible empty");
+			}
 //			this.renderSlotEntriesChooserForSlot(_systemState.slots[i]);
-			var slotentryList = _gui.getElement("#slotentryChooserList" + _systemState.slots[i].slotId);
+			var slotentryList = _gui.getElement("#slotentryChooserList" + slot.slotId);
 			slotentryList.children().remove();
 		}
 		traverseArmyData(this, this.renderSlotEntries);
@@ -362,12 +375,16 @@ function ChooserGui() {
 		var rowElement = _gui.getElement("#slotRow" + slot.slotId);
 		var menuElement = _gui.getElement("#slotMenuItem" + slot.slotId);
 		var hasElements = ($.inArray(true, traverseArmyData(this, this.refreshForArmyData, {slotId: slot.slotId}))) > -1;
-		if(hasElements) {
-			rowElement.removeClass("invisible");
+		if(slot.visible) {
 			menuElement.removeClass("invisible");
 		} else {
-			rowElement.addClass("invisible");
 			menuElement.addClass("invisible");
+		}
+		
+		if(!slot.visible || (_guiState.isSmallDevice && _currentSlotId > -1 && slot.slotId != _currentSlotId)) {
+			rowElement.addClass("invisible empty");
+		} else {
+			rowElement.removeClass("invisible empty");
 		}
 		
 		var tabRow = rowElement.find(".tabRow");

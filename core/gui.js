@@ -27,6 +27,7 @@ function Gui() {
 
 	this.init = function() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmyAction, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
@@ -39,6 +40,10 @@ function Gui() {
 		jQuery.event.add(window, "resize", this.onResizeContainer);
 	};
 
+	this.onPostChangeArmyAction = function(event, additionalData) {
+		this.checkSlotVisibility();
+	};
+	
 	this.onPostChangeArmy = function(event, additionalData) {
 		this.refreshAll();
 		this.stopLongRunningProcess();
@@ -72,6 +77,7 @@ function Gui() {
 
 	this.prepare = function() {
 		this.renderLanguageSelect();
+		this.checkSlotVisibility();
 
 		_dispatcher.triggerEvent("postPrepareGui");
 	};
@@ -89,6 +95,13 @@ function Gui() {
 		var windowWidth = myWindow.width();
 
 		_guiState.isSmallDevice = (windowWidth < 580);
+	};
+	
+	this.checkSlotVisibility = function() {
+		for ( var i in _systemState.slots) {
+			var slot = _systemState.slots[i];
+			slot.visible = $.inArray(true, traverseArmyData(this, this.checkSlotVisible, { slotId : slot.slotId })) > -1;
+		}
 	};
 
 	this.refreshTotalPoints = function() {
@@ -155,6 +168,11 @@ function Gui() {
 			}
 		}
 		return true;
+	};
+	
+	this.checkSlotVisible = function(armyData, armyIndex, additionalParams) {
+		return !isUndefined(armyData.entityslotCount[additionalParams.slotId])
+				&& (armyData.entityslotCount[additionalParams.slotId] > 0);
 	};
 
 	this.startLongRunningProcess = function() {
