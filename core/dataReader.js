@@ -191,15 +191,18 @@ function DataReader() {
 			fillsPool = parsePools(armyIndex, fillsPool);
 			var needsPool = coalesce(obj.needsPool, null);
 			needsPool = parsePools(armyIndex, needsPool);
+			var enabled = true;//coalesce(obj.enabled, true);
 			
-			var entityslot = new EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool);
+			var entityslot = new EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, enabled);
 			armyData.entityslots[entityslot.entityslotId] = entityslot;
 			armyData.setEntityCount(entityslot.entityslotId, 0);
 			registerEntityslotForPools(entityslot);
-			if(isUndefined(armyData.entityslotCount[slotId])) {
-				armyData.entityslotCount[slotId] = 1;
-			} else {
-				armyData.entityslotCount[slotId]++;
+			if(enabled) {
+					if(isUndefined(armyData.entityslotCount[slotId])) {
+						armyData.entityslotCount[slotId] = 1;
+					} else {
+						armyData.entityslotCount[slotId]++;
+					}
 			}
 		}
 		
@@ -234,6 +237,9 @@ function DataReader() {
 			optionLists[optionListId] = optionList;
 			var optionsJson = obj.options;
 			optionList.options = {};
+			if(!optionsJson) {
+				continue;
+			}
 			for(var j = 0; j < optionsJson.length; j++) {
 				var obj2 = optionsJson[j];
 				var optionId = obj2.oId;
