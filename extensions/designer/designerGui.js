@@ -30,6 +30,7 @@ function DesignerGui() {
 		_dispatcher.bindEvent("postPrepareGui", this, this.onPostPrepareGui, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
@@ -64,6 +65,10 @@ function DesignerGui() {
 	this.onPostChangeLanguage = function(event) {
 		this.refreshSlotEntries();
 		this.refreshElements();
+	};
+	
+	this.onPostChangeArmy = function(event) {
+		this.removeInvalidEntries();
 	};
 	
 	this.onPreCallFragment = function(event, additionalData) {
@@ -732,6 +737,15 @@ function DesignerGui() {
 				return false;
 			}
 			this.expandEntryOptions(armyData, entityslot);
+		});
+	};
+	
+	this.removeInvalidEntries = function() {
+		$(".entry").each(function(index, element) {
+			var localId = element.id.split('_')[1];
+			if(_armyState.lookupId(localId) == null) {
+				element.remove();
+			}
 		});
 	};
 	
