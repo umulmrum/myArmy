@@ -86,7 +86,7 @@ function Army(armyId, armyName, armyPrefix, armyGroup) {
 }
 
 function EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTaken,
-		slotCost, fillsPool, needsPool) {
+		slotCost, fillsPool, needsPool, enabled) {
 	this.armyIndex = armyIndex;
 	this.entityslotId = entityslotId;
 	this.entityId = entityId;
@@ -97,6 +97,7 @@ function EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTake
 	this.slotCost = slotCost;
 	this.fillsPool = fillsPool;
 	this.needsPool = needsPool;
+	this.enabled = enabled;
 
 	this.init = function() {
 		this.localId = null;
@@ -107,7 +108,7 @@ function EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTake
 	this.init();
 
 	this.clone = function() {
-		var cloned = new EntitySlot(this.armyIndex, this.entityslotId, this.entityId, this.slotId, this.minTaken, this.maxTaken, this.slotCost, this.fillsPool, this.needsPool);
+		var cloned = new EntitySlot(this.armyIndex, this.entityslotId, this.entityId, this.slotId, this.minTaken, this.maxTaken, this.slotCost, this.fillsPool, this.needsPool, this.enabled);
 		if(this.entity != null) {
 			cloned.entity = this.entity.clone();
 		}

@@ -36,6 +36,7 @@ function Gui() {
 		
 		this.getElement(".appMenuButton").on(_guiState.clickEvent, { menuId: "appMenu" }, toggleMenu);
 		this.getElement(".slotMenuButton").on(_guiState.clickEvent, { menuId: "slotMenu" }, toggleMenu);
+		this.getElement(".messageCloseButton").on(_guiState.clickEvent, this.hideMessages);
 
 		jQuery.event.add(window, "resize", this.onResizeContainer);
 	};
@@ -223,6 +224,39 @@ function Gui() {
 	
 	/*****************************
 	 *     popup menus end
+	 *****************************/
+	
+	/*****************************
+	 *     user messages start
+	 *****************************/
+	
+	this.displayErrorMessage = function(message) {
+		displayMessage(message, "Error");
+	}
+	
+	this.displaySuccessMessage = function(message) {
+		displayMessage(message, "Success");
+	}
+	
+	this.displayInfoMessage = function(message) {
+		displayMessage(message, "Info");
+	}
+	
+	function displayMessage(message, type) {
+		var messageBar = _gui.getElement('.messageBar');
+		var messageElement = _gui.getElement('.message');
+		messageElement.html(message);
+		messageBar.removeClass();
+		messageBar.addClass("messageBar message" + type);
+	};
+
+	this.hideMessages = function() {
+		var messageBar = _gui.getElement('.messageBar');
+		messageBar.addClass("invisible");
+	};
+	
+	/*****************************
+	 *     user messages end
 	 *****************************/
 	
 	/*****************************

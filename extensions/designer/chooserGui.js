@@ -232,6 +232,9 @@ function ChooserGui() {
 	this.renderSlotEntries = function(armyData, armyIndex) {
 		for ( var i in armyData.entityslots) {
 			var entityslot = armyData.entityslots[i];
+			if(!entityslot.enabled) {
+				continue;
+			}
 			var entityslotId = entityslot.entityslotId;
 			var slotentryList = _gui.getElement("#slotentryChooserList" + entityslot.slotId);
 			var entity = armyData.entityPool[entityslot.entityId];
