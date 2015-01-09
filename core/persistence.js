@@ -39,7 +39,7 @@ function Persistence() {
 	// values in base36 encoding.
 	var MARKER = {};
 	// add every marker character!
-	MARKER.SET = {Y:1,D:1,A:1,F:1,E:1,C:1,L:1,O:1,U:1,N:1,T:1};
+	MARKER.SET = {Y:1,D:1,A:1,F:1,E:1,C:1,L:1,O:1,U:1,N:1,T:1,X:1};
 	MARKER.SYSTEM = "Y";
 	MARKER.DETACHMENT_TYPE = "D";
 	MARKER.ARMY = "A";
@@ -52,6 +52,7 @@ function Persistence() {
 	MARKER.OPTION = "O";
 	MARKER.SUBOPTION = "U";
 	MARKER.SUBOPTION_END = "N";
+	MARKER.EXTRA = "X";
 
 	this.init = function() {
 		_dispatcher.bindEvent("postStateRefresh", this, this.createStatelink, _dispatcher.PHASE_STATE);
@@ -227,8 +228,15 @@ function Persistence() {
 	function restoreEntity(fileVersion, q, i, armyIndex) {
 		var value = val(q, i);
 		var entityslotId = parseInt(value, BASE);
-		var entity = _controller.addEntry(armyIndex, entityslotId, false);
 		i = i + value.length;
+		// workaround to remove old system entities without completely breaking saved armies
+		if(entityslotId >= 901 && entityslotId <= 904) {
+			while(i < q.length && q[i] != MARKER.ENTITY && q[i] != MARKER.ARMY && q[i] != MARKER.ALLYENTITY) {
+				i++;
+			}
+		} else {
+			var entity = _controller.addEntry(armyIndex, entityslotId, false);
+		}
 		while(i < q.length) {
 			switch(q[i]) {
 			case MARKER.COUNT:

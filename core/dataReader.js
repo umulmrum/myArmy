@@ -75,9 +75,6 @@ function DataReader() {
 		var currentSystem = _systemState.system;
 		if(currentSystem != null) {
 			this.readTexts(currentSystem.systemBaseDir + "textsystem", _guiState.text);
-			if(_armyState.getArmyData(0) != null) {
-				this.readTexts(currentSystem.systemBaseDir + "textarmy", _armyState.getArmyData(0).text);
-			}
 		}
 	};
 	
@@ -220,10 +217,6 @@ function DataReader() {
 	this.loadArmy = function(armyData, armyIndex) {
 		var armyPath = getArmyPath(armyData.army) + "army.json";
 		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { armyIndex: armyIndex});
-	};
-	
-	this.loadSystemArmy = function() {
-		doJson(_systemState.system.systemBaseDir + "army.json", $.proxy(this.readArmy, this), loadfail, false, { armyIndex: 0});
 	};
 	
 	function readOptions(armyIndex, entity, optionListsJson) {

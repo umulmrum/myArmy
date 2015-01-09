@@ -89,10 +89,6 @@ function Controller() {
 			_dataReader.readTextsArmy(armyData);
 			
 			_dataReader.loadArmy(armyData, armyIndex);
-			if(armyIndex == 0) {
-				_dataReader.loadSystemArmy();
-				_dataReader.readTexts(_systemState.system.systemBaseDir + "textarmy", armyData.text);
-			}
 			_armyState.getArmyData(armyIndex).resetArmy();
 		} else {
 			_armyState.setArmy(armyIndex, null);
