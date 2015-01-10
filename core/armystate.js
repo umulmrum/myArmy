@@ -57,15 +57,18 @@ function ArmyState() {
 	};
 	
 	this.removeArmy = function(armyIndex) {
-		if(((this.getArmyCount() -1) < armyIndex) || (armyData[armyIndex].army == null)) {
+		if(((this.getArmyCount() -1) < armyIndex) || (armyData[armyIndex].getArmy(0) == null)) {
 			return;
 		}
-		for(var i = 0; i < armyData[armyIndex].selections.length; i++) {
-			var entityslot = armyData[armyIndex].selections[i];
-			removeEntitySlotLocalIds(entityslot);
-			this.totalPoints -= entityslot.entity.totalCost;
-			this.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
-		}
+        for(var i = 0; i < armyData[armyIndex].getArmyCount(); i++) {
+            var armyUnit = armyData[armyIndex].getArmyUnit(i);
+            for(var j = 0; j < armyUnit.getSelectionCount(); j++) {
+                var entityslot = armyUnit.getSelection(j);
+                removeEntitySlotLocalIds(entityslot);
+                this.totalPoints -= entityslot.entity.totalCost;
+                this.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
+            }
+        }
 		this.setArmy(armyIndex, null);
 		_persistence.createStatelink();
 	};
@@ -86,30 +89,41 @@ function ArmyState() {
 		delete this.armyLookup[element.localId];
 	};
 	
-	this.getArmyData = function(index) {
-		return armyData[index];
+	this.getArmyData = function(armyDataIndex) {
+		return armyData[armyDataIndex];
+	};
+
+    this.setArmyData = function(armyDataIndex, armyDataParam) {
+        armyData[armyDataIndex] = armyDataParam;
+    };
+	
+	this.getArmyUnit = function(armyDataIndex, armyUnitIndex) {
+        if(armyData[armyDataIndex] == null) {
+            return null;
+        }
+		return armyData[armyDataIndex].getArmyUnit(armyUnitIndex);
 	};
 	
 	this.getArmyDataCount = function() {
 		return armyData.length;
 	}
 	
-	this.getArmy = function(index) {
-		if(armyData[index] == null) {
+	this.getArmy = function(armyDataIndex, armyUnitIndex) {
+		if(armyData[armyDataIndex] == null) {
 			return null;
 		}
-		return armyData[index].army;
+		return armyData[armyDataIndex].getArmy(armyUnitIndex);
 	};
 	
-	this.setArmy = function(armyIndex, army) {
-		armyData[armyIndex] = new ArmyData();
-		armyData[armyIndex].army = army;
+	this.setArmy = function(armyDataIndex, armyUnitIndex, army) {
+		armyData[armyDataIndex] = new ArmyData();
+		armyData[armyDataIndex].setArmy(armyUnitIndex, army);
 	};
 	
 	this.getArmyCount = function() {
 		var count = 0;
 		for(var i = 0; i < armyData.length; i++) {
-			if(armyData[i].army != null) {
+			if(armyData[i].getArmy(0) != null) {
 				count++;
 			}
 		}
@@ -118,7 +132,7 @@ function ArmyState() {
 	
 	this.getFirstArmyIndex = function() {
 		for(var i = 0; i < armyData.length; i++) {
-			if(armyData[i].army != null) {
+			if(armyData[i].getArmy(0) != null) {
 				return i;
 			}
 		}
@@ -127,7 +141,7 @@ function ArmyState() {
 
 	this.getLastArmyIndex = function() {
 		for(var i = armyData.length - 1; i >= 0; i--) {
-			if(armyData[i].army != null) {
+			if(armyData[i].getArmy(0) != null) {
 				return i;
 			}
 		}

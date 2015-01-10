@@ -178,14 +178,15 @@ function getSlotHeadingText(slot) {
 }
 
 function getSlotHeadingForArmy(armyData, armyIndex, additionalParams) {
-	if(!isUndefined(armyData.text[additionalParams.slotName])) {
-		return armyData.text[additionalParams.slotName];
+    var armyUnit = armyData.getArmyUnit(0);
+	if(!isUndefined(armyUnit.getText(additionalParams.slotName))) {
+		return armyUnit.getText(additionalParams.slotName);
 	} else {
 		return null;
 	}
 }
 
-function getChooserCountForArmy (armyData, armyIndex, additionalParams) {
+function getChooserCountForArmy (armyUnit, armyUnitIndex, armyData, armyIndex, additionalParams) {
 	// support multiple entities per slot by using fractions and round them up here
-	return Math.ceil(armyData.selectionCost[additionalParams.slotId]);
+	return Math.ceil(armyUnit.getSelectionCost(additionalParams.slotId));
 }

@@ -39,8 +39,8 @@ function State() {
 	};
 	
 	this.sortSelections = function(event, additionalData) {
-		var armyData = _armyState.getArmyData(additionalData.entityslot.armyIndex);
-		var sortedSelections = armyData.selections.sort(function(a, b) {
+		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.armyDataIndex, additionalData.entityslot.armyUnitIndex);
+		var sortedSelections = armyUnit.getSelections().sort(function(a, b) {
 			var slotA = _systemState.slots[a.slotId];
 			var slotB = _systemState.slots[b.slotId];
 			if (slotA.position < slotB.position) {
@@ -56,7 +56,7 @@ function State() {
 				return 0;
 			}
 		});
-		armyData.selections = sortedSelections;
+		armyUnit.setSelections(sortedSelections);
 	};
 	
 	this.onDefaultEvent = function(event, additionalData) {
@@ -77,36 +77,36 @@ function State() {
 	};
 	
 	this.onPostResetArmy = function(event) {
-		traverseArmyData(this, this.checkAllEntityslotsAvailable);
+		traverseArmyUnit(this, this.checkAllEntityslotsAvailable);
 	};
 	
 	this.refreshDirtyThings = function(force) {
-		traverseArmyData(this, checkDirtyPools); // mark additional entityslots as dirty if affected by pool
-		traverseArmyData(this, this.calculateDirtyEntityStatesInChooser, { force: force});
-		traverseArmyData(this, this.calculateDirtyEntityStatesInSelections, { force: force});
+		traverseArmyUnit(this, checkDirtyPools); // mark additional entityslots as dirty if affected by pool
+		traverseArmyUnit(this, this.calculateDirtyEntityStatesInChooser, { force: force});
+		traverseArmyUnit(this, this.calculateDirtyEntityStatesInSelections, { force: force});
 		
 		_dispatcher.triggerEvent("postStateRefresh");
 	};
 
-	this.calculateDirtyEntityStatesInChooser = function(armyData, additionalParams) {
-		for(var i in armyData.entityslots) {
-			var entityslot = armyData.entityslots[i];
+	this.calculateDirtyEntityStatesInChooser = function(armyUnit, armyUnitIndex, armyData, armyDataIndex, additionalParams) {
+		for(var i in armyUnit.getEntityslots()) {
+			var entityslot = armyUnit.getEntityslot(i);
 			if(additionalParams.force || entityslot.dirty) {
-				_state.checkEntityslotAvailable(armyData, entityslot);
+				_state.checkEntityslotAvailable(armyUnit, entityslot);
 			}
 		}
 	};
 
-	this.checkAllEntityslotsAvailable = function(armyData) {
-		for(var i in armyData.entityslots) {
-			_state.checkEntityslotAvailable(armyData, armyData.entityslots[i]);
+	this.checkAllEntityslotsAvailable = function(armyUnit) {
+		for(var i in armyUnit.getEntityslots()) {
+			_state.checkEntityslotAvailable(armyUnit, armyUnit.getEntityslot(i));
 		}
 	};
 
-	this.checkEntityslotAvailable = function(armyData, entityslot) {
+	this.checkEntityslotAvailable = function(armyUnit, entityslot) {
 		
 		var availableState = 1;
-		var count = armyData.getEntityCount(entityslot.entityslotId);
+		var count = armyUnit.getEntityCount(entityslot.entityslotId);
 		if (count > entityslot.maxTaken) {
 			availableState = -1;
 		} else if (count == entityslot.maxTaken) {
@@ -115,10 +115,10 @@ function State() {
 				
 		if(availableState > -1) { // the worst case won't be changed
 			for(var i in entityslot.needsPool) {
-				var pool = armyData.getPool(i);
+				var pool = armyUnit.getPool(i);
 				if (pool.currentCount - entityslot.needsPool[pool.name] < 0) {
 					// do not display the entityslot's state worse than necessary
-					if (pool.currentCount >= 0 || (armyData.getEntityCount(entityslot.entityslotId) == 0) /*&& pool.currentCount >= -50000*/) {
+					if (pool.currentCount >= 0 || (armyUnit.getEntityCount(entityslot.entityslotId) == 0) /*&& pool.currentCount >= -50000*/) {
 						availableState = 0;
 					} /*else if(pool.currentCount < -50000) {
 						availableState = -2;
@@ -140,9 +140,9 @@ function State() {
 		}
 	};
 
-	this.calculateDirtyEntityStatesInSelections = function(armyData, additionalParams) {
-		for ( var i = 0; i < armyData.selections.length; i++) {
-			var slotEntry = armyData.selections[i];
+	this.calculateDirtyEntityStatesInSelections = function(armyUnit, additionalParams) {
+		for ( var i = 0; i < armyUnit.getSelectionCount(); i++) {
+			var slotEntry = armyUnit.getSelection(i);
 			if (additionalParams.force || slotEntry.dirty) {
 				_state.calculateEntityState(slotEntry);
 			}
@@ -297,7 +297,7 @@ function State() {
 			return defaultValue;
 		} else {
 			var entitySlot = _armyState.lookupId(entity.parentEntityslot);
-			var pool = _armyState.getArmyData(entitySlot.armyIndex).pools;
+			var pool = _armyState.getArmyUnit(entitySlot.armyDataIndex, entitySlot.armyUnitIndex).getPools();
 			return parseInt(eval(value));
 		}
 	}

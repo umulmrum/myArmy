@@ -26,95 +26,89 @@
 function ArmyData() {
 	
 	this.detachmentType = null;
-	this.army = null;
 	
 	// static data (these variables do only depend on the army type, so will not changed after the army data was read)
 	this.allowedAllies = [];
-	this.entityPool = {}; // all entities related to the current army type
-	this.entityslots = {}; // all the selectable entityslots
 	this.entityslotCount = {}; // the number of selectable entityslots per slot
-	
-	// dynamic data (will reflect the user's selections)
-	this.selections = []; // the entityslots the user selected to be in his army
-	this.selectionCount = {}; //the number of entityslots per slot
-	this.selectionCost = {}; // the total slotCost per slot
-	this.entityCount = {}; // a counter for each entityslotId - used for minTaken and maxTaken
 	
 	this.stateLinkPart = null;
 	
-	this.pools = {};
+	var armyUnits = {};
+//	var armyUnitCount = 0;
 	
-	this.text = {};
+	this.getArmy = function(armyUnitIndex) {
+		if(isUndefined(armyUnits[armyUnitIndex])) {
+			return null;
+		}
+		return armyUnits[armyUnitIndex].getArmy();
+	};
+	
+	this.getArmyUnits = function() {
+		return armyUnits;
+	};
+	
+	this.setArmy = function(armyUnitIndex, army) {
+		if(isUndefined(armyUnits[armyUnitIndex])) {
+			armyUnits[armyUnitIndex] = new ArmyUnit();
+		}
+		armyUnits[armyUnitIndex].setArmy(army);
+	};
+	
+	this.getArmyUnit = function(armyUnitIndex) {
+		return armyUnits[armyUnitIndex];
+	};
+	
+	this.setArmyUnit = function(armyUnitIndex, armyUnit) {
+		armyUnits[armyUnitIndex] = army;
+	};
+	
+	this.getArmyUnitCount = function() {
+		return getObjectSize(armyUnits);
+	};
 	
 	this.resetArmy = function() {
-		this.selections = [];
-		this.selectionCount = {};
-		this.selectionCost = {};
-		for(var i in _systemState.slots) {
-			this.selectionCount[i] = 0;
-			this.selectionCost[i] = 0;
-		}
-		for(var i in this.entityCount) {
-			this.entityCount[i] = 0;
-		}
-		this.stateLinkPart = null;
-		this.resetPools();
-	};
-	
-	this.resetPools = function() {
-		for ( var i in this.pools) {
-			var pool = this.pools[i];
-			pool.currentCount = pool.start;
-			pool.dependingOptions = {};
+		for(var i in armyUnits) {
+			armyUnits[i].resetArmy();
 		}
 	};
 	
-	this.addEntry = function(entityslot, doEntityCalculations) {
-		this.selections.push(entityslot);
-		this.selectionCount[entityslot.slotId] = this.selectionCount[entityslot.slotId] + 1;
-		this.selectionCost[entityslot.slotId] = this.selectionCost[entityslot.slotId] + entityslot.slotCost;
-		this.entityCount[entityslot.entityslotId] = this.entityCount[entityslot.entityslotId] + 1;
-		assignEntitySlotLocalId(entityslot);
-		if(doEntityCalculations) {
-			_state.calculateEntityState(entityslot);
-		}
-		changeModelCountPool(entityslot, 0, entityslot.entity.currentCount);
-		entityslot.dirty = true;
-		this.entityslots[entityslot.entityslotId].dirty = true;
+	this.addEntry = function(armyUnitIndex, entityslot, doEntityCalculations) {
+		armyUnits[armyUnitIndex].addEntry(entityslot, doEntityCalculations);
 	};
 
-	this.removeEntry = function(entityslot) {
-		removeItems(this.selections, entityslot);
-		this.selectionCount[entityslot.slotId] = this.selectionCount[entityslot.slotId] - 1;
-		this.selectionCost[entityslot.slotId] = this.selectionCost[entityslot.slotId] - entityslot.slotCost;
-		this.entityCount[entityslot.entityslotId] = this.entityCount[entityslot.entityslotId] - 1;
-		removeEntitySlotLocalIds(entityslot);
-		changeModelCountPool(entityslot, entityslot.entity.currentCount, 0);
-		_armyState.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
-		this.entityslots[entityslot.entityslotId].dirty = true;
+	this.removeEntry = function(armyUnitIndex, entityslot) {
+		armyUnits[armyUnitIndex].removeEntry(entityslot);
 	};
 	
-	this.addPool = function(name, pool) {
-		this.pools[name] = pool;
+	this.addPool = function(armyUnitIndex, name, pool) {
+		armyUnits[armyUnitIndex].addPool(name, pool);
+	};
+
+	this.increaseEntityslotCount = function(slotId) {
+		if(isUndefined(this.entityslotCount[slotId])) {
+			this.entityslotCount[slotId] = 1;
+		} else {
+			this.entityslotCount[slotId]++;
+		}
 	};
 	
-	this.getEntityCount = function(entityslotId) {
-		return this.entityCount[entityslotId];
+	this.getEntityCount = function(armyUnitIndex, entityslotId) {
+		return armyUnits[armyUnitIndex].getEntityCount(entityslotId);
 	};
 	
-	this.setEntityCount = function(entityslotId, count) {
-		this.entityCount[entityslotId] = count;
+	this.setEntityCount = function(armyUnitIndex, entityslotId, count) {
+		armyUnits[armyUnitIndex].setEntityCount(entityslotId, count);
 	};
 	
-	this.getPools = function() {
-		return this.pools;
+	this.getPools = function(armyUnitIndex) {
+		return armyUnits[armyUnitIndex].getPools();
 	};
 	
-	this.getPool = function(name) {
-		return this.pools[name];
+	this.getPool = function(armyUnitIndex, name) {
+		return armyUnits[armyUnitIndex].getPool(name);
 	};
 	
-	this.setPools = function(pools) {
-		this.pools = pools;
+	this.setPools = function(armyUnitIndex, pools) {
+		armyUnits[armyUnitIndex].setPools(pools);
 	};
 }

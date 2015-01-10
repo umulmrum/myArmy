@@ -130,10 +130,11 @@ function Gui() {
 	};
 
 	this.getArmyName = function(armyData) {
-		if (armyData.army == null) {
+        var armyUnit = armyData.getArmyUnit(0);
+		if (armyUnit == null || armyUnit.getArmy() == null) {
 			return null;
 		}
-		return _guiState.text[armyData.army.armyPrefix];
+		return _guiState.text[armyUnit.getArmy().armyPrefix];
 	};
 
 	this.renderLanguageSelect = function() {

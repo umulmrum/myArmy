@@ -42,8 +42,8 @@ function DesignerGui() {
 	
 	this.onPostAddSelection = function(event, additionalData) {
 		var localId = additionalData.entityslot.localId;
-		var armyData = _armyState.getArmyData(additionalData.entityslot.armyIndex);
-		this.renderEntry(armyData, localId);
+		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.armyDataIndex, additionalData.entityslot.armyUnitIndex);
+		this.renderEntry(armyUnit, localId);
 	};
 	
 	this.onPostRemoveSelection = function(event, additionalData) {
@@ -51,7 +51,7 @@ function DesignerGui() {
 	};
 	
 	this.onPostStateRefresh = function(event) {
-		traverseArmyData(this, this.refreshDirtyContainerEntries);
+		traverseArmyUnit(this, this.refreshDirtyContainerEntries);
 	};
 	
 	this.onPostPrepareGui = function(event) {
@@ -88,8 +88,8 @@ function DesignerGui() {
 	};
 	
 	this.onPostChangeSpecialDisplay = function(event) {
-		traverseArmyData(this, this.refreshSelections);
-	}
+		traverseArmyUnit(this, this.refreshSelections);
+	};
 	
 	/**
 	 * Refreshes UI elements.
@@ -112,32 +112,32 @@ function DesignerGui() {
 		if (_systemState.system == null) {
 			return;
 		}
-		traverseArmyData(this, this.renderSelectionsForSlot, { slotId: slot.slotId });
+		traverseArmyUnit(this, this.renderSelectionsForSlot, { slotId: slot.slotId });
 	};
 	
 	this.refreshSlotEntries = function() {
-		traverseArmyData(this, this.refreshSlotEntriesForArmy);
+		traverseArmyUnit(this, this.refreshSlotEntriesForArmy);
 	};
 	
-	this.refreshSlotEntriesForArmy = function(armyData) {
-		for(var i in armyData.selections) {
-			var entityslot = armyData.selections[i];
-			this.refreshEntry(armyData, entityslot);
+	this.refreshSlotEntriesForArmy = function(armyUnit) {
+		for(var i in armyUnit.getSelections()) {
+			var entityslot = armyUnit.getSelection(i);
+			this.refreshEntry(armyUnit, entityslot);
 		}
 	};
 	
-	this.getHasElements = function(armyData, armyIndex, additionalParams) {
-		if(armyData.army == null) {
-			return false;
-		}
-		return armyData.entityslotCount[additionalParams.slotId] > 0;
-	};
+	//this.getHasElements = function(armyData, armyIndex, additionalParams) {
+	//	if(armyData.army == null) {
+	//		return false;
+	//	}
+	//	return armyData.entityslotCount[additionalParams.slotId] > 0;
+	//};
 	
-	this.renderSelectionsForSlot = function(armyData, armyIndex, additionalParams) {
-		var selections = armyData.selections;
+	this.renderSelectionsForSlot = function(armyUnit, armyUnitIndex, armyData, armyDataIndex, additionalParams) {
+		var selections = armyUnit.getSelections();
 		for (var j = 0; j < selections.length; j++) {
 			if(selections[j].slotId == additionalParams.slotId) {
-				this.renderEntry(armyData, selections[j].localId);
+				this.renderEntry(armyUnit, selections[j].localId);
 			}
 		}
 	};
@@ -146,7 +146,7 @@ function DesignerGui() {
 	 * Renders an entity from scratch.
 	 * Use this when adding/cloning an entity or restoring a persisted army.
 	 */
-	this.renderEntry = function(armyData, entityslotLocalId) {
+	this.renderEntry = function(armyUnit, entityslotLocalId) {
 		var entityslot = _armyState.lookupId(entityslotLocalId);
 		var entity = entityslot.entity;
 		var container = _gui.getElement("#slotentryDesignerList" + entityslot.slotId);
@@ -161,7 +161,7 @@ function DesignerGui() {
 		entry.append(entryContent);
 		optionContainer = table();
 		
-		var position = getEntryPosition(armyData, entityslot);
+		var position = getEntryPosition(armyUnit.getSelections(), entityslot);
 		if(position == 0) {
 			container.prepend(entry);
 		} else {
@@ -177,7 +177,7 @@ function DesignerGui() {
 			event.data.target.clickOption($(this).attr('data-localId'));
 		});
 
-		this.renderEntryHeader(armyData, entryContent, entityslot);
+		this.renderEntryHeader(armyUnit, entryContent, entityslot);
 
 		if (entity.minCount < entity.maxCount) {
 			this.renderModelCountHeader(entryContent, entity, entityslot);
@@ -188,7 +188,7 @@ function DesignerGui() {
 		var isFirstOptionList = true;
 		for ( var i in entity.optionLists) {
 			var optionList = entity.optionLists[i];
-			optionListCount += this.renderOptionList(armyData, optionContainer, optionList,
+			optionListCount += this.renderOptionList(armyUnit, optionContainer, optionList,
 					isCollapsed, isFirstOptionList, 1, false);
 			if (optionListCount > 0) {
 				isFirstOptionList = false;
@@ -199,14 +199,14 @@ function DesignerGui() {
 			entryContent.append(optionContainerDiv.append(optionContainer));
 		}
 
-		this.renderEntryActions(armyData, entry, entityslot);
+		this.renderEntryActions(armyUnit, entry, entityslot);
 	};
 	
-	function getEntryPosition(armyData, entityslot) {
+	function getEntryPosition(selections, entityslot) {
 		var position = 0;
 		var i = 0;
-		while(i < armyData.selections.length) {
-			var sel = armyData.selections[i]; 
+		while(i < selections.length) {
+			var sel = selections[i];
 			if(sel.slotId == entityslot.slotId) {
 				if(sel.localId == entityslot.localId) {
 					break;
@@ -216,18 +216,23 @@ function DesignerGui() {
 			i++;
 		}
 		
-		for(i = 0; i < entityslot.armyIndex; i++) {
+		for(i = 0; i < entityslot.armyDataIndex; i++) {
 			if(_armyState.getArmyData(i) != null) {
-				position += _armyState.getArmyData(i).selectionCount[entityslot.slotId];
+                var armyData = _armyState.getArmyData(i);
+                for(var j = 0; j < armyData.getArmyUnitCount(); j++) {
+                    if(armyData.getArmyUnit(j) != null) {
+				        position += armyData.getArmyUnit(j).getSelectionCount(entityslot.slotId);
+                    }
+                }
 			}
 		}
 		return position;
 	}
 
-	this.renderEntryHeader = function(armyData, container, entityslot) {
+	this.renderEntryHeader = function(armyUnit, container, entityslot) {
 		var entity = entityslot.entity;
 		var entryHeader = null;
-		var entityName = armyData.text[entity.entityName];
+		var entityName = armyUnit.getText(entity.entityName);
 		var entityCost = "";
 		if (entity.totalCost > 0) {
 			entityCost = entity.totalCost + " " + _guiState.text["points"];
@@ -235,7 +240,7 @@ function DesignerGui() {
 		entryHeader = div(null, null, "entryHeader commonHighlight");
 		if(_armyState.getArmyCount() > 1) {
 			var armyIndexCss = (entity.minCount < entity.maxCount) ? "entryArmyIndexWithModelCount" : "entryArmyIndex";
-			var armyIndexElement = span(entityslot.armyIndex + 1, null, armyIndexCss);
+			var armyIndexElement = span(entityslot.armyDataIndex + 1, null, armyIndexCss);
 			entryHeader.append(armyIndexElement);
 		}
 		var entityNameElement = span(entityName, null, "entryName");
@@ -306,7 +311,7 @@ function DesignerGui() {
 		}
 	};
 	
-	this.renderOptionList = function(armyData, optionContainer, optionList, isCollapsed,
+	this.renderOptionList = function(armyUnit, optionContainer, optionList, isCollapsed,
 			isFirstOptionList, depth, invisible) {
 		// if (optionList.currentMaxTaken <= 0) {
 		// return 0;
@@ -315,7 +320,7 @@ function DesignerGui() {
 		var wasRendered;
 		for ( var j in optionList.options) {
 			var option = optionList.options[j];
-			wasRendered = this.renderOption(armyData, optionContainer, optionList, option,
+			wasRendered = this.renderOption(armyUnit, optionContainer, optionList, option,
 					isCollapsed, isFirstOptionList, isFirstOption, depth,
 					invisible);
 
@@ -324,22 +329,24 @@ function DesignerGui() {
 		return 1;
 	};
 
-	/**
-	 * 
-	 * @param optionContainer
-	 * @param optionList
-	 * @param option
-	 * @param isCollapsed
-	 * @param isFirstOptionList
-	 * @param isFirstOption
-	 * @param depth
-	 * @return true if option was rendered, false otherwise
-	 */
-	this.renderOption = function(armyData, optionContainer, optionList, option, isCollapsed,
+    /**
+     *
+     * @param armyUnit
+     * @param optionContainer
+     * @param optionList
+     * @param option
+     * @param isCollapsed
+     * @param isFirstOptionList
+     * @param isFirstOption
+     * @param depth
+     * @param invisible
+     * @return true if option was rendered, false otherwise
+     */
+	this.renderOption = function(armyUnit, optionContainer, optionList, option, isCollapsed,
 			isFirstOptionList, isFirstOption, depth, invisible) {
 
 		var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
-		var optionEntity = _armyState.getArmyData(parentEntityslot.armyIndex).entityPool[option.entityId];
+		var optionEntity = _armyState.getArmyUnit(parentEntityslot.armyDataIndex, parentEntityslot.armyUnitIndex).getFromEntityPool(option.entityId);
 
 		var cssClasses = "option";
 		if (isFirstOption && !isFirstOptionList) {
@@ -364,7 +371,7 @@ function DesignerGui() {
 		var optionTextAttr = {};
 		optionTextAttr["style"] = "padding-left: " + padding + "px";
 
-		var optionText = armyData.text[optionEntity.entityName];
+		var optionText = armyUnit.getText(optionEntity.entityName);
 		if (option.currentMaxTaken > 1) {
 			optionText += " " + option.currentCount + "/"
 					+ option.currentMaxTaken;
@@ -386,7 +393,7 @@ function DesignerGui() {
 			for ( var k in option.optionLists) {
 				var subOptionList = option.optionLists[k];
 
-				subOptionListCount += this.renderOptionList(armyData, optionContainer,
+				subOptionListCount += this.renderOptionList(armyUnit, optionContainer,
 						subOptionList, isCollapsed, isFirstSubOptionList,
 						depth + 1, !option.selected);
 				if (subOptionListCount > 0) {
@@ -397,7 +404,7 @@ function DesignerGui() {
 		return true;
 	};
 	
-	this.renderEntryActions = function(armyData, container, entityslot) {
+	this.renderEntryActions = function(armyUnit, container, entityslot) {
 		var entryButtons = null;
 		var deleteButtonImg = null;
 		var cloneButtonImg = null;
@@ -427,7 +434,7 @@ function DesignerGui() {
 				collapseButton = div("", null, "entryButton collapseButton");
 				collapseButton.on(_guiState.clickEvent, $.proxy(
 						function(event) {
-							this.collapseEntryOptions(armyData, entityslot);
+							this.collapseEntryOptions(armyUnit, entityslot);
 							return false;
 						}, this));
 				entryButtons.append(collapseButton);
@@ -435,7 +442,7 @@ function DesignerGui() {
 				expandButton = div("", null, "entryButton expandButton");
 				expandButton.on(_guiState.clickEvent, $.proxy(
 						function(event) {
-							this.expandEntryOptions(armyData, entityslot);
+							this.expandEntryOptions(armyUnit, entityslot);
 							return false;
 						}, this));
 				entryButtons.append(expandButton);
@@ -463,25 +470,25 @@ function DesignerGui() {
 		}
 	};
 	
-	this.refreshSelections = function(armyData) {
-		for(var i in armyData.selections) {
-			var entityslot = armyData.selections[i];
-			this.refreshEntry(armyData, entityslot);
+	this.refreshSelections = function(armyUnit) {
+		for(var i in armyUnit.getSelections()) {
+			var entityslot = armyUnit.getSelection(i);
+			this.refreshEntry(armyUnit, entityslot);
 			entityslot.dirty = false;
 		}
 	};
 	
-	this.refreshDirtyContainerEntries = function(armyData) {
-		for(var i in armyData.selections) {
-			var entityslot = armyData.selections[i];
+	this.refreshDirtyContainerEntries = function(armyUnit) {
+		for(var i in armyUnit.getSelections()) {
+			var entityslot = armyUnit.getSelection(i);
 			if(entityslot.dirty) {
-				this.refreshEntry(armyData, entityslot);
+				this.refreshEntry(armyUnit, entityslot);
 				entityslot.dirty = false;
 			}
 		}
 	};
 	
-	this.refreshEntry = function(armyData, entityslot) {
+	this.refreshEntry = function(armyUnit, entityslot) {
 		var entity = entityslot.entity;
 		var container = $("#entriesPerSlotWrapper" + entityslot.slotId);
 		var isCollapsed = entityslot.optionDisplayState == _guiState.OPTION_DISPLAYSTATE.COLLAPSED;
@@ -490,7 +497,7 @@ function DesignerGui() {
 		var optionContainer = entry.find(".optionContainer table");
 		var entryContent = entry.find("#entryContent_" + entityslot.localId);
 
-		this.refreshEntryHeader(armyData, entryContent, entity);
+		this.refreshEntryHeader(armyUnit, entryContent, entity);
 
 		if (entity.minCount < entity.maxCount) {
 			this.refreshModelCountHeader(entryContent, entity, entityslot);
@@ -500,7 +507,7 @@ function DesignerGui() {
 		var isFirstOptionList = true;
 		for ( var i in entity.optionLists) {
 			var optionList = entity.optionLists[i];
-			optionListCount += this.refreshOptionList(armyData, optionContainer, optionList,
+			optionListCount += this.refreshOptionList(armyUnit, optionContainer, optionList,
 					isCollapsed, isFirstOptionList, 1, false);
 			if (optionListCount > 0) {
 				isFirstOptionList = false;
@@ -510,10 +517,10 @@ function DesignerGui() {
 		this.refreshEntryActions(entry, entityslot);
 	};
 
-	this.refreshEntryHeader = function(armyData, container, entity) {
+	this.refreshEntryHeader = function(armyUnit, container, entity) {
 
 		var entryHeader = null;
-		var entityName = armyData.text[entity.entityName];
+		var entityName = armyUnit.getText(entity.entityName);
 		var entityCost = "";
 		if (entity.totalCost > 0) {
 			entityCost = entity.totalCost + " " + _guiState.text["points"];
@@ -556,13 +563,13 @@ function DesignerGui() {
 		}
 	};
 	
-	this.refreshOptionList = function(armyData, optionContainer, optionList, isCollapsed,
+	this.refreshOptionList = function(armyUnit, optionContainer, optionList, isCollapsed,
 			isFirstOptionList, depth, invisible) {
 		var isFirstOption = true;
 		var wasRendered;
 		for ( var j in optionList.options) {
 			var option = optionList.options[j];
-			wasRendered = this.refreshOption(armyData, optionContainer, optionList, option,
+			wasRendered = this.refreshOption(armyUnit, optionContainer, optionList, option,
 					isCollapsed, isFirstOptionList, isFirstOption, depth,
 					invisible);
 
@@ -571,21 +578,23 @@ function DesignerGui() {
 		return 1;
 	};
 
-	/**
-	 * 
-	 * @param optionContainer
-	 * @param optionList
-	 * @param option
-	 * @param isCollapsed
-	 * @param isFirstOptionList
-	 * @param isFirstOption
-	 * @param depth
-	 * @return true if option was rendered, false otherwise
-	 */
-	this.refreshOption = function(armyData, optionContainer, optionList, option, isCollapsed,
+    /**
+     *
+     * @param armyUnit
+     * @param optionContainer
+     * @param optionList
+     * @param option
+     * @param isCollapsed
+     * @param isFirstOptionList
+     * @param isFirstOption
+     * @param depth
+     * @param invisible
+     * @return boolean true if option was rendered, false otherwise
+     */
+	this.refreshOption = function(armyUnit, optionContainer, optionList, option, isCollapsed,
 			isFirstOptionList, isFirstOption, depth, invisible) {
 
-		var optionEntity = armyData.entityPool[option.entityId];
+		var optionEntity = armyUnit.getFromEntityPool(option.entityId);
 		var cssClasses = "option";
 		if (isFirstOption && !isFirstOptionList) {
 			cssClasses += " firstOption";
@@ -601,14 +610,14 @@ function DesignerGui() {
 			cssClasses += " selected";
 		}
 		if (invisible || optionList.currentMaxTaken <= 0
-				|| (isCollapsed && !option.selected) || (!option.selected && !_gui.checkDisplay(armyData.entityPool[option.entityId]))) {
+				|| (isCollapsed && !option.selected) || (!option.selected && !_gui.checkDisplay(optionEntity))) {
 			cssClasses += " invisible";
 		}
 		var optionElement = optionContainer.find("#option_" + option.localId);
 		optionElement.removeClass();
 		optionElement.addClass(cssClasses);
 		
-		var optionText = armyData.text[optionEntity.entityName];
+		var optionText = armyUnit.getText(optionEntity.entityName);
 		if (option.currentMaxTaken > 1) {
 			optionText += " " + option.currentCount + "/"
 					+ option.currentMaxTaken;
@@ -626,7 +635,7 @@ function DesignerGui() {
 			for ( var k in option.optionLists) {
 				var subOptionList = option.optionLists[k];
 
-				subOptionListCount += this.refreshOptionList(armyData, optionContainer,
+				subOptionListCount += this.refreshOptionList(armyUnit, optionContainer,
 						subOptionList, isCollapsed, isFirstSubOptionList,
 						depth + 1, !option.selected);
 				if (subOptionListCount > 0) {
@@ -716,18 +725,18 @@ function DesignerGui() {
 		$(".entry").remove();
 	};
 	
-	this.expandEntryOptions = function(armyData, entityslot) {
+	this.expandEntryOptions = function(armyUnit, entityslot) {
 		entityslot.optionDisplayState = _guiState.OPTION_DISPLAYSTATE.EXPANDED;
-		this.refreshEntry(armyData, entityslot);
+		this.refreshEntry(armyUnit, entityslot);
 
 		var entryContent = _gui.getElement("#entryContent_" + entityslot.localId);
 
 		entryContent.unbind(_guiState.clickEvent);
 	};
 
-	this.collapseEntryOptions = function(armyData, entityslot) {
+	this.collapseEntryOptions = function(armyUnit, entityslot) {
 		entityslot.optionDisplayState = _guiState.OPTION_DISPLAYSTATE.COLLAPSED;
-		this.refreshEntry(armyData, entityslot);
+		this.refreshEntry(armyUnit, entityslot);
 
 		var entryContent = _gui.getElement("#entryContent_" + entityslot.localId);
 
@@ -736,7 +745,7 @@ function DesignerGui() {
 			if (!wasClick(event)) {
 				return false;
 			}
-			this.expandEntryOptions(armyData, entityslot);
+			this.expandEntryOptions(armyUnit, entityslot);
 		});
 	};
 	

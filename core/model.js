@@ -85,9 +85,10 @@ function Army(armyId, armyName, armyPrefix, armyGroup) {
 	this.pools = {};
 }
 
-function EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTaken,
+function EntitySlot(armyDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken,
 		slotCost, fillsPool, needsPool, enabled) {
-	this.armyIndex = armyIndex;
+	this.armyDataIndex = armyDataIndex;
+	this.armyUnitIndex = armyUnitIndex;
 	this.entityslotId = entityslotId;
 	this.entityId = entityId;
 	this.entity = null;
@@ -108,7 +109,7 @@ function EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTake
 	this.init();
 
 	this.clone = function() {
-		var cloned = new EntitySlot(this.armyIndex, this.entityslotId, this.entityId, this.slotId, this.minTaken, this.maxTaken, this.slotCost, this.fillsPool, this.needsPool, this.enabled);
+		var cloned = new EntitySlot(this.armyDataIndex, this.armyUnitIndex, this.entityslotId, this.entityId, this.slotId, this.minTaken, this.maxTaken, this.slotCost, this.fillsPool, this.needsPool, this.enabled);
 		if(this.entity != null) {
 			cloned.entity = this.entity.clone();
 		}
@@ -229,14 +230,14 @@ function Option(optionId, entityId, cost, costPerModel, minTaken,
 	};
 }
 
-function Pool(armyIndex, name, start) {
+function Pool(armyDataIndex, name, start) {
 
-	this.armyIndex = armyIndex;
+	this.armyDataIndex = armyDataIndex;
 	this.name = name;
 	if (isNumber(start)) {
 		this.start = start;
 	} else if (start.indexOf(":") != -1) {
-		if (armyIndex == 0) {
+		if (armyDataIndex == 0) {
 			this.start = parseInt(start.substring(0, start.indexOf(":")));
 		} else {
 			this.start = parseInt(start.substring(start.indexOf(":") + 1));
@@ -252,7 +253,7 @@ function Pool(armyIndex, name, start) {
 
 
 	this.clone = function() {
-		var cloned = new Pool(this.armyIndex, this.name, this.start);
+		var cloned = new Pool(this.armyDataIndex, this.name, this.start);
 		cloned.currentCount = this.currentCount; 
 		cloned.dirty = true;
 		return cloned;

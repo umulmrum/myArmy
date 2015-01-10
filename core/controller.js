@@ -64,49 +64,50 @@ function Controller() {
 		}
 	};
 	
-	this.changeDetachmentType = function(armyIndex, detachmentTypeId) {
+	this.changeDetachmentType = function(armyDataIndex, detachmentTypeId) {
 		var detachmentType = _systemState.system.detachmentTypes[detachmentTypeId];
-		var armyData = _armyState.getArmyData(armyIndex);
+		var armyData = _armyState.getArmyData(armyDataIndex);
 		if(armyData == null) {
 			return;
 		}
 		armyData.detachmentType = detachmentType;
 		
-		_dispatcher.triggerEvent("postChangeDetachmentType", { armyIndex: armyIndex, newDetachmentTypeId: detachmentTypeId });
+		_dispatcher.triggerEvent("postChangeDetachmentType", { armyIndex: armyDataIndex, newDetachmentTypeId: detachmentTypeId });
 	};
 	
-	this.changeArmy = function(armyIndex, armyId, detachmentTypeId) {
+	this.changeArmy = function(armyDataIndex, armyId, detachmentTypeId) {
 		_gui.startLongRunningProcess();
-		var currentArmy = _armyState.getArmy(armyIndex);
+		var currentArmy = _armyState.getArmy(armyDataIndex, 0);
 		var armyChanged = !((armyId == -1) && (currentArmy == null)) || ((currentArmy != null) && (armyId == currentArmy.armyId));
 		if (!armyChanged) {
 			return;
 		}
-		_armyState.removeArmy(armyIndex);
+		_armyState.removeArmy(armyDataIndex);
 		if(armyId != -1) {
-			_armyState.setArmy(armyIndex, _systemState.armies[armyId]);
-			var armyData = _armyState.getArmyData(armyIndex); 
-			_dataReader.readTextsArmy(armyData);
+			_armyState.setArmy(armyDataIndex, 0, _systemState.armies[armyId]);
+			var armyData = _armyState.getArmyData(armyDataIndex);
+			var armyUnit = armyData.getArmyUnit(0);
+			_dataReader.readTextsArmy(armyUnit);
 			
-			_dataReader.loadArmy(armyData, armyIndex);
-			_armyState.getArmyData(armyIndex).resetArmy();
+			_dataReader.loadArmy(armyUnit, armyDataIndex, 0);
+			_armyState.getArmyData(armyDataIndex).resetArmy();
 		} else {
-			_armyState.setArmy(armyIndex, null);
+			_armyState.setArmy(armyDataIndex, null);
 		}
 		if(!isUndefined(detachmentTypeId)) {
-			this.changeDetachmentType(armyIndex, detachmentTypeId);
+			this.changeDetachmentType(armyDataIndex, detachmentTypeId);
 		}
-		_dispatcher.triggerEvent("postChangeArmy", { armyIndex: armyIndex, newArmyId: armyId });
+		_dispatcher.triggerEvent("postChangeArmy", { armyDataIndex: armyDataIndex, newArmyId: armyId });
 	};
 	
-	this.addEntry = function(armyIndex, entityslotId, doEntityCalculations) {
-		var armyData = _armyState.getArmyData(armyIndex);
-		var entityslot = armyData.entityslots[entityslotId].clone();
+	this.addEntry = function(armyDataIndex, armyUnitIndex, entityslotId, doEntityCalculations) {
+        var armyUnit = _armyState.getArmyUnit(armyDataIndex, armyUnitIndex);
+		var entityslot = armyUnit.getEntityslot(entityslotId).clone();
 		var entityId = entityslot.entityId;
-		var entity = armyData.entityPool[entityId].clone();
+		var entity = armyUnit.getFromEntityPool(entityId).clone();
 		entityslot.entity = entity;
 		
-		armyData.addEntry(entityslot, doEntityCalculations);
+		armyUnit.addEntry(entityslot, doEntityCalculations);
 		
 		if (doEntityCalculations) {
 			registerEntityslotOptionsForPools(entityslot);
@@ -118,24 +119,24 @@ function Controller() {
 	};
 	
 	this.cloneEntry = function(entityslot) {
-		var armyData = _armyState.getArmyData(entityslot.armyIndex);
+		var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
 		var newEntityslot = entityslot.clone();
 		var newEntity = newEntityslot.entity;
-		armyData.addEntry(newEntityslot, false);
+		armyUnit.addEntry(newEntityslot, false);
 		newEntity.totalCost = 0; // will be recalculated later on
 		registerEntityslotOptionsForPools(newEntityslot);
 		changePoolByEntityslot(newEntityslot, true);
-		fixOptionPool(newEntityslot.entity);
+		fixOptionPool(armyUnit, newEntityslot.entity);
 		
 		_dispatcher.triggerEvent("postAddSelection", { entityslot: newEntityslot });
 	};
 	
 	this.deleteEntry = function(entityslot) {
-		var armyData = _armyState.getArmyData(entityslot.armyIndex);
+        var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
 		var entity = entityslot.entity;
 		_armyState.addTotalPoints((-1) * entity.totalCost);
 		unregisterEntityslotOptionsForPools(entityslot);
-		armyData.removeEntry(entityslot);
+		armyUnit.removeEntry(entityslot);
 		
 		_dispatcher.triggerEvent("postRemoveSelection", { entityslot: entityslot });
 	};

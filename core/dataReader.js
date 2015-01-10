@@ -61,39 +61,40 @@ function DataReader() {
 	}
 	
 	this.reloadAllTexts = function() {
-		_guiState.text = {};
+		_guiState.resetTexts();
 		this.readTextsCommon();
 		this.readTextsSystem();
-		traverseArmyData(this, this.readTextsArmy);
+		traverseArmyUnit(this, this.readTextsArmy);
 	};
 	
 	this.readTextsCommon = function() {
-		this.readTexts("data/textcommon", _guiState.text);
+		this.readTexts("data/textcommon", $.proxy(_guiState.addTexts, _guiState));
 	};
 	
 	this.readTextsSystem = function() {
 		var currentSystem = _systemState.system;
 		if(currentSystem != null) {
-			this.readTexts(currentSystem.systemBaseDir + "textsystem", _guiState.text);
+			this.readTexts(currentSystem.systemBaseDir + "textsystem", $.proxy(_guiState.addTexts, _guiState));
 		}
 	};
 	
-	this.readTextsArmy = function(armyData) {
-		var army = armyData.army;
+	this.readTextsArmy = function(armyUnit) {
+		var army = armyUnit.getArmy();
 		if(army != null) {
-			this.readTexts(getArmyPath(army) + "textarmy", armyData.text);
+			this.readTexts(getArmyPath(army) + "textarmy", $.proxy(armyUnit.setTexts, armyUnit));
 		}
 	};
 	
-	this.readTexts = function(filepath, target) {
+	this.readTexts = function(filepath, callback) {
 		var file = filepath + "_" + _guiState.lang + ".json";
-		doJson(file, this.readTextsSuccess, null, false, { target: target });
+		doJson(file, this.readTextsSuccess, null, false, { callback: callback });
 	};
 	
 	this.readTextsSuccess = function(data, additionalParams) {
-		for(var i in data) {
-			additionalParams.target[i] = data[i];
-		}
+		additionalParams.callback(data);
+//		for(var i in data) {
+//			additionalParams.target[i] = data[i];
+//		}
 	};
 	
 	this.readSystems = function() {
@@ -137,12 +138,13 @@ function DataReader() {
 	};
 	
 	this.readArmy = function(data, additionalParams) {
-		this.readArmydata(additionalParams.armyIndex, data);
+		this.readArmydata(additionalParams.armyDataIndex, additionalParams.armyUnitIndex, data);
 	};
 	
-	this.readArmydata = function(armyIndex, data) {
+	this.readArmydata = function(armyDataIndex, armyUnitIndex, data) {
 		
-		var armyData = _armyState.getArmyData(armyIndex);
+		var armyData = _armyState.getArmyData(armyDataIndex);
+		var armyUnit = armyData.getArmyUnit(armyUnitIndex);
 		
 		var entities = data.entities || [];
 		for(var i = 0; i < entities.length; i++) {
@@ -154,25 +156,25 @@ function DataReader() {
 			var minCount = coalesce(obj.minCount, 1);
 			var maxCount = coalesce(obj.maxCount, 1);
 			var special = obj.special;
-			var localPools = readPools(armyIndex, obj.localPools);
+			var localPools = readPools(armyDataIndex, obj.localPools);
 			var modelCountPoolChange = obj.modelCountPoolChange;
 			var entity = new Entity(entityId, entityName, cost, costPerModel, minCount, maxCount, special, localPools, modelCountPoolChange);
 			var optionLists = obj.optionLists;
 			if(!isUndefined(optionLists)) {
 				//			entity.optionDisplayState = _guiState.OPTION_DISPLAYSTATE_EXPANDED;
-				readOptions(armyIndex, entity, optionLists);
+				readOptions(armyDataIndex, entity, optionLists);
 				//		} else {
 				//			entity.optionDisplayState = _guiState.OPTION_DISPLAYSTATE_ALWAYS;
 			}
 			
-			armyData.entityPool[entity.entityId] = entity;
+			armyUnit.addToEntityPool(entity);
 		}
 		
 		var pools = data.pools || [];
 		for(var i = 0; i < pools.length; i++) {
 			var obj = pools[i];
-			var pool = new Pool(armyIndex, obj.name, obj.start);
-			armyData.addPool(pool.name, pool);
+			var pool = new Pool(armyDataIndex, obj.name, obj.start);
+			armyUnit.addPool(pool);
 		}
 		
 		var entityslots = data.entityslots || [];
@@ -185,41 +187,38 @@ function DataReader() {
 			var maxTaken = coalesce(obj.maxTaken, Number.MAX_VALUE);
 			var slotCost = coalesce(obj.slotCost, _systemState.system.defaultSlotCost);
 			var fillsPool = coalesce(obj.fillsPool, null);
-			fillsPool = parsePools(armyIndex, fillsPool);
+			fillsPool = parsePools(armyDataIndex, fillsPool);
 			var needsPool = coalesce(obj.needsPool, null);
-			needsPool = parsePools(armyIndex, needsPool);
+			needsPool = parsePools(armyDataIndex, needsPool);
 			var enabled = true;//coalesce(obj.enabled, true);
 			
-			var entityslot = new EntitySlot(armyIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, enabled);
-			armyData.entityslots[entityslot.entityslotId] = entityslot;
-			armyData.setEntityCount(entityslot.entityslotId, 0);
+			var entityslot = new EntitySlot(armyDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, enabled);
+			armyUnit.addEntityslot(entityslot);
+			armyUnit.setEntityCount(entityslot.entityslotId, 0);
 			registerEntityslotForPools(entityslot);
 			if(enabled) {
-					if(isUndefined(armyData.entityslotCount[slotId])) {
-						armyData.entityslotCount[slotId] = 1;
-					} else {
-						armyData.entityslotCount[slotId]++;
-					}
+				armyData.increaseEntityslotCount(slotId);
 			}
 		}
 		
-		resolveDeepOptions(armyData);
-		resolveLocalPoolChain(armyData);
+		var entityPool = armyUnit.getEntityPool();
+		resolveDeepOptions(entityPool);
+		resolveLocalPoolChain(armyUnit);
 		
-		var allies = data.allies || [];
-		if(allies.length > 0) {
-			armyData.allowedAllies.push.apply(armyData.allowedAllies, allies);
-		}
+//		var allies = data.allies || [];
+//		if(allies.length > 0) {
+//			armyData.allowedAllies.push.apply(armyData.allowedAllies, allies);
+//		}
 		
-		traverseArmyData(null, checkPoolsAvailable);
+		traverseArmyUnit(null, checkPoolsAvailable);
 	};
 	
-	this.loadArmy = function(armyData, armyIndex) {
-		var armyPath = getArmyPath(armyData.army) + "army.json";
-		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { armyIndex: armyIndex});
+	this.loadArmy = function(armyUnit, armyDataIndex, armyUnitIndex) {
+		var armyPath = getArmyPath(armyUnit.getArmy()) + "army.json";
+		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { armyDataIndex: armyDataIndex, armyUnitIndex: armyUnitIndex });
 	};
 	
-	function readOptions(armyIndex, entity, optionListsJson) {
+	function readOptions(armyDataIndex, entity, optionListsJson) {
 		var optionLists = {};
 		for(var i = 0; i < optionListsJson.length; i++) {
 			var obj = optionListsJson[i];
@@ -242,13 +241,13 @@ function DataReader() {
 				var minTaken = coalesce(obj2.minTaken, 0);
 				var maxTaken = coalesce(obj2.maxTaken, 1);
 				var fillsPool = obj2.fillsPool || null;
-				fillsPool = parsePools(armyIndex, fillsPool);
+				fillsPool = parsePools(armyDataIndex, fillsPool);
 				var needsPool = obj2.needsPool || null;
-				needsPool = parsePools(armyIndex, needsPool);
+				needsPool = parsePools(armyDataIndex, needsPool);
 				var fillsLocalPool = obj2.fillsLocalPool || null;
-				fillsLocalPool = parsePools(armyIndex, fillsLocalPool);
+				fillsLocalPool = parsePools(armyDataIndex, fillsLocalPool);
 				var needsLocalPool = obj2.needsLocalPool || null;
-				needsLocalPool = parsePools(armyIndex, needsLocalPool);
+				needsLocalPool = parsePools(armyDataIndex, needsLocalPool);
 				var option = new Option(optionId, entityId, cost, costPerModel, minTaken, maxTaken, fillsPool, needsPool, fillsLocalPool, needsLocalPool);
 				optionList.options[optionId] = option;
 			}
@@ -256,40 +255,40 @@ function DataReader() {
 		}
 	}
 
-	function resolveDeepOptions(armyData) {
-		for(var i in armyData.entityPool) {
-			var entity = armyData.entityPool[i];
+	function resolveDeepOptions(entityPool) {
+		for(var i in entityPool) {
+			var entity = entityPool[i];
 			if(entity.hasOptions()) {
-				doResolveDeepOptions(armyData, entity.optionLists);
+				doResolveDeepOptions(entityPool, entity.optionLists);
 			}
 		}
 	}
 
-	function doResolveDeepOptions(armyData, optionLists) {
+	function doResolveDeepOptions(entityPool, optionLists) {
 		for(var i in optionLists) {
 			var optionList = optionLists[i];
 			for(var j in optionList.options) {
 				var option = optionList.options[j];
-				var entity = armyData.entityPool[option.entityId];
+				var entity = entityPool[option.entityId];
 				if(entity.hasOptions() /*&& !option.hasOptions()*/) { // the second condition is to avoid duplicate computations
 					option.optionLists = cloneObject(entity.optionLists);
-					doResolveDeepOptions(armyData, option.optionLists);
+					doResolveDeepOptions(entityPool, option.optionLists);
 				}
 			}
 		}
 	}
 
-	function resolveLocalPoolChain(armyData) {
-		for(var i in armyData.entityPool) {
-			var entity = armyData.entityPool[i];
+	function resolveLocalPoolChain(armyUnit) {
+		for(var i in armyUnit.getEntityPool()) {
+			var entity = armyUnit.getFromEntityPool(i);
 			if(entity.hasOptions()) {
-				traverseOptions(armyData, entity, copyLocalPools);
+				traverseOptions(armyUnit, entity, copyLocalPools);
 			}
 		}
 	}
 	
-	function copyLocalPools(armyData, optionList, option) {
-		var optionEntity = armyData.entityPool[option.entityId];
+	function copyLocalPools(armyUnit, optionList, option) {
+		var optionEntity = armyUnit.getFromEntityPool(option.entityId);
 		var hasLocalPools = false;
 		var localPools = {};
 		for(var i in optionEntity.localPools) {
@@ -301,7 +300,7 @@ function DataReader() {
 		}
 	}
 	
-	function readPools(armyIndex, poolsParam) {
+	function readPools(armyDataIndex, poolsParam) {
 		var pools = {};
 		if(isUndefined(poolsParam)) {
 			return pools;
@@ -309,7 +308,7 @@ function DataReader() {
 		for(var i = 0; i < poolsParam.length; i++) {
 			var name = poolsParam[i].name;
 			var start = poolsParam[i].start;
-			pools[name] = new Pool(armyIndex, name, start);
+			pools[name] = new Pool(armyDataIndex, name, start);
 		}
 		return pools;
 	}

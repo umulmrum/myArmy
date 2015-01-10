@@ -66,15 +66,25 @@ function coalesce(value1, value2) {
 	}
 }
 
-function traverseOptions(armyData, entityOrOption, callback) {
+function getObjectSize(obj) {
+	var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) {
+        	size++;
+        }
+    }
+    return size;
+}
+
+function traverseOptions(armyUnit, entityOrOption, callback) {
 	for(var i in entityOrOption.optionLists) {
 		var optionList = entityOrOption.optionLists[i];
 		for(var j in optionList.options) {
 			var option = optionList.options[j];
-			callback(armyData, optionList, option);
+			callback(armyUnit, optionList, option);
 			
 			if(!option.hasOptions()) {
-				traverseOptions(option, callback);
+				traverseOptions(armyUnit, option, callback);
 			}
 		}
 	}
@@ -82,13 +92,32 @@ function traverseOptions(armyData, entityOrOption, callback) {
 
 function traverseArmyData(caller, callback, additionalParams) {
 	var retValue = [];
-	for(var i = 0; i < _armyState.getArmyDataCount(); i++) {
-		var armyData = _armyState.getArmyData(i);
-		if(armyData.army == null) {
-			retValue[i] = null;
+	for(var armyDataIndex = 0; armyDataIndex < _armyState.getArmyDataCount(); armyDataIndex++) {
+		var armyData = _armyState.getArmyData(armyDataIndex);
+		if(armyData.getArmyUnitCount() == 0) {
+			retValue[armyDataIndex] = null;
 			continue;
 		}
-		retValue[i] = callback.call(caller, armyData, i, additionalParams);
+		retValue[armyDataIndex] = callback.call(caller, armyData, armyDataIndex, additionalParams);
+	}
+	return retValue;
+}
+
+function traverseArmyUnit(caller, callback, additionalParams) {
+	var params = additionalParams || [];
+	params["_caller"] = caller;
+	params["_callback"] = callback;
+	return traverseArmyData(null, doTraverseArmyUnit, params);
+}
+
+function doTraverseArmyUnit(armyData, armyDataIndex, additionalParams) {
+	var caller = additionalParams["_caller"];
+	var callback = additionalParams["_callback"];
+	var armyUnits = armyData.getArmyUnits();
+	var retValue = [];
+	for(var armyUnitIndex in armyUnits) {
+		var armyUnit = armyUnits[armyUnitIndex];
+		retValue[armyUnitIndex] = callback.call(caller, armyUnit, armyUnitIndex, armyData, armyDataIndex, additionalParams);
 	}
 	return retValue;
 }

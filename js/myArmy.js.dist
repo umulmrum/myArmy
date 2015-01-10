@@ -32,6 +32,7 @@ loadScript("core/datastore.js");
 loadScript("core/model.js");
 loadScript("core/dispatcher.js");
 loadScript("core/systemstate.js");
+loadScript("core/armyunit.js");
 loadScript("core/armydata.js");
 loadScript("core/armystate.js");
 loadScript("core/guistate.js");

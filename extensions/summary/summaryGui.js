@@ -25,7 +25,7 @@ function SummaryGui() {
 	this.init = function() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		//_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("summary.postChangeOptions", this, this.onPostChangeOptions, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("summary.postSelectAll", this, this.onPostSelectAll, _dispatcher.PHASE_STATE);
@@ -248,27 +248,34 @@ function SummaryGui() {
 		// that way
 	};
 
-	function traverseSelections(armyIndex, armyData, slot, armyRenderer) {
+	function traverseSelections(armyDataIndex, armyData, slot, armyRenderer) {
 		var data = [];
-		for ( var j = 0; j < armyData.selections.length; j++) {
-			var slotEntry = armyData.selections[j];
-			if (slotEntry.slotId != slot.slotId) {
-				continue;
-			}
-			var entity = slotEntry.entity;
-			data.push(renderEntity(armyIndex, armyData, entity, armyRenderer));
-		}
+        for(var i = 0; i < armyData.getArmyUnitCount(); i++) {
+            var armyUnit = armyData.getArmyUnit(i);
+            if(armyUnit == null) {
+                continue;
+            }
+
+            for ( var j = 0; j < armyUnit.getSelectionCount(); j++) {
+                var slotEntry = armyUnit.getSelection(j);
+                if (slotEntry.slotId != slot.slotId) {
+                    continue;
+                }
+                var entity = slotEntry.entity;
+                data.push(renderEntity(armyDataIndex, armyUnit, entity, armyRenderer));
+            }
+        }
 		return data;
 	}
 
-	function renderEntity(armyIndex, armyData, entity, armyRenderer) {
+	function renderEntity(armyDataIndex, armyUnit, entity, armyRenderer) {
 		var s = "";
-		s += armyRenderer.renderEntityHeading(armyIndex, armyData, entity);
+		s += armyRenderer.renderEntityHeading(armyDataIndex, armyUnit, entity);
 		s += armyRenderer.renderEntityCost(entity);
 		s += "\n";
 
 		if (entity.hasOptions()) {
-			var subSummary = renderOptions(armyData, entity.optionLists, 0,
+			var subSummary = renderOptions(armyUnit, entity.optionLists, 0,
 					armyRenderer);
 			if (subSummary != '') {
 				s += subSummary;
@@ -279,7 +286,7 @@ function SummaryGui() {
 		return s;
 	}
 
-	function renderOptions(armyData, optionLists, depth, armyRenderer) {
+	function renderOptions(armyUnit, optionLists, depth, armyRenderer) {
 		var s = "";
 		var optionsWithoutSuboptions = [];
 		var optionsWithSuboptions = [];
@@ -293,13 +300,13 @@ function SummaryGui() {
 				}
 				if (option.hasOptions()) {
 					var suboption = armyRenderer.joinSingleSuboption(
-							armyRenderer.renderOption(armyData, option, depth),
-							renderOptions(armyData, option.optionLists,
+							armyRenderer.renderOption(armyUnit, option, depth),
+							renderOptions(armyUnit, option.optionLists,
 									depth + 1, armyRenderer));
 					optionsWithSuboptions.push(suboption);
 				} else {
 					optionsWithoutSuboptions.push(armyRenderer.renderOption(
-							armyData, option, depth));
+							armyUnit, option, depth));
 				}
 			}
 		}
@@ -329,7 +336,7 @@ function SummaryGui() {
 				if (armyData == null) {
 					continue;
 				}
-				var army = armyData.army;
+				var army = armyData.getArmyUnit(0).getArmy();
 				if (!isFirst) {
 					string += "\n";
 				}
@@ -355,7 +362,7 @@ function SummaryGui() {
 			s += " (";
 
 			var isFirst = true;
-			var countPerSlot = traverseArmyData(this, getChooserCountForArmy, {
+			var countPerSlot = traverseArmyUnit(this, getChooserCountForArmy, {
 				slotId : slot.slotId
 			});
 
@@ -383,7 +390,7 @@ function SummaryGui() {
 			s += getSlotHeadingText(slot);
 			s += " (";
 
-			var countPerSlot = traverseArmyData(this, getChooserCountForArmy, {
+			var countPerSlot = traverseArmyUnit(this, getChooserCountForArmy, {
 				slotId : slot.slotId
 			});
 			
@@ -476,10 +483,10 @@ function SummaryGui() {
 			return s;
 		};
 		
-		this.renderSlotHeadingSingle = function(slot, armyIndex) {
+		this.renderSlotHeadingSingle = function(slot, armyDataIndex) {
 			var s = "";
 			s += "[size=3][i]";
-			s += this.miscRenderer.renderSlotHeadingSingle(slot, armyIndex);
+			s += this.miscRenderer.renderSlotHeadingSingle(slot, armyDataIndex);
 			s += "[/i][/size]";
 			return s;
 		};
@@ -500,17 +507,17 @@ function SummaryGui() {
 
 	function DefaultArmyRenderer() {
 
-		this.renderEntityHeading = function(armyIndex, armyData, entity) {
+		this.renderEntityHeading = function(armyDataIndex, armyUnit, entity) {
 			var s = "";
 
 			if (_armyState.getArmyCount() > 1) {
-				s += "[" + (armyIndex + 1) + "] ";
+				s += "[" + (armyDataIndex + 1) + "] ";
 			}
 
 			if (entity.currentCount > 1) {
 				s += entity.currentCount + "x ";
 			}
-			s += armyData.text[entity.entityName];
+			s += armyUnit.getText(entity.entityName);
 			return s;
 		};
 
@@ -519,12 +526,12 @@ function SummaryGui() {
 					+ ")";
 		};
 
-		this.renderOption = function(armyData, option, depth, isFirst, isLast) {
+		this.renderOption = function(armyUnit, option, depth, isFirst, isLast) {
 			var s = "";
 			if (option.currentCount > 1) {
 				s += option.currentCount + "x ";
 			}
-			s += armyData.text[armyData.entityPool[option.entityId].entityName];
+			s += armyUnit.getText(armyUnit.getFromEntityPool(option.entityId).entityName);
 			return s;
 		};
 
@@ -550,8 +557,8 @@ function SummaryGui() {
 
 		this.armyRenderer = armyRenderer;
 
-		this.renderEntityHeading = function(armyIndex, armyData, entity) {
-			return this.armyRenderer.renderEntityHeading(armyIndex, armyData,
+		this.renderEntityHeading = function(armyDataIndex, armyUnit, entity) {
+			return this.armyRenderer.renderEntityHeading(armyDataIndex, armyUnit,
 					entity);
 		};
 
@@ -559,9 +566,9 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(armyData, option, depth, isFirst, isLast) {
+		this.renderOption = function(armyUnit, option, depth, isFirst, isLast) {
 			var s = "";
-			s += this.armyRenderer.renderOption(armyData, option, depth,
+			s += this.armyRenderer.renderOption(armyUnit, option, depth,
 					isFirst, isLast);
 			return s;
 		};
@@ -617,8 +624,8 @@ function SummaryGui() {
 //		this.lineStarter = '............................................................................................';
 		this.lineStarter = '______________________________________________';
 
-		this.renderEntityHeading = function(armyIndex, armyData, entity) {
-			return this.armyRenderer.renderEntityHeading(armyIndex, armyData,
+		this.renderEntityHeading = function(armyDataIndex, armyUnit, entity) {
+			return this.armyRenderer.renderEntityHeading(armyDataIndex, armyUnit,
 					entity);
 		};
 
@@ -626,8 +633,8 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(armyData, option, depth) {
-			return this.armyRenderer.renderOption(armyData, option, depth);
+		this.renderOption = function(armyUnit, option, depth) {
+			return this.armyRenderer.renderOption(armyUnit, option, depth);
 		};
 
 		this.joinOptions = function(options, depth) {
@@ -659,14 +666,14 @@ function SummaryGui() {
 	function BBCodeArmyRendererDecorator(armyRenderer) {
 		this.armyRenderer = armyRenderer;
 
-		this.renderEntity = function(armyIndex, armyData, entity, armyRenderer) {
+		this.renderEntity = function(armyIndex, armyUnit, entity, armyRenderer) {
 			return armyRenderer.renderEntity();
 		};
 
-		this.renderEntityHeading = function(armyIndex, armyData, entity) {
+		this.renderEntityHeading = function(armyDataIndex, armyUnit, entity) {
 			var s = "";
 			s += "[b]";
-			s += this.armyRenderer.renderEntityHeading(armyIndex, armyData,
+			s += this.armyRenderer.renderEntityHeading(armyDataIndex, armyUnit,
 					entity);
 			s += "[/b]";
 			return s;
@@ -676,8 +683,8 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(armyData, option, depth) {
-			return this.armyRenderer.renderOption(armyData, option, depth);
+		this.renderOption = function(armyUnit, option, depth) {
+			return this.armyRenderer.renderOption(armyUnit, option, depth);
 		};
 
 		this.joinOptions = function(options, depth) {

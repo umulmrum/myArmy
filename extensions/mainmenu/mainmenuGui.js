@@ -107,8 +107,8 @@ function MainmenuGui() {
 		var lastArmyGroup = -1;
 		var optgroup = "";
 		
-		var armyData = _armyState.getArmyData(0);
-		var selectedArmyId = (armyData != null && armyData.army != null) ? armyData.army.armyId : -1;
+		var armyUnit = _armyState.getArmyUnit(0, 0);
+		var selectedArmyId = (armyUnit != null && armyUnit.getArmy() != null) ? armyUnit.getArmy().armyId : -1;
 		
 		for (var j = 0; j < sortedArmies.length; j++) {
 			if (sortedArmies[j].armyGroup != lastArmyGroup) {
@@ -133,30 +133,30 @@ function MainmenuGui() {
 		}
 	};
 	
-	this.addArmySelect = function(armyIndex) {
-		if(armyIndex >= 10 || armyIndex == 0 || _gui.getElement("#armySelect" + armyIndex) != null) {
+	this.addArmySelect = function(armyDataIndex) {
+		if(armyDataIndex >= 10 || armyDataIndex == 0 || _gui.getElement("#armySelect" + armyDataIndex) != null) {
 			return;
 		}
-		var armySelectElement = select("armySelect" + armyIndex);
-		armySelectElement.on("change", { armyIndex: armyIndex}, function(event) {
-			_controller.changeArmy(armyIndex, this.value, _gui.getElement("#detachmentTypeSelect" + armyIndex).val());
+		var armySelectElement = select("armySelect" + armyDataIndex);
+		armySelectElement.on("change", { armyIndex: armyDataIndex}, function(event) {
+			_controller.changeArmy(armyDataIndex, this.value, _gui.getElement("#detachmentTypeSelect" + armyDataIndex).val());
 		});
-		var detachmentBoxElement = _gui.getElement("#detachmentBox" + armyIndex);
-		detachmentBoxElement.append(getDetachmentTypeSelectbox(armyIndex));
+		var detachmentBoxElement = _gui.getElement("#detachmentBox" + armyDataIndex);
+		detachmentBoxElement.append(getDetachmentTypeSelectbox(armyDataIndex));
 		detachmentBoxElement.append(armySelectElement);
 		detachmentBoxElement.removeClass("invisible");
 		detachmentBoxElement.after("<br />");
-		armySelectElement = _gui.getElement("#armySelect" + armyIndex);
+		armySelectElement = _gui.getElement("#armySelect" + armyDataIndex);
 		
 		armySelectElement.append(_gui.getElement("#armySelect0").children().clone());
-		this.refreshArmySelect(armyIndex);
+		this.refreshArmySelect(armyDataIndex);
 	};
 	
 	this.refreshArmySelect = function(armyIndex) {
 		var armySelectElement = _gui.getElement("#armySelect" + armyIndex);
 //		var mainArmyData = _armyState.getArmyData(0);
-		var armyData = _armyState.getArmyData(armyIndex);
-		var armyId = (armyData != null && armyData.army != null) ? armyData.army.armyId : -1;
+		var armyUnit = _armyState.getArmyUnit(armyIndex, 0);
+		var armyId = (armyUnit != null && armyUnit.getArmy() != null) ? armyUnit.getArmy().armyId : -1;
 		armySelectElement.find("option").each(function(index, element) {
 			var $element = $(element);
 			var elementValue = parseInt(element.value);

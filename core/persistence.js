@@ -39,9 +39,9 @@ function Persistence() {
 	// values in base36 encoding.
 	var MARKER = {};
 	// add every marker character!
-	MARKER.SET = {Y:1,D:1,A:1,F:1,E:1,C:1,L:1,O:1,U:1,N:1,T:1,X:1};
+	MARKER.SET = {Y:1,D:1,A:1,F:1,E:1,C:1,L:1,O:1,U:1,N:1,T:1};
 	MARKER.SYSTEM = "Y";
-	MARKER.DETACHMENT_TYPE = "D";
+	MARKER.DETACHMENT = "D";
 	MARKER.ARMY = "A";
 	MARKER.ALLY = "A";
 	MARKER.FOC = "F";
@@ -52,8 +52,7 @@ function Persistence() {
 	MARKER.OPTION = "O";
 	MARKER.SUBOPTION = "U";
 	MARKER.SUBOPTION_END = "N";
-	MARKER.EXTRA = "X";
-
+	
 	this.init = function() {
 		_dispatcher.bindEvent("postStateRefresh", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.createStatelink, _dispatcher.PHASE_STATE);
@@ -96,12 +95,12 @@ function Persistence() {
 			}
 		}
 		
-		traverseArmyData(this, doEntityCalculations);
+		traverseArmyUnit(this, doEntityCalculations);
 	};
 
-	function doEntityCalculations(armyData) {
-		for(var i = 0; i < armyData.selections.length; i++) {
-			var entityslot = armyData.selections[i];
+	function doEntityCalculations(armyUnit) {
+		for(var i = 0; i < armyUnit.getSelectionCount(); i++) {
+			var entityslot = armyUnit.getSelection(i);
 			registerEntityslotOptionsForPools(entityslot);
 			changePoolByEntityslot(entityslot, true);
 		}
@@ -126,36 +125,77 @@ function Persistence() {
 		var systemid = parseInt(value, BASE);
 		_controller.changeSystem(systemid);
 		i = i + value.length;
-		var armyIndex = 0;
+		var armyDataIndex = 0;
 		while(i < q.length) {
 			switch(q[i]) {
+                case MARKER.DETACHMENT:
+                    i = restoreDetachment(fileVersion, q, i + MARKER.DETACHMENT.length, armyDataIndex);
+                    armyDataIndex++;
+                    break;
 				case MARKER.ARMY:
-					i = restoreCurrentArmy(fileVersion, q, i + MARKER.ARMY.length, armyIndex);
-					armyIndex++;
+					i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, armyDataIndex, 0);
+					armyDataIndex++;
 					break;
 				case MARKER.FOC:
 					i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
 					break;
 				default:
-					alert("Unexpected token '" + q[i] + "' in restoreCurrentSystem");
+					alert("Unexpected token '" + q[i] + "' in restoreSystem");
 					return i + 1;
 			}
 		}
 		return i+1;
 	}
-	
-	function restoreCurrentArmy(fileVersion, q, i, armyIndex) {
-		var value = val(q, i);
-		var armyid = parseInt(value, BASE);
-		_controller.changeArmy(armyIndex, armyid);
-		if(_armyState.getArmyData(armyIndex).getDetachmentType == null) {
-			setDefaultDetachmentType(armyIndex);
-		}
-		i = i + value.length;
-		while(i < q.length) {
+
+    function restoreDetachment(fileVersion, q, i, armyDataIndex) {
+
+        var value = val(q, i);
+        var detachmentTypeId = parseInt(value, BASE);
+        _armyState.setArmyData(armyDataIndex, new ArmyData());
+        _controller.changeDetachmentType(armyDataIndex, detachmentTypeId);
+
+        var armyUnitIndex = 0;
+
+        i += value.length;
+
+        while(i < q.length) {
+            switch(q[i]) {
+                case MARKER.DETACHMENT:
+                    return i;
+                    break;
+                case MARKER.ARMY:
+                    i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, armyDataIndex, armyUnitIndex);
+                    armyUnitIndex++;
+                    break;
+                default:
+                    alert("Unexpected token '" + q[i] + "' in restoreDetachment");
+                    return;
+            }
+        }
+        return i+1;
+    }
+
+	function restoreArmy(fileVersion, q, i, armyDataIndex, armyUnitIndex) {
+
+        if(armyUnitIndex != 0) {
+            alert("not implemented yet :-)");
+        }
+        var value = val(q, i);
+        var armyid = parseInt(value, BASE);
+        _controller.changeArmy(armyDataIndex, armyid);
+        if(_armyState.getArmyData(armyDataIndex).detachmentType == null) {
+            setDefaultDetachmentType(armyDataIndex);
+        }
+        i = i + value.length;
+
+        while(i < q.length) {
 			switch(q[i]) {
-			case MARKER.DETACHMENT_TYPE:
-				i = restoreDetachmentType(fileVersion, q, i + MARKER.DETACHMENT_TYPE.length, armyIndex);
+			case MARKER.DETACHMENT:
+                if(fileVersion < 2) {
+				    i = restoreDetachmentType(fileVersion, q, i + MARKER.DETACHMENT.length, armyDataIndex);
+                } else {
+                    return i;
+                }
 				break;
 			case MARKER.ARMY:
 				if(fileVersion == 0) {
@@ -168,14 +208,14 @@ function Persistence() {
 				i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
 				break;
 			case MARKER.ENTITY:
-				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, armyIndex);
+				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, armyDataIndex, 0);
 				break;
 			case MARKER.ALLYENTITY:
 				// legacy
-				i = restoreEntity(fileVersion, q, i + MARKER.ALLYENTITY.length, 1);
+				i = restoreEntity(fileVersion, q, i + MARKER.ALLYENTITY.length, 1, 0);
 				break;
 			default:
-				alert("Unexpected token '" + q[i] + "' in restoreCurrentArmy");
+				alert("Unexpected token '" + q[i] + "' in restoreArmy");
 				return;
 			}
 		}
@@ -225,7 +265,7 @@ function Persistence() {
 		return i + value.length;
 	}
 	
-	function restoreEntity(fileVersion, q, i, armyIndex) {
+	function restoreEntity(fileVersion, q, i, armyDataIndex, armyUnitIndex) {
 		var value = val(q, i);
 		var entityslotId = parseInt(value, BASE);
 		i = i + value.length;
@@ -235,7 +275,7 @@ function Persistence() {
 				i++;
 			}
 		} else {
-			var entity = _controller.addEntry(armyIndex, entityslotId, false);
+			var entity = _controller.addEntry(armyDataIndex, armyUnitIndex, entityslotId, false);
 		}
 		while(i < q.length) {
 			switch(q[i]) {
@@ -251,6 +291,9 @@ function Persistence() {
 			case MARKER.ARMY:
 				return i;
 				break;
+            case MARKER.DETACHMENT:
+                return i;
+                break;
 			case MARKER.ALLYENTITY:
 				i = restoreEntity(fileVersion, q, i + MARKER.ALLYENTITY.length, 1);
 				break;
@@ -299,6 +342,9 @@ function Persistence() {
 			case MARKER.ARMY:
 				return i;
 				break;
+            case MARKER.DETACHMENT:
+                return i;
+                break;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreOptionList");
 				return i + 1;
@@ -338,6 +384,9 @@ function Persistence() {
 			case MARKER.ARMY:
 				return i;
 				break;
+            case MARKER.DETACHMENT:
+                return i;
+                break;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreOption");
 				return i + 1;
@@ -380,14 +429,14 @@ function Persistence() {
 			return;
 		}
 	
-		var state = "1"; // version of link format (currently 2 versions; if none is given, we assume 0 when loading an army)
+		var state = "2"; // version of link format (zero-based; if none is given, we assume 0 when loading an army)
 		state += MARKER.SYSTEM + _systemState.system.systemId.toString(BASE);
 		if(_armyState.getFocCount() > 1) {
 			state += MARKER.FOC + _armyState.getFocCount().toString(BASE);
 		}
 	
 		if (_armyState.getArmyCount() != 0) {
-			var stateLinksPerArmy = traverseArmyData(this, createStateLinkForArmy);
+			var stateLinksPerArmy = traverseArmyData(this, createStateLinkForArmyData);
 			for(var i = 0; i < stateLinksPerArmy.length; i++) {
 				if(stateLinksPerArmy[i] != null) {
 					state += stateLinksPerArmy[i];
@@ -402,12 +451,22 @@ function Persistence() {
 		window.setTimeout("window.setTimeout(\"_persistence.setHashEvent(true)\", 1)", 1);
 	};
 	
-	function createStateLinkForArmy(armyData) {
+	function createStateLinkForArmyData(armyData) {
 		
-		var state = MARKER.ARMY + armyData.army.armyId.toString(BASE);
-		state += MARKER.DETACHMENT_TYPE + armyData.detachmentType.id;
-		for(var i in armyData.selections) {
-			var entityslot = armyData.selections[i];
+		var state = MARKER.DETACHMENT + armyData.detachmentType.id;
+
+        for(var armyUnitIndex in armyData.getArmyUnits()) {
+            var armyUnit = armyData.getArmyUnit(armyUnitIndex);
+            state += createStateLinkForArmyUnit(armyUnit);
+        }
+
+		return state;
+	}
+	
+	function createStateLinkForArmyUnit(armyUnit) {
+		var state = MARKER.ARMY + armyUnit.getArmy().armyId.toString(BASE);
+		for(var i in armyUnit.getSelections()) {
+			var entityslot = armyUnit.getSelection(i);
 			state += entityslot.state;
 		}
 		return state;
