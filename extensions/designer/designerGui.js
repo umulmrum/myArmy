@@ -41,9 +41,8 @@ function DesignerGui() {
 	};
 	
 	this.onPostAddSelection = function(event, additionalData) {
-		var localId = additionalData.entityslot.localId;
 		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.armyDataIndex, additionalData.entityslot.armyUnitIndex);
-		this.renderEntry(armyUnit, localId);
+		this.renderEntry(armyUnit, additionalData.entityslot.localId);
 	};
 	
 	this.onPostRemoveSelection = function(event, additionalData) {
@@ -221,7 +220,7 @@ function DesignerGui() {
                 var armyData = _armyState.getArmyData(i);
                 for(var j = 0; j < armyData.getArmyUnitCount(); j++) {
                     if(armyData.getArmyUnit(j) != null) {
-				        position += armyData.getArmyUnit(j).getSelectionCount(entityslot.slotId);
+				        position += armyData.getArmyUnit(j).getSelectionCountPerSlot(entityslot.slotId);
                     }
                 }
 			}

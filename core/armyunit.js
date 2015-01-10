@@ -33,7 +33,7 @@ function ArmyUnit() {
 	
 	// dynamic data (will reflect the user's selections)
 	var selections = []; // the entityslots the user selected to be in his army
-	var selectionCount = {}; //the number of entityslots per slot
+	var selectionCountPerSlot = {}; //the number of entityslots per slot
 	var selectionCost = {}; // the total slotCost per slot
 	var entityCount = {}; // a counter for each entityslotId - used for minTaken and maxTaken
 	
@@ -45,10 +45,10 @@ function ArmyUnit() {
 	
 	this.resetArmy = function() {
 		selections = [];
-		selectionCount = {};
+		selectionCountPerSlot = {};
 		selectionCost = {};
 		for(var i in _systemState.slots) {
-			selectionCount[i] = 0;
+			selectionCountPerSlot[i] = 0;
 			selectionCost[i] = 0;
 		}
 		for(var i in entityCount) {
@@ -68,7 +68,7 @@ function ArmyUnit() {
 	
 	this.addEntry = function(entityslot, doEntityCalculations) {
 		selections.push(entityslot);
-		selectionCount[entityslot.slotId] = selectionCount[entityslot.slotId] + 1;
+		selectionCountPerSlot[entityslot.slotId] = selectionCountPerSlot[entityslot.slotId] + 1;
 		selectionCost[entityslot.slotId] = selectionCost[entityslot.slotId] + entityslot.slotCost;
 		entityCount[entityslot.entityslotId] = entityCount[entityslot.entityslotId] + 1;
 		assignEntitySlotLocalId(entityslot);
@@ -82,7 +82,7 @@ function ArmyUnit() {
 
 	this.removeEntry = function(entityslot) {
 		removeItems(selections, entityslot);
-		selectionCount[entityslot.slotId] = selectionCount[entityslot.slotId] - 1;
+		selectionCountPerSlot[entityslot.slotId] = selectionCountPerSlot[entityslot.slotId] - 1;
 		selectionCost[entityslot.slotId] = selectionCost[entityslot.slotId] - entityslot.slotCost;
 		entityCount[entityslot.entityslotId] = entityCount[entityslot.entityslotId] - 1;
 		removeEntitySlotLocalIds(entityslot);
@@ -133,6 +133,10 @@ function ArmyUnit() {
 
     this.getSelectionCount = function() {
         return selections.length;
+    };
+
+    this.getSelectionCountPerSlot = function(slotId) {
+        return selectionCountPerSlot[slotId];
     };
 
     this.getSelectionCost = function(slotId) {
