@@ -316,14 +316,15 @@ function Gui() {
 	 *****************************/
 
 	this.loadFile = function(event) {
-		this.startLongRunningProcess();
+		_gui    .startLongRunningProcess();
 	    var f = event.target.files[0]; 
 
 	    if (f) {
 	      var r = new FileReader();
 	      r.onload = function(e) {
 		      var content = e.target.result;
-		      content = content.substr(0, content.indexOf("\r\n"));
+              var regex = /\s/;
+		      content = content.substr(0, regex.exec(content).index);
 		      if(content.indexOf("#") == -1) {
 		    	  alert("Invalid file");
 		      } else {
