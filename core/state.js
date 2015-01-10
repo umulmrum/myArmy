@@ -39,7 +39,7 @@ function State() {
 	};
 	
 	this.sortSelections = function(event, additionalData) {
-		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.armyDataIndex, additionalData.entityslot.armyUnitIndex);
+		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
 		var sortedSelections = armyUnit.getSelections().sort(function(a, b) {
 			var slotA = _systemState.slots[a.slotId];
 			var slotB = _systemState.slots[b.slotId];
@@ -88,7 +88,7 @@ function State() {
 		_dispatcher.triggerEvent("postStateRefresh");
 	};
 
-	this.calculateDirtyEntityStatesInChooser = function(armyUnit, armyUnitIndex, armyData, armyDataIndex, additionalParams) {
+	this.calculateDirtyEntityStatesInChooser = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {
 		for(var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if(additionalParams.force || entityslot.dirty) {
@@ -297,7 +297,7 @@ function State() {
 			return defaultValue;
 		} else {
 			var entitySlot = _armyState.lookupId(entity.parentEntityslot);
-			var pool = _armyState.getArmyUnit(entitySlot.armyDataIndex, entitySlot.armyUnitIndex).getPools();
+			var pool = _armyState.getArmyUnit(entitySlot.detachmentDataIndex, entitySlot.armyUnitIndex).getPools();
 			return parseInt(eval(value));
 		}
 	}

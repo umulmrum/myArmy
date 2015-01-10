@@ -33,7 +33,7 @@ loadScript("core/model.js");
 loadScript("core/dispatcher.js");
 loadScript("core/systemstate.js");
 loadScript("core/armyunit.js");
-loadScript("core/armydata.js");
+loadScript("core/detachmentdata.js");
 loadScript("core/armystate.js");
 loadScript("core/guistate.js");
 loadScript("core/state.js");

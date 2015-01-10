@@ -101,7 +101,7 @@ function Gui() {
 	this.checkSlotVisibility = function() {
 		for ( var i in _systemState.slots) {
 			var slot = _systemState.slots[i];
-			slot.visible = $.inArray(true, traverseArmyData(this, this.checkSlotVisible, { slotId : slot.slotId })) > -1;
+			slot.visible = $.inArray(true, traverseDetachmentData(this, this.checkSlotVisible, { slotId : slot.slotId })) > -1;
 		}
 	};
 
@@ -114,7 +114,7 @@ function Gui() {
 
 		var string = "";
 		var isFirst = true;
-		var armyNames = traverseArmyData(this, this.getArmyName);
+		var armyNames = traverseDetachmentData(this, this.getArmyName);
 		for ( var i = 0; i < armyNames.length; i++) {
 			var armyName = armyNames[i];
 			if (armyName == null) {
@@ -129,8 +129,8 @@ function Gui() {
 		this.getElement("#armyLabel").html(string);
 	};
 
-	this.getArmyName = function(armyData) {
-        var armyUnit = armyData.getArmyUnit(0);
+	this.getArmyName = function(detachmentData) {
+        var armyUnit = detachmentData.getArmyUnit(0);
 		if (armyUnit == null || armyUnit.getArmy() == null) {
 			return null;
 		}
@@ -172,9 +172,9 @@ function Gui() {
 		return true;
 	};
 	
-	this.checkSlotVisible = function(armyData, armyIndex, additionalParams) {
-		return !isUndefined(armyData.entityslotCount[additionalParams.slotId])
-				&& (armyData.entityslotCount[additionalParams.slotId] > 0);
+	this.checkSlotVisible = function(detachmentData, armyIndex, additionalParams) {
+		return !isUndefined(detachmentData.entityslotCount[additionalParams.slotId])
+				&& (detachmentData.entityslotCount[additionalParams.slotId] > 0);
 	};
 
 	this.startLongRunningProcess = function() {

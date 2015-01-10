@@ -125,16 +125,16 @@ function Persistence() {
 		var systemid = parseInt(value, BASE);
 		_controller.changeSystem(systemid);
 		i = i + value.length;
-		var armyDataIndex = 0;
+		var detachmentDataIndex = 0;
 		while(i < q.length) {
 			switch(q[i]) {
                 case MARKER.DETACHMENT:
-                    i = restoreDetachment(fileVersion, q, i + MARKER.DETACHMENT.length, armyDataIndex);
-                    armyDataIndex++;
+                    i = restoreDetachment(fileVersion, q, i + MARKER.DETACHMENT.length, detachmentDataIndex);
+                    detachmentDataIndex++;
                     break;
 				case MARKER.ARMY:
-					i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, armyDataIndex, 0);
-					armyDataIndex++;
+					i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, detachmentDataIndex, 0);
+					detachmentDataIndex++;
 					break;
 				case MARKER.FOC:
 					i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
@@ -147,12 +147,12 @@ function Persistence() {
 		return i+1;
 	}
 
-    function restoreDetachment(fileVersion, q, i, armyDataIndex) {
+    function restoreDetachment(fileVersion, q, i, detachmentDataIndex) {
 
         var value = val(q, i);
         var detachmentTypeId = parseInt(value, BASE);
-        _armyState.setArmyData(armyDataIndex, new ArmyData());
-        _controller.changeDetachmentType(armyDataIndex, detachmentTypeId);
+        _armyState.setDetachmentData(detachmentDataIndex, new DetachmentData());
+        _controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
 
         var armyUnitIndex = 0;
 
@@ -164,7 +164,7 @@ function Persistence() {
                     return i;
                     break;
                 case MARKER.ARMY:
-                    i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, armyDataIndex, armyUnitIndex);
+                    i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, detachmentDataIndex, armyUnitIndex);
                     armyUnitIndex++;
                     break;
                 default:
@@ -175,16 +175,16 @@ function Persistence() {
         return i+1;
     }
 
-	function restoreArmy(fileVersion, q, i, armyDataIndex, armyUnitIndex) {
+	function restoreArmy(fileVersion, q, i, detachmentDataIndex, armyUnitIndex) {
 
         if(armyUnitIndex != 0) {
             alert("not implemented yet :-)");
         }
         var value = val(q, i);
         var armyid = parseInt(value, BASE);
-        _controller.changeArmy(armyDataIndex, armyid);
-        if(_armyState.getArmyData(armyDataIndex).detachmentType == null) {
-            setDefaultDetachmentType(armyDataIndex);
+        _controller.changeArmy(detachmentDataIndex, armyid);
+        if(_armyState.getDetachmentData(detachmentDataIndex).detachmentType == null) {
+            setDefaultDetachmentType(detachmentDataIndex);
         }
         i = i + value.length;
 
@@ -192,7 +192,7 @@ function Persistence() {
 			switch(q[i]) {
 			case MARKER.DETACHMENT:
                 if(fileVersion < 2) {
-				    i = restoreDetachmentType(fileVersion, q, i + MARKER.DETACHMENT.length, armyDataIndex);
+				    i = restoreDetachmentType(fileVersion, q, i + MARKER.DETACHMENT.length, detachmentDataIndex);
                 } else {
                     return i;
                 }
@@ -208,7 +208,7 @@ function Persistence() {
 				i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
 				break;
 			case MARKER.ENTITY:
-				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, armyDataIndex, 0);
+				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, detachmentDataIndex, 0);
 				break;
 			case MARKER.ALLYENTITY:
 				// legacy
@@ -234,7 +234,7 @@ function Persistence() {
 		var value = val(q, i);
 		var armyid = parseInt(value, BASE);
 		_controller.changeArmy(1, armyid);
-		if(_armyState.getArmyData(armyIndex).getDetachmentType == null) {
+		if(_armyState.getDetachmentData(armyIndex).getDetachmentType == null) {
 			setDefaultDetachmentType(armyIndex);
 		}
 		i = i + value.length;
@@ -250,11 +250,11 @@ function Persistence() {
 	 * @param armyIndex
 	 */
 	function setDefaultDetachmentType(armyIndex) {
-		var armyData = _armyState.getArmyData(armyIndex);
+		var detachmentData = _armyState.getDetachmentData(armyIndex);
 		if(armyIndex == 0) {
-			armyData.detachmentType = _systemState.system.detachmentTypes["1"];
+			detachmentData.detachmentType = _systemState.system.detachmentTypes["1"];
 		} else {
-			armyData.detachmentType = _systemState.system.detachmentTypes["2"];
+			detachmentData.detachmentType = _systemState.system.detachmentTypes["2"];
 		}
 	}
 	
@@ -265,7 +265,7 @@ function Persistence() {
 		return i + value.length;
 	}
 	
-	function restoreEntity(fileVersion, q, i, armyDataIndex, armyUnitIndex) {
+	function restoreEntity(fileVersion, q, i, detachmentDataIndex, armyUnitIndex) {
 		var value = val(q, i);
 		var entityslotId = parseInt(value, BASE);
 		i = i + value.length;
@@ -275,7 +275,7 @@ function Persistence() {
 				i++;
 			}
 		} else {
-			var entity = _controller.addEntry(armyDataIndex, armyUnitIndex, entityslotId, false);
+			var entity = _controller.addEntry(detachmentDataIndex, armyUnitIndex, entityslotId, false);
 		}
 		while(i < q.length) {
 			switch(q[i]) {
@@ -436,7 +436,7 @@ function Persistence() {
 		}
 	
 		if (_armyState.getArmyCount() != 0) {
-			var stateLinksPerArmy = traverseArmyData(this, createStateLinkForArmyData);
+			var stateLinksPerArmy = traverseDetachmentData(this, createStateLinkForDetachmentData);
 			for(var i = 0; i < stateLinksPerArmy.length; i++) {
 				if(stateLinksPerArmy[i] != null) {
 					state += stateLinksPerArmy[i];
@@ -451,12 +451,12 @@ function Persistence() {
 		window.setTimeout("window.setTimeout(\"_persistence.setHashEvent(true)\", 1)", 1);
 	};
 	
-	function createStateLinkForArmyData(armyData) {
+	function createStateLinkForDetachmentData(detachmentData) {
 		
-		var state = MARKER.DETACHMENT + armyData.detachmentType.id;
+		var state = MARKER.DETACHMENT + detachmentData.detachmentType.id;
 
-        for(var armyUnitIndex in armyData.getArmyUnits()) {
-            var armyUnit = armyData.getArmyUnit(armyUnitIndex);
+        for(var armyUnitIndex in detachmentData.getArmyUnits()) {
+            var armyUnit = detachmentData.getArmyUnit(armyUnitIndex);
             state += createStateLinkForArmyUnit(armyUnit);
         }
 

@@ -41,7 +41,7 @@ function DesignerGui() {
 	};
 	
 	this.onPostAddSelection = function(event, additionalData) {
-		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.armyDataIndex, additionalData.entityslot.armyUnitIndex);
+		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
 		this.renderEntry(armyUnit, additionalData.entityslot.localId);
 	};
 	
@@ -125,14 +125,14 @@ function DesignerGui() {
 		}
 	};
 	
-	//this.getHasElements = function(armyData, armyIndex, additionalParams) {
-	//	if(armyData.army == null) {
+	//this.getHasElements = function(detachmentData, armyIndex, additionalParams) {
+	//	if(detachmentData.army == null) {
 	//		return false;
 	//	}
-	//	return armyData.entityslotCount[additionalParams.slotId] > 0;
+	//	return detachmentData.entityslotCount[additionalParams.slotId] > 0;
 	//};
 	
-	this.renderSelectionsForSlot = function(armyUnit, armyUnitIndex, armyData, armyDataIndex, additionalParams) {
+	this.renderSelectionsForSlot = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {
 		var selections = armyUnit.getSelections();
 		for (var j = 0; j < selections.length; j++) {
 			if(selections[j].slotId == additionalParams.slotId) {
@@ -215,12 +215,12 @@ function DesignerGui() {
 			i++;
 		}
 		
-		for(i = 0; i < entityslot.armyDataIndex; i++) {
-			if(_armyState.getArmyData(i) != null) {
-                var armyData = _armyState.getArmyData(i);
-                for(var j = 0; j < armyData.getArmyUnitCount(); j++) {
-                    if(armyData.getArmyUnit(j) != null) {
-				        position += armyData.getArmyUnit(j).getSelectionCountPerSlot(entityslot.slotId);
+		for(i = 0; i < entityslot.detachmentDataIndex; i++) {
+			if(_armyState.getDetachmentData(i) != null) {
+                var detachmentData = _armyState.getDetachmentData(i);
+                for(var j = 0; j < detachmentData.getArmyUnitCount(); j++) {
+                    if(detachmentData.getArmyUnit(j) != null) {
+				        position += detachmentData.getArmyUnit(j).getSelectionCountPerSlot(entityslot.slotId);
                     }
                 }
 			}
@@ -239,7 +239,7 @@ function DesignerGui() {
 		entryHeader = div(null, null, "entryHeader commonHighlight");
 		if(_armyState.getArmyCount() > 1) {
 			var armyIndexCss = (entity.minCount < entity.maxCount) ? "entryArmyIndexWithModelCount" : "entryArmyIndex";
-			var armyIndexElement = span(entityslot.armyDataIndex + 1, null, armyIndexCss);
+			var armyIndexElement = span(entityslot.detachmentDataIndex + 1, null, armyIndexCss);
 			entryHeader.append(armyIndexElement);
 		}
 		var entityNameElement = span(entityName, null, "entryName");
@@ -345,7 +345,7 @@ function DesignerGui() {
 			isFirstOptionList, isFirstOption, depth, invisible) {
 
 		var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
-		var optionEntity = _armyState.getArmyUnit(parentEntityslot.armyDataIndex, parentEntityslot.armyUnitIndex).getFromEntityPool(option.entityId);
+		var optionEntity = _armyState.getArmyUnit(parentEntityslot.detachmentDataIndex, parentEntityslot.armyUnitIndex).getFromEntityPool(option.entityId);
 
 		var cssClasses = "option";
 		if (isFirstOption && !isFirstOptionList) {

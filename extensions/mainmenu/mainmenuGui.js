@@ -128,33 +128,33 @@ function MainmenuGui() {
 	};
 	
 	this.addNewArmySelects = function() {
-		for(var i = 0; i < _armyState.getArmyDataCount(); i++) {
+		for(var i = 0; i < _armyState.getDetachmentDataCount(); i++) {
 			this.addArmySelect(i + 1);
 		}
 	};
 	
-	this.addArmySelect = function(armyDataIndex) {
-		if(armyDataIndex >= 10 || armyDataIndex == 0 || _gui.getElement("#armySelect" + armyDataIndex) != null) {
+	this.addArmySelect = function(detachmentDataIndex) {
+		if(detachmentDataIndex >= 10 || detachmentDataIndex == 0 || _gui.getElement("#armySelect" + detachmentDataIndex) != null) {
 			return;
 		}
-		var armySelectElement = select("armySelect" + armyDataIndex);
-		armySelectElement.on("change", { armyIndex: armyDataIndex}, function(event) {
-			_controller.changeArmy(armyDataIndex, this.value, _gui.getElement("#detachmentTypeSelect" + armyDataIndex).val());
+		var armySelectElement = select("armySelect" + detachmentDataIndex);
+		armySelectElement.on("change", { armyIndex: detachmentDataIndex}, function(event) {
+			_controller.changeArmy(detachmentDataIndex, this.value, _gui.getElement("#detachmentTypeSelect" + detachmentDataIndex).val());
 		});
-		var detachmentBoxElement = _gui.getElement("#detachmentBox" + armyDataIndex);
-		detachmentBoxElement.append(getDetachmentTypeSelectbox(armyDataIndex));
+		var detachmentBoxElement = _gui.getElement("#detachmentBox" + detachmentDataIndex);
+		detachmentBoxElement.append(getDetachmentTypeSelectbox(detachmentDataIndex));
 		detachmentBoxElement.append(armySelectElement);
 		detachmentBoxElement.removeClass("invisible");
 		detachmentBoxElement.after("<br />");
-		armySelectElement = _gui.getElement("#armySelect" + armyDataIndex);
+		armySelectElement = _gui.getElement("#armySelect" + detachmentDataIndex);
 		
 		armySelectElement.append(_gui.getElement("#armySelect0").children().clone());
-		this.refreshArmySelect(armyDataIndex);
+		this.refreshArmySelect(detachmentDataIndex);
 	};
 	
 	this.refreshArmySelect = function(armyIndex) {
 		var armySelectElement = _gui.getElement("#armySelect" + armyIndex);
-//		var mainArmyData = _armyState.getArmyData(0);
+//		var mainDetachmentData = _armyState.getDetachmentData(0);
 		var armyUnit = _armyState.getArmyUnit(armyIndex, 0);
 		var armyId = (armyUnit != null && armyUnit.getArmy() != null) ? armyUnit.getArmy().armyId : -1;
 		armySelectElement.find("option").each(function(index, element) {
@@ -165,7 +165,7 @@ function MainmenuGui() {
 			}
 			if(element.value == -1) {
 				$element.html("> " + _guiState.text["army"] + " " + (armyIndex + 1) + " <");
-			} /*else if (armyIndex > 0 && ($.inArray(elementValue, mainArmyData.allowedAllies) == -1)) {
+			} /*else if (armyIndex > 0 && ($.inArray(elementValue, mainDetachmentData.allowedAllies) == -1)) {
 				$element.addClass("bad");
 			} else {
 				$element.removeClass("bad");
@@ -174,7 +174,7 @@ function MainmenuGui() {
 		
 		// mark select element as invalid if an invalid ally was selected
 		/*if(armyIndex > 0 && armyId != -1) {
-			if($.inArray(armyId, mainArmyData.allowedAllies) == -1) {
+			if($.inArray(armyId, mainDetachmentData.allowedAllies) == -1) {
 				armySelectElement.addClass("bad");
 			} else {
 				armySelectElement.removeClass("bad");
@@ -184,7 +184,7 @@ function MainmenuGui() {
 	
 	function getDetachmentTypeSelectbox(armyIndex) {
 		var isPrimary = (armyIndex == 0);
-		var armyData = _armyState.getArmyData(armyIndex);
+		var detachmentData = _armyState.getDetachmentData(armyIndex);
 		var selectBox = select("detachmentTypeSelect" + armyIndex);
 //		selectBox.append(option(_guiState.text["choosedetachmenttype"], -1));
 		
@@ -195,7 +195,7 @@ function MainmenuGui() {
 		
 		for(var i in _systemState.system.detachmentTypes) {
 			var detachmentType = _systemState.system.detachmentTypes[i];
-			var isSelected = ((armyData != null) && (armyData.detachmentType.id == detachmentType.id));
+			var isSelected = ((detachmentData != null) && (detachmentData.detachmentType.id == detachmentType.id));
 			if(!isPrimary || detachmentType.canBePrimary) {
 				selectBox.append(option(_guiState.text[detachmentType.name], detachmentType.id, isSelected));
 			}

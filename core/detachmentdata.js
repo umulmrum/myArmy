@@ -23,7 +23,7 @@
 /**
  * A single army detachment's data
  */
-function ArmyData() {
+function DetachmentData() {
 	
 	this.detachmentType = null;
 	

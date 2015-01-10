@@ -132,7 +132,7 @@ function ChooserGui() {
 			var slotId = slot.slotId;
 			var slotName = _guiState.text[slot.slotName];
 
-//			var visible = $.inArray(true, traverseArmyData(this, this.checkSlotVisible, { slotId : slotId })) > -1;
+//			var visible = $.inArray(true, traverseDetachmentData(this, this.checkSlotVisible, { slotId : slotId })) > -1;
 
 			slotCount++;
 
@@ -177,9 +177,9 @@ function ChooserGui() {
 
 	};
 
-//	this.checkSlotVisible = function(armyData, armyIndex, additionalParams) {
-//		return !isUndefined(armyData.entityslotCount[additionalParams.slotId])
-//				&& (armyData.entityslotCount[additionalParams.slotId] > 0);
+//	this.checkSlotVisible = function(detachmentData, armyIndex, additionalParams) {
+//		return !isUndefined(detachmentData.entityslotCount[additionalParams.slotId])
+//				&& (detachmentData.entityslotCount[additionalParams.slotId] > 0);
 //	};
 	
 	this.renderUnitSelectionTabs = function() {
@@ -189,7 +189,7 @@ function ChooserGui() {
 			tabRow.addClass("invisible");
 		}
 		
-		for(var i = 0; i < _armyState.getArmyDataCount(); i++) {
+		for(var i = 0; i < _armyState.getDetachmentDataCount(); i++) {
 			var xLi = li(i + 1, null, "tab unitTab", null);
 			if(unitsToShow == i) {
 				xLi.addClass("selectedTab");
@@ -229,7 +229,7 @@ function ChooserGui() {
 		traverseArmyUnit(this, this.renderSlotEntries);
 	};
 	
-	this.renderSlotEntries = function(armyUnit, armyUnitIndex, armyData, armyDataIndex) {
+	this.renderSlotEntries = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex) {
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if(!entityslot.enabled) {
@@ -243,16 +243,16 @@ function ChooserGui() {
 			var cssClasses = this.getCssForEntry(armyUnit, entityslot);
 			
 			var xli = li(/*"&raquo; " +*/ entityName,
-					"chooserEntry" + armyDataIndex + "_" + armyUnitIndex + "_" + entityslotId, cssClasses);
+					"chooserEntry" + detachmentDataIndex + "_" + armyUnitIndex + "_" + entityslotId, cssClasses);
 			xli.on(_guiState.clickEvent, {
-				armyDataIndex : armyDataIndex,
+				detachmentDataIndex : detachmentDataIndex,
                 armyUnitIndex: armyUnitIndex,
 				entityslotId : entityslotId
 			}, function(event) {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.addEntry(event.data.armyDataIndex, event.data.armyUnitIndex, event.data.entityslotId, true);
+				_controller.addEntry(event.data.detachmentDataIndex, event.data.armyUnitIndex, event.data.entityslotId, true);
 			});
 //			if (entityslot.availableState == 0) {
 //				xli.append(span(" (" + _guiState.text["max"] + ")", null,
@@ -326,7 +326,7 @@ function ChooserGui() {
 			}
 			thisText += slotCount;
 			
-			var detachmentType = _armyState.getArmyData(i).detachmentType;
+			var detachmentType = _armyState.getDetachmentData(i).detachmentType;
 				
 			var isThisOk = checkSlotMinMax(detachmentType, slotId, slotCount);
 			isOk = isOk && isThisOk;
@@ -358,12 +358,12 @@ function ChooserGui() {
 		return (count >= minCount) && (count <= maxCount);
 	}
 	
-	this.refreshDirtySlots = function(armyUnit, armyUnitIndex, armyData, armyDataIndex) {
+	this.refreshDirtySlots = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex) {
 //		var dirtySlotIds = {}; // take object instead of array, so that we get a unique constraint for free
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if (entityslot.dirty) {
-				this.refreshSlotentry(armyDataIndex, armyUnit, armyUnitIndex, entityslot);
+				this.refreshSlotentry(detachmentDataIndex, armyUnit, armyUnitIndex, entityslot);
 //				dirtySlotIds[entityslot.slotId] = 1;
 				entityslot.dirty = false;
 			}
@@ -382,8 +382,8 @@ function ChooserGui() {
 		}
 	};
 	
-	this.refreshSlotentry = function(armyDataIndex, armyUnit, armyUnitIndex, entityslot) {
-		var entry = $("#chooserEntry" + armyDataIndex + "_" + armyUnitIndex + "_" + entityslot.entityslotId);
+	this.refreshSlotentry = function(detachmentDataIndex, armyUnit, armyUnitIndex, entityslot) {
+		var entry = $("#chooserEntry" + detachmentDataIndex + "_" + armyUnitIndex + "_" + entityslot.entityslotId);
 		entry.removeClass();
 		entry.addClass(this.getCssForEntry(armyUnit, entityslot));
 	};
@@ -410,21 +410,21 @@ function ChooserGui() {
 		tabs.filter(":eq(" + unitsToShow + ")").addClass("selectedTab");
 	};
 	
-	this.refreshForArmyUnit = function(armyUnit, armyUnitIndex, armyData, armyDataIndex, additionalParams) {
+	this.refreshForArmyUnit = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {
 		for ( var j in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(j);
 			if (entityslot.slotId != additionalParams.slotId) {
 				continue;
 			}
 			
-			var entry = $("#chooserEntry" + armyDataIndex + "_" + armyUnitIndex + "_" + entityslot.entityslotId);
+			var entry = $("#chooserEntry" + detachmentDataIndex + "_" + armyUnitIndex + "_" + entityslot.entityslotId);
 			entry.removeClass();
 			entry.addClass(this.getCssForEntry(armyUnit, entityslot));
 			var entity = armyUnit.getFromEntityPool(entityslot.entityId);
 			var entityName = armyUnit.getText(entity.entityName);
 			entry.html(entityName);
 		}
-		return armyData.entityslotCount[additionalParams.slotId] > 0;
+		return detachmentData.entityslotCount[additionalParams.slotId] > 0;
 	};
 	
 	this.getCssForEntry = function(armyUnit, entityslot) {
@@ -444,7 +444,7 @@ function ChooserGui() {
             // break;
 		}
 		
-		if(entityslot.armyDataIndex != unitsToShow) {
+		if(entityslot.detachmentDataIndex != unitsToShow) {
 			cssClass += " invisible";
 		}
 		if(!_gui.checkDisplay(armyUnit.getFromEntityPool(entityslot.entityId))) {

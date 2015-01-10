@@ -64,44 +64,44 @@ function Controller() {
 		}
 	};
 	
-	this.changeDetachmentType = function(armyDataIndex, detachmentTypeId) {
+	this.changeDetachmentType = function(detachmentDataIndex, detachmentTypeId) {
 		var detachmentType = _systemState.system.detachmentTypes[detachmentTypeId];
-		var armyData = _armyState.getArmyData(armyDataIndex);
-		if(armyData == null) {
+		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		if(detachmentData == null) {
 			return;
 		}
-		armyData.detachmentType = detachmentType;
+		detachmentData.detachmentType = detachmentType;
 		
-		_dispatcher.triggerEvent("postChangeDetachmentType", { armyIndex: armyDataIndex, newDetachmentTypeId: detachmentTypeId });
+		_dispatcher.triggerEvent("postChangeDetachmentType", { armyIndex: detachmentDataIndex, newDetachmentTypeId: detachmentTypeId });
 	};
 	
-	this.changeArmy = function(armyDataIndex, armyId, detachmentTypeId) {
+	this.changeArmy = function(detachmentDataIndex, armyId, detachmentTypeId) {
 		_gui.startLongRunningProcess();
-		var currentArmy = _armyState.getArmy(armyDataIndex, 0);
+		var currentArmy = _armyState.getArmy(detachmentDataIndex, 0);
 		var armyChanged = !((armyId == -1) && (currentArmy == null)) || ((currentArmy != null) && (armyId == currentArmy.armyId));
 		if (!armyChanged) {
 			return;
 		}
-		_armyState.removeArmy(armyDataIndex);
+		_armyState.removeArmy(detachmentDataIndex);
 		if(armyId != -1) {
-			_armyState.setArmy(armyDataIndex, 0, _systemState.armies[armyId]);
-			var armyData = _armyState.getArmyData(armyDataIndex);
-			var armyUnit = armyData.getArmyUnit(0);
+			_armyState.setArmy(detachmentDataIndex, 0, _systemState.armies[armyId]);
+			var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+			var armyUnit = detachmentData.getArmyUnit(0);
 			_dataReader.readTextsArmy(armyUnit);
 			
-			_dataReader.loadArmy(armyUnit, armyDataIndex, 0);
-			_armyState.getArmyData(armyDataIndex).resetArmy();
+			_dataReader.loadArmy(armyUnit, detachmentDataIndex, 0);
+			_armyState.getDetachmentData(detachmentDataIndex).resetArmy();
 		} else {
-			_armyState.setArmy(armyDataIndex, null);
+			_armyState.setArmy(detachmentDataIndex, null);
 		}
 		if(!isUndefined(detachmentTypeId)) {
-			this.changeDetachmentType(armyDataIndex, detachmentTypeId);
+			this.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
 		}
-		_dispatcher.triggerEvent("postChangeArmy", { armyDataIndex: armyDataIndex, newArmyId: armyId });
+		_dispatcher.triggerEvent("postChangeArmy", { detachmentDataIndex: detachmentDataIndex, newArmyId: armyId });
 	};
 	
-	this.addEntry = function(armyDataIndex, armyUnitIndex, entityslotId, doEntityCalculations) {
-        var armyUnit = _armyState.getArmyUnit(armyDataIndex, armyUnitIndex);
+	this.addEntry = function(detachmentDataIndex, armyUnitIndex, entityslotId, doEntityCalculations) {
+        var armyUnit = _armyState.getArmyUnit(detachmentDataIndex, armyUnitIndex);
 		var entityslot = armyUnit.getEntityslot(entityslotId).clone();
 		var entityId = entityslot.entityId;
 		var entity = armyUnit.getFromEntityPool(entityId).clone();
@@ -119,7 +119,7 @@ function Controller() {
 	};
 	
 	this.cloneEntry = function(entityslot) {
-		var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+		var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 		var newEntityslot = entityslot.clone();
 		var newEntity = newEntityslot.entity;
 		armyUnit.addEntry(newEntityslot, false);
@@ -132,7 +132,7 @@ function Controller() {
 	};
 	
 	this.deleteEntry = function(entityslot) {
-        var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+        var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 		var entity = entityslot.entity;
 		_armyState.addTotalPoints((-1) * entity.totalCost);
 		unregisterEntityslotOptionsForPools(entityslot);

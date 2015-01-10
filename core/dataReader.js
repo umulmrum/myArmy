@@ -138,13 +138,13 @@ function DataReader() {
 	};
 	
 	this.readArmy = function(data, additionalParams) {
-		this.readArmydata(additionalParams.armyDataIndex, additionalParams.armyUnitIndex, data);
+		this.readArmydata(additionalParams.detachmentDataIndex, additionalParams.armyUnitIndex, data);
 	};
 	
-	this.readArmydata = function(armyDataIndex, armyUnitIndex, data) {
+	this.readArmydata = function(detachmentDataIndex, armyUnitIndex, data) {
 		
-		var armyData = _armyState.getArmyData(armyDataIndex);
-		var armyUnit = armyData.getArmyUnit(armyUnitIndex);
+		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		var armyUnit = detachmentData.getArmyUnit(armyUnitIndex);
 		
 		var entities = data.entities || [];
 		for(var i = 0; i < entities.length; i++) {
@@ -156,13 +156,13 @@ function DataReader() {
 			var minCount = coalesce(obj.minCount, 1);
 			var maxCount = coalesce(obj.maxCount, 1);
 			var special = obj.special;
-			var localPools = readPools(armyDataIndex, obj.localPools);
+			var localPools = readPools(detachmentDataIndex, obj.localPools);
 			var modelCountPoolChange = obj.modelCountPoolChange;
 			var entity = new Entity(entityId, entityName, cost, costPerModel, minCount, maxCount, special, localPools, modelCountPoolChange);
 			var optionLists = obj.optionLists;
 			if(!isUndefined(optionLists)) {
 				//			entity.optionDisplayState = _guiState.OPTION_DISPLAYSTATE_EXPANDED;
-				readOptions(armyDataIndex, entity, optionLists);
+				readOptions(detachmentDataIndex, entity, optionLists);
 				//		} else {
 				//			entity.optionDisplayState = _guiState.OPTION_DISPLAYSTATE_ALWAYS;
 			}
@@ -173,7 +173,7 @@ function DataReader() {
 		var pools = data.pools || [];
 		for(var i = 0; i < pools.length; i++) {
 			var obj = pools[i];
-			var pool = new Pool(armyDataIndex, obj.name, obj.start);
+			var pool = new Pool(detachmentDataIndex, obj.name, obj.start);
 			armyUnit.addPool(pool);
 		}
 		
@@ -187,17 +187,17 @@ function DataReader() {
 			var maxTaken = coalesce(obj.maxTaken, Number.MAX_VALUE);
 			var slotCost = coalesce(obj.slotCost, _systemState.system.defaultSlotCost);
 			var fillsPool = coalesce(obj.fillsPool, null);
-			fillsPool = parsePools(armyDataIndex, fillsPool);
+			fillsPool = parsePools(detachmentDataIndex, fillsPool);
 			var needsPool = coalesce(obj.needsPool, null);
-			needsPool = parsePools(armyDataIndex, needsPool);
+			needsPool = parsePools(detachmentDataIndex, needsPool);
 			var enabled = true;//coalesce(obj.enabled, true);
 			
-			var entityslot = new EntitySlot(armyDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, enabled);
+			var entityslot = new EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, enabled);
 			armyUnit.addEntityslot(entityslot);
 			armyUnit.setEntityCount(entityslot.entityslotId, 0);
 			registerEntityslotForPools(entityslot);
 			if(enabled) {
-				armyData.increaseEntityslotCount(slotId);
+				detachmentData.increaseEntityslotCount(slotId);
 			}
 		}
 		
@@ -207,18 +207,18 @@ function DataReader() {
 		
 //		var allies = data.allies || [];
 //		if(allies.length > 0) {
-//			armyData.allowedAllies.push.apply(armyData.allowedAllies, allies);
+//			detachmentData.allowedAllies.push.apply(detachmentData.allowedAllies, allies);
 //		}
 		
 		traverseArmyUnit(null, checkPoolsAvailable);
 	};
 	
-	this.loadArmy = function(armyUnit, armyDataIndex, armyUnitIndex) {
+	this.loadArmy = function(armyUnit, detachmentDataIndex, armyUnitIndex) {
 		var armyPath = getArmyPath(armyUnit.getArmy()) + "army.json";
-		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { armyDataIndex: armyDataIndex, armyUnitIndex: armyUnitIndex });
+		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnitIndex });
 	};
 	
-	function readOptions(armyDataIndex, entity, optionListsJson) {
+	function readOptions(detachmentDataIndex, entity, optionListsJson) {
 		var optionLists = {};
 		for(var i = 0; i < optionListsJson.length; i++) {
 			var obj = optionListsJson[i];
@@ -241,13 +241,13 @@ function DataReader() {
 				var minTaken = coalesce(obj2.minTaken, 0);
 				var maxTaken = coalesce(obj2.maxTaken, 1);
 				var fillsPool = obj2.fillsPool || null;
-				fillsPool = parsePools(armyDataIndex, fillsPool);
+				fillsPool = parsePools(detachmentDataIndex, fillsPool);
 				var needsPool = obj2.needsPool || null;
-				needsPool = parsePools(armyDataIndex, needsPool);
+				needsPool = parsePools(detachmentDataIndex, needsPool);
 				var fillsLocalPool = obj2.fillsLocalPool || null;
-				fillsLocalPool = parsePools(armyDataIndex, fillsLocalPool);
+				fillsLocalPool = parsePools(detachmentDataIndex, fillsLocalPool);
 				var needsLocalPool = obj2.needsLocalPool || null;
-				needsLocalPool = parsePools(armyDataIndex, needsLocalPool);
+				needsLocalPool = parsePools(detachmentDataIndex, needsLocalPool);
 				var option = new Option(optionId, entityId, cost, costPerModel, minTaken, maxTaken, fillsPool, needsPool, fillsLocalPool, needsLocalPool);
 				optionList.options[optionId] = option;
 			}
@@ -300,7 +300,7 @@ function DataReader() {
 		}
 	}
 	
-	function readPools(armyDataIndex, poolsParam) {
+	function readPools(detachmentDataIndex, poolsParam) {
 		var pools = {};
 		if(isUndefined(poolsParam)) {
 			return pools;
@@ -308,7 +308,7 @@ function DataReader() {
 		for(var i = 0; i < poolsParam.length; i++) {
 			var name = poolsParam[i].name;
 			var start = poolsParam[i].start;
-			pools[name] = new Pool(armyDataIndex, name, start);
+			pools[name] = new Pool(detachmentDataIndex, name, start);
 		}
 		return pools;
 	}

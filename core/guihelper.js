@@ -157,7 +157,7 @@ function checkbox(name, checked) {
 
 
 function getSlotHeadingText(slot) {
-	var armyTexts = traverseArmyData(null, getSlotHeadingForArmy, {slotName: slot.slotName});
+	var armyTexts = traverseDetachmentData(null, getSlotHeadingForArmy, {slotName: slot.slotName});
 	var text = "";
 	var isFirst = true;
 	for(var i = 0; i < armyTexts.length; i++) {
@@ -177,8 +177,8 @@ function getSlotHeadingText(slot) {
 	return text;
 }
 
-function getSlotHeadingForArmy(armyData, armyIndex, additionalParams) {
-    var armyUnit = armyData.getArmyUnit(0);
+function getSlotHeadingForArmy(detachmentData, armyIndex, additionalParams) {
+    var armyUnit = detachmentData.getArmyUnit(0);
 	if(!isUndefined(armyUnit.getText(additionalParams.slotName))) {
 		return armyUnit.getText(additionalParams.slotName);
 	} else {
@@ -186,7 +186,7 @@ function getSlotHeadingForArmy(armyData, armyIndex, additionalParams) {
 	}
 }
 
-function getChooserCountForArmy (armyUnit, armyUnitIndex, armyData, armyIndex, additionalParams) {
+function getChooserCountForArmy (armyUnit, armyUnitIndex, detachmentData, armyIndex, additionalParams) {
 	// support multiple entities per slot by using fractions and round them up here
 	return Math.ceil(armyUnit.getSelectionCost(additionalParams.slotId));
 }

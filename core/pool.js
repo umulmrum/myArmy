@@ -43,7 +43,7 @@ function parsePools(armyIndex, poolString) {
  * @param entityslot
  */
 function registerEntityslotForPools(entityslot) {
-	var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 	for ( var i in entityslot.needsPool) {
 		var pool = armyUnit.getPool(i);
 		if(isUndefined(pool)) {
@@ -70,7 +70,7 @@ function registerEntityslotOptionsForPools(entityslot) {
 }
 
 function registerOptionForPools(option, entityslot) {
-	var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 	for ( var i in option.needsPool) {
 		var pool = armyUnit.getPool(i);
 		pool.dependingOptions[option.localId] = option;
@@ -103,7 +103,7 @@ function unregisterOptionForPools(option) {
 		doSelectOption(_armyState.lookupId(option.parentOptionList), option, 0);
 	}
 	var entityslot = _armyState.lookupId(option.parentEntityslot);
-	var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 	for ( var i in option.needsPool) {
 		delete armyUnit.getPool(i).dependingOptions[option.localId];
 	}
@@ -160,7 +160,7 @@ function checkPoolsAvailable(armyUnit) {
 
 function resolveOptionPoolAvailable(option) {
 	var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
-	var armyUnit = _armyState.getArmyUnit(parentEntityslot.armyDataIndex, parentEntityslot.armyUnitIndex);
+	var armyUnit = _armyState.getArmyUnit(parentEntityslot.detachmentDataIndex, parentEntityslot.armyUnitIndex);
 	var poolAvailable = 1;
 
 	for ( var i in option.needsPool) {
@@ -253,7 +253,7 @@ function checkPoolAvailable(pool) {
 
 function changePoolByEntityslot(entityslot, isAdd) {
 	var multiplier = isAdd ? 1 : -1;
-	var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 	
 	changePool(armyUnit, entityslot.fillsPool, multiplier);
 	changePool(armyUnit, entityslot.needsPool, (-1) * multiplier);
@@ -265,7 +265,7 @@ function changePoolByOption(option, newCount, oldCount) {
 		return;
 	}
 	var entityslot = _armyState.lookupId(option.parentEntityslot);
-	var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 	changePool(armyUnit, option.fillsPool, diff);
 	changePool(armyUnit, option.needsPool, (-1) * diff);
 }
@@ -291,7 +291,7 @@ function fixOptionPool(armyUnit, entityOrOption) {
  */
 function fixOptionPoolVisitor(armyUnit, optionList, option) {
 	var entityslot = _armyState.lookupId(option.parentEntityslot);
-	//var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+	//var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 	for ( var i in option.needsPool) {
 		if ((armyUnit.getPool(i).currentCount - option.needsPool[i]) < 0) {
 			// doSelectOption(optionList, option, 0); // do not use this (see
@@ -385,7 +385,7 @@ function changeModelCountPool(entityslot, oldCount, count) {
 			realPoolChange = (-1) *  poolChange;
 		}
 		if(realPoolChange != 0) {
-			var armyUnit = _armyState.getArmyUnit(entityslot.armyDataIndex, entityslot.armyUnitIndex);
+			var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 			armyUnit.getPool(poolName).currentCount += realPoolChange;
 			armyUnit.getPool(poolName).dirty = true;
 		}

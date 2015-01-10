@@ -90,15 +90,15 @@ function traverseOptions(armyUnit, entityOrOption, callback) {
 	}
 }
 
-function traverseArmyData(caller, callback, additionalParams) {
+function traverseDetachmentData(caller, callback, additionalParams) {
 	var retValue = [];
-	for(var armyDataIndex = 0; armyDataIndex < _armyState.getArmyDataCount(); armyDataIndex++) {
-		var armyData = _armyState.getArmyData(armyDataIndex);
-		if(armyData.getArmyUnitCount() == 0) {
-			retValue[armyDataIndex] = null;
+	for(var detachmentDataIndex = 0; detachmentDataIndex < _armyState.getDetachmentDataCount(); detachmentDataIndex++) {
+		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		if(detachmentData.getArmyUnitCount() == 0) {
+			retValue[detachmentDataIndex] = null;
 			continue;
 		}
-		retValue[armyDataIndex] = callback.call(caller, armyData, armyDataIndex, additionalParams);
+		retValue[detachmentDataIndex] = callback.call(caller, detachmentData, detachmentDataIndex, additionalParams);
 	}
 	return retValue;
 }
@@ -107,17 +107,17 @@ function traverseArmyUnit(caller, callback, additionalParams) {
 	var params = additionalParams || [];
 	params["_caller"] = caller;
 	params["_callback"] = callback;
-	return traverseArmyData(null, doTraverseArmyUnit, params);
+	return traverseDetachmentData(null, doTraverseArmyUnit, params);
 }
 
-function doTraverseArmyUnit(armyData, armyDataIndex, additionalParams) {
+function doTraverseArmyUnit(detachmentData, detachmentDataIndex, additionalParams) {
 	var caller = additionalParams["_caller"];
 	var callback = additionalParams["_callback"];
-	var armyUnits = armyData.getArmyUnits();
+	var armyUnits = detachmentData.getArmyUnits();
 	var retValue = [];
 	for(var armyUnitIndex in armyUnits) {
 		var armyUnit = armyUnits[armyUnitIndex];
-		retValue[armyUnitIndex] = callback.call(caller, armyUnit, armyUnitIndex, armyData, armyDataIndex, additionalParams);
+		retValue[armyUnitIndex] = callback.call(caller, armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams);
 	}
 	return retValue;
 }
