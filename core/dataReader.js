@@ -38,9 +38,13 @@ function DataReader() {
 	this.onPostChangeLanguage = function(event) {
 		this.reloadAllTexts();
 	};
-	
+
+    function getSystemPath(system) {
+        return "data/" + system.systemPrefix + "/";
+    }
+
 	function getArmyPath(army) {
-		return _systemState.system.systemBaseDir + army.armyPrefix + "/";
+		return getSystemPath(_systemState.system) + army.armyPrefix + "/";
 	}
 	
 	function doJson(file, successHandler, errorHandler, isAsync, additionalParams) {
@@ -74,7 +78,7 @@ function DataReader() {
 	this.readTextsSystem = function() {
 		var currentSystem = _systemState.system;
 		if(currentSystem != null) {
-			this.readTexts(currentSystem.systemBaseDir + "textsystem", $.proxy(_guiState.addTexts, _guiState));
+			this.readTexts(getSystemPath(currentSystem) + "textsystem", $.proxy(_guiState.addTexts, _guiState));
 		}
 	};
 	
@@ -98,7 +102,7 @@ function DataReader() {
 	};
 	
 	this.readSystems = function() {
-		doJson('data/system.json', this.readSystemsSuccess, loadfail, false);
+		doJson('data/systems.json', this.readSystemsSuccess, loadfail, false);
 	};
 	
 	this.readSystemsSuccess = function(data) {
@@ -106,29 +110,45 @@ function DataReader() {
 			var obj = data[i];
 			var systemId = obj.systemid;
 			var systemName = obj.systemname;
-			var systemBaseDir = obj.systembasedir;
-			var defaultSlotCost = coalesce(obj.defaultSlotCost, 1);
-			var slots = obj.slots;
-			var special = obj.special;
-			var system = new System(systemId, systemName, systemBaseDir, defaultSlotCost, slots, special);
+			var systemPrefix = obj.systemprefix;
+			var system = new System(systemId, systemName, systemPrefix);
 			_systems.push(system);
-			var detachmentTypes = obj.detachmentTypes;
-			for(var j = 0; j < detachmentTypes.length; j++) {
-				var obj2 = detachmentTypes[j];
-				system.detachmentTypes[obj2.id] = new DetachmentType(obj2.id, obj2.name, obj2.minSlotCounts, obj2.maxSlotCounts, isUndefined(obj2.canBePrimary) ? true : obj2.canBePrimary);
-			}
 		}
 	};
-	
-	this.readArmies = function() {
-		doJson(_systemState.system.systemBaseDir + "armies.json", this.readArmiesSuccess, loadfail, false);
-	};
-	
-	this.readArmiesSuccess = function(data) {
+
+    this.readSystem = function(system) {
+        doJson(getSystemPath(system) + '/system.json', this.readSystemSuccess, loadfail, false, { system: system });
+    };
+
+    this.readSystemSuccess = function(data, additionalParams) {
+
+        var system = additionalParams.system;
+        var defaultSlotCost = coalesce(data.defaultSlotCost, 1);
+        var slots = data.slots;
+        var special = data.special;
+        var armies = data.armies;
+        var extensions = data.extensions;
+
+        for (var i = 0; i < slots.length; i++) {
+            var mySlot = slots[i];
+            _systemState.slots[mySlot.slotId] = new Slot(mySlot.slotId, mySlot.slotName, mySlot.order);
+        }
+        for (var i = 0; i < special.length; i++) {
+            var mySpecial = special[i];
+            system.special[mySpecial.id] = new Special(mySpecial.id, mySpecial.name);
+        }
+
+        var detachmentTypes = {};
+        for(var i = 0; i < data.detachmentTypes.length; i++) {
+            var obj2 = data.detachmentTypes[i];
+            detachmentTypes[obj2.id] = new DetachmentType(obj2.id, obj2.name, obj2.minSlotCounts, obj2.maxSlotCounts, isUndefined(obj2.canBePrimary) ? true : obj2.canBePrimary);
+        }
+        system.detachmentTypes = detachmentTypes;
+
 		_systemState.armies = {};
 		
-		for(var i = 0; i < data.length; i++) {
-			var obj = data[i];
+		for(var i = 0; i < armies.length; i++) {
+			var obj = armies[i];
 			var armyId = obj.id;
 			var armyName = obj.name;
 			var armyPrefix = obj.prefix;

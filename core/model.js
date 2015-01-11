@@ -23,27 +23,16 @@
 /**
  * System represents a game system.
  */
-function System(systemId, systemName, systemBaseDir, defaultSlotCost, slots,
-		specials) {
+function System(systemId, systemName, systemPrefix) {
 	this.systemId = systemId;
 	this.systemName = systemName;
-	this.systemBaseDir = systemBaseDir;
-	this.defaultSlotCost = defaultSlotCost;
-	this.slots = {};
-	for (var i = 0; i < slots.length; i++) {
-		var mySlot = slots[i];
-		_systemState.slots[mySlot.slotId] = new Slot(mySlot.slotId, mySlot.slotName,
-				mySlot.order);
-	}
-
+	this.systemPrefix = systemPrefix;
+    this.defaultSlotCost = 1;
+    this.slots = {};
 	this.special = {};
-	for (var i = 0; i < specials.length; i++) {
-		var mySpecial = specials[i];
-		this.special[mySpecial.spId] = new Special(mySpecial.spId,
-				mySpecial.spName);
-	}
-	
 	this.detachmentTypes = {};
+    this.armies = {};
+    this.extensions = {};
 }
 
 /**

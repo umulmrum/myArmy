@@ -84,7 +84,7 @@ function MainmenuGui() {
 			} else if (a.armyGroup > b.armyGroup) {
 				return 1;
 			}
-			return _guiState.text[a.armyPrefix] > _guiState.text[b.armyPrefix] ? 1 : -1;
+			return _guiState.text["army." + a.armyPrefix] > _guiState.text["army." + b.armyPrefix] ? 1 : -1;
 		});
 		
 		var detachmentBoxElement = _gui.getElement("#detachmentBox0");
@@ -102,7 +102,7 @@ function MainmenuGui() {
 		
 		
 		armySelectElement.children().remove();
-		armySelectElement.append(jQuery('<option></option').val("-1").html("> " +_guiState.text["army"] + " 1 <"));
+		armySelectElement.append(jQuery('<option></option>').val("-1").html("> " +_guiState.text["army"] + " 1 <"));
 		
 		var lastArmyGroup = -1;
 		var optgroup = "";
@@ -121,7 +121,7 @@ function MainmenuGui() {
 				armySelectElement.append(optgroup);
 			}
 			var armyId = sortedArmies[j].armyId;
-			var armyName = _guiState.text[_systemState.armies[armyId].armyPrefix];
+			var armyName = _guiState.text["army." + _systemState.armies[armyId].armyPrefix];
 			
 			optgroup.append(option(armyName, armyId, armyId == selectedArmyId));
 		}
@@ -224,7 +224,7 @@ function MainmenuGui() {
 			var armyId = selectBox[0].options[index].value;
 			if((armyId != '') && (armyId != -1)) {
 				var army = _systemState.armies[armyId];
-				selectBox[0].options[index].innerHTML = _guiState.text[army.armyPrefix];
+				selectBox[0].options[index].innerHTML = _guiState.text["army." + army.armyPrefix];
 			} else if(armyId == -1) {
 				selectBox[0].options[index].innerHTML = "> " + _guiState.text["army"] + " " + (armyIndex + 1) + " <";
 			}

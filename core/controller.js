@@ -57,7 +57,7 @@ function Controller() {
 					break;
 				}
 			}
-			_dataReader.readArmies();
+			_dataReader.readSystem(_systemState.system);
 			this.resetArmylist();
 			
 			_dispatcher.triggerEvent("postChangeSystem");
