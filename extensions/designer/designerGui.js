@@ -31,6 +31,7 @@ function DesignerGui() {
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
@@ -67,6 +68,10 @@ function DesignerGui() {
 	};
 	
 	this.onPostChangeArmy = function(event) {
+		this.removeInvalidEntries();
+	};
+
+	this.onPostDeleteDetachment = function(event) {
 		this.removeInvalidEntries();
 	};
 	

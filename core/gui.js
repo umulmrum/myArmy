@@ -29,6 +29,8 @@ function Gui() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmyAction, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachmentAction, _dispatcher.PHASE_ACTION);
+		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
@@ -46,6 +48,15 @@ function Gui() {
 	};
 	
 	this.onPostChangeArmy = function(event, additionalData) {
+		this.refreshAll();
+		this.stopLongRunningProcess();
+	};
+
+	this.onPostDeleteDetachmentAction = function(event, additionalData) {
+		this.checkSlotVisibility();
+	};
+
+	this.onPostDeleteDetachment = function(event, additionalData) {
 		this.refreshAll();
 		this.stopLongRunningProcess();
 	};
@@ -134,7 +145,7 @@ function Gui() {
 		if (armyUnit == null || armyUnit.getArmy() == null) {
 			return null;
 		}
-		return _guiState.text[armyUnit.getArmy().armyPrefix];
+		return _guiState.text["army." + armyUnit.getArmy().armyPrefix];
 	};
 
 	this.renderLanguageSelect = function() {

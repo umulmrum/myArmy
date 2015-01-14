@@ -43,7 +43,12 @@ function MainmenuExtension() {
 		<div class="invisible"> \
 			<select id="systemSelect" class="invisible"></select> \
 		</div> \
-		<span id="detachmentBox0" class="detachmentBox"></span><br /> \
+		<div id="detachmentCreator" class="detachmentCreator detachmentBox">\
+			<span class="detachmentCreatorHeading">:</span>\
+			<select id="armySelect" />\
+		</div>\
+		<ul id="detachmentBoxContainer"></ul>\
+		<!--span id="detachmentBox0" class="detachmentBox"></span><br /> \
 		<span id="detachmentBox1" class="detachmentBox invisible"></span> \
 		<span id="detachmentBox2" class="detachmentBox invisible"></span> \
 		<span id="detachmentBox3" class="detachmentBox invisible"></span> \
@@ -52,17 +57,15 @@ function MainmenuExtension() {
 		<span id="detachmentBox6" class="detachmentBox invisible"></span> \
 		<span id="detachmentBox7" class="detachmentBox invisible"></span> \
 		<span id="detachmentBox8" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox9" class="detachmentBox invisible"></span> \
-		<br /> \
-		<label> \
-			<span id="fileLoaderLabel"></span> \
-			<input type="file" id="fileLoader"> \
-		</label> \
-		<br /> \
-		<br /> \
+		<span id="detachmentBox9" class="detachmentBox invisible"></span--> \
 		<div><a id="resetButton"></a></div> \
+		<div><a id="deleteAllDetachmentsButton"></a></div> \
 	</div> \
 		 \
+	<span id="fileLoaderLabel" class="slotHeadingContainer"></span> \
+		<div class="pageContent"> \
+			<input type="file" id="fileLoader"> \
+		</div> \
 	<span id="optionsHeading" class="slotHeadingContainer"></span> \
 	<div class="pageContent"> \
 		<div id="specialContainer"></div> \
@@ -80,8 +83,14 @@ function MainmenuExtension() {
 		_gui.getElement("#systemSelect").on("change", function() {
 			_controller.changeSystem(this.value);
 		});
+		_gui.getElement("#armySelect").on("change", function() {
+			_controller.addDetachment(this.value);
+		});
 		_gui.getElement("#resetButton").on(_guiState.clickEvent, function() {
 			_controller.resetArmylist();
+		});
+		_gui.getElement("#deleteAllDetachmentsButton").on(_guiState.clickEvent, function() {
+			_controller.deleteAllDetachments();
 		});
 		_gui.getElement("#creditsButton").on(_guiState.clickEvent, function() {
 			_gui.showFragment("credits");

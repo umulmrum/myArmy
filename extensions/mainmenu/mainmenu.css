@@ -34,20 +34,37 @@
 }
 
 .detachmentBox {
-	background-color: #EEEEEE;
-	border: 1px solid #DADADA;
 	margin-bottom: 3px;
 	padding: 2px;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+	/*display: table-row;*/
+	max-width: 45em;
 	display: inline-block;
+}
+
+.detachmentCreator {
+	background-color: #EEEEEE;
+	border: 1px solid #DADADA;
+}
+
+.detachmentBoxContent {
+	display: table-cell;
+	width: 26.5em;
+}
+
+.detachmentBoxContent .optionContainer div {
+	width: 100%;
 }
 
 .detachmentBox select:first-child {
 	margin-right: 3px;
 }
 
+.detachmentContainer {
+	padding: 3px;
+}
 
 /*****************************
  *     small devices

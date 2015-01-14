@@ -58,6 +58,7 @@ function Persistence() {
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
+		//_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_ACTION);
 		
 		jQuery.event.add(window, "hashchange", function() {
 			if(_guiState.hashEventEnabled) {
@@ -69,6 +70,11 @@ function Persistence() {
 	
 	this.onPostStateRefresh = function(event) {
 		this.createStatelink();
+	};
+
+	this.onPostDeleteDetachment = function(event, additionalData) {
+		this.createStatelink();
+		init();
 	};
 
 	this.restoreState = function() {
@@ -151,8 +157,8 @@ function Persistence() {
 
         var value = val(q, i);
         var detachmentTypeId = parseInt(value, BASE);
-        _armyState.setDetachmentData(detachmentDataIndex, new DetachmentData());
-        _controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
+        //_armyState.setDetachmentData(detachmentDataIndex, new DetachmentData());
+        //_controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
 
         var armyUnitIndex = 0;
 
@@ -164,7 +170,7 @@ function Persistence() {
                     return i;
                     break;
                 case MARKER.ARMY:
-                    i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, detachmentDataIndex, armyUnitIndex);
+                    i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, detachmentDataIndex, armyUnitIndex, detachmentTypeId);
                     armyUnitIndex++;
                     break;
                 default:
@@ -175,17 +181,14 @@ function Persistence() {
         return i+1;
     }
 
-	function restoreArmy(fileVersion, q, i, detachmentDataIndex, armyUnitIndex) {
+	function restoreArmy(fileVersion, q, i, detachmentDataIndex, armyUnitIndex, detachmentTypeId) {
 
         if(armyUnitIndex != 0) {
             alert("not implemented yet :-)");
         }
         var value = val(q, i);
         var armyid = parseInt(value, BASE);
-        _controller.changeArmy(detachmentDataIndex, armyid);
-        if(_armyState.getDetachmentData(detachmentDataIndex).detachmentType == null) {
-            setDefaultDetachmentType(detachmentDataIndex);
-        }
+        _controller.addDetachment(armyid, detachmentTypeId);
         i = i + value.length;
 
         while(i < q.length) {
@@ -222,10 +225,10 @@ function Persistence() {
 		return i+1;
 	}
 	
-	function restoreDetachmentType(fileVersion, q, i, armyIndex) {
+	function restoreDetachmentType(fileVersion, q, i, detachmentDataIndex) {
 		var value = val(q, i);
 		var detachmentTypeId = parseInt(value, BASE);
-		_controller.changeDetachmentType(armyIndex, detachmentTypeId);
+		_controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
 		i = i + value.length;
 		return i;
 	}
@@ -233,29 +236,9 @@ function Persistence() {
 	function restoreCurrentArmyLegacy(fileVersion, q, i) {
 		var value = val(q, i);
 		var armyid = parseInt(value, BASE);
-		_controller.changeArmy(1, armyid);
-		if(_armyState.getDetachmentData(armyIndex).getDetachmentType == null) {
-			setDefaultDetachmentType(armyIndex);
-		}
+		_controller.addDetachment(armyid);
 		i = i + value.length;
 		return i;//+1;
-	}
-	
-	/**
-	 * Sets a default value for the army's detachment type.
-	 * This method serves as a "converter" for legacy armies where no detachments existed
-	 * There are fixed IDs in this methods which is why it is quite hacky. In theory this 
-	 * should not be a problem though.
-	 * 
-	 * @param armyIndex
-	 */
-	function setDefaultDetachmentType(armyIndex) {
-		var detachmentData = _armyState.getDetachmentData(armyIndex);
-		if(armyIndex == 0) {
-			detachmentData.detachmentType = _systemState.system.detachmentTypes["1"];
-		} else {
-			detachmentData.detachmentType = _systemState.system.detachmentTypes["2"];
-		}
 	}
 	
 	function restoreFoc(fileVersion, q, i) {

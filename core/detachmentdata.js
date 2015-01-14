@@ -23,8 +23,9 @@
 /**
  * A single army detachment's data
  */
-function DetachmentData() {
-	
+function DetachmentData(detachmentDataIndexParam) {
+
+	var detachmentDataIndex = detachmentDataIndexParam;
 	this.detachmentType = null;
 	
 	// static data (these variables do only depend on the army type, so will not changed after the army data was read)
@@ -35,7 +36,11 @@ function DetachmentData() {
 	
 	var armyUnits = {};
 //	var armyUnitCount = 0;
-	
+
+	this.getDetachmentDataIndex = function() {
+		return detachmentDataIndex;
+	};
+
 	this.getArmy = function(armyUnitIndex) {
 		if(isUndefined(armyUnits[armyUnitIndex])) {
 			return null;

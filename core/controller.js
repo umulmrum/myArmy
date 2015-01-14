@@ -46,6 +46,10 @@ function Controller() {
 		
 		_dispatcher.triggerEvent("postResetArmy");
 	};
+
+	this.deleteAllDetachments = function() {
+		self.location.hash = "#";
+	};
 	
 	this.changeSystem = function(systemId) {
 		if (systemId != -1
@@ -74,30 +78,35 @@ function Controller() {
 		
 		_dispatcher.triggerEvent("postChangeDetachmentType", { armyIndex: detachmentDataIndex, newDetachmentTypeId: detachmentTypeId });
 	};
-	
-	this.changeArmy = function(detachmentDataIndex, armyId, detachmentTypeId) {
-		_gui.startLongRunningProcess();
-		var currentArmy = _armyState.getArmy(detachmentDataIndex, 0);
-		var armyChanged = !((armyId == -1) && (currentArmy == null)) || ((currentArmy != null) && (armyId == currentArmy.armyId));
-		if (!armyChanged) {
+
+	this.addDetachment = function(armyId, detachmentTypeId) {
+		if(armyId == -1) {
 			return;
 		}
-		_armyState.removeArmy(detachmentDataIndex);
-		if(armyId != -1) {
-			_armyState.setArmy(detachmentDataIndex, 0, _systemState.armies[armyId]);
-			var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
-			var armyUnit = detachmentData.getArmyUnit(0);
-			_dataReader.readTextsArmy(armyUnit);
-			
-			_dataReader.loadArmy(armyUnit, detachmentDataIndex, 0);
-			_armyState.getDetachmentData(detachmentDataIndex).resetArmy();
-		} else {
-			_armyState.setArmy(detachmentDataIndex, null);
-		}
+		_gui.startLongRunningProcess();
+
+		var detachmentData = _armyState.addDetachment(_systemState.armies[armyId]);
+		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
+		var armyUnit = detachmentData.getArmyUnit(0);
+		_dataReader.readTextsArmy(armyUnit);
+
+		_dataReader.loadArmy(armyUnit, detachmentDataIndex, 0);
+		_armyState.getDetachmentData(detachmentDataIndex).resetArmy();
 		if(!isUndefined(detachmentTypeId)) {
 			this.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
+		} else {
+			if(detachmentDataIndex == 0) {
+				this.changeDetachmentType(detachmentDataIndex, "1");
+			} else {
+				this.changeDetachmentType(detachmentDataIndex, "2");
+			}
 		}
 		_dispatcher.triggerEvent("postChangeArmy", { detachmentDataIndex: detachmentDataIndex, newArmyId: armyId });
+	};
+
+	this.deleteDetachment = function(detachmentDataIndex) {
+		_armyState.removeDetachment(detachmentDataIndex);
+		_dispatcher.triggerEvent("postDeleteDetachment", { detachmentDataIndex: detachmentDataIndex });
 	};
 	
 	this.addEntry = function(detachmentDataIndex, armyUnitIndex, entityslotId, doEntityCalculations) {

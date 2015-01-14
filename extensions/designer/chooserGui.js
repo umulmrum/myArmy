@@ -29,6 +29,7 @@ function ChooserGui() {
 		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postPrepareGui", this, this.onPostPrepareGui, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
@@ -53,6 +54,13 @@ function ChooserGui() {
 	};
 	
 	this.onPostChangeArmy = function(event) {
+		this.refreshSlotHeadings();
+		this.renderUnitSelectionTabs();
+		this.renderEntries();
+		this.refresh();
+	};
+
+	this.onPostDeleteDetachment = function(event) {
 		this.refreshSlotHeadings();
 		this.renderUnitSelectionTabs();
 		this.renderEntries();

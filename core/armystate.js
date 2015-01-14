@@ -56,12 +56,12 @@ function ArmyState() {
 		}
 	};
 	
-	this.removeArmy = function(armyIndex) {
-		if(((this.getArmyCount() -1) < armyIndex) || (detachmentData[armyIndex].getArmy(0) == null)) {
+	this.removeDetachment = function(detachmentDataIndex) {
+		if(((this.getArmyCount() -1) < detachmentDataIndex) || (detachmentData[detachmentDataIndex].getArmy(0) == null)) {
 			return;
 		}
-        for(var i = 0; i < detachmentData[armyIndex].getArmyCount(); i++) {
-            var armyUnit = detachmentData[armyIndex].getArmyUnit(i);
+        for(var i = 0; i < detachmentData[detachmentDataIndex].getArmyUnitCount(); i++) {
+            var armyUnit = detachmentData[detachmentDataIndex].getArmyUnit(i);
             for(var j = 0; j < armyUnit.getSelectionCount(); j++) {
                 var entityslot = armyUnit.getSelection(j);
                 removeEntitySlotLocalIds(entityslot);
@@ -69,7 +69,9 @@ function ArmyState() {
                 this.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
             }
         }
-		this.setArmy(armyIndex, null);
+		//detachmentData.splice(detachmentDataIndex, 1);
+		//this.setArmy(detachmentDataIndex, null);
+
 		_persistence.createStatelink();
 	};
 	
@@ -106,7 +108,7 @@ function ArmyState() {
 	
 	this.getDetachmentDataCount = function() {
 		return detachmentData.length;
-	}
+	};
 	
 	this.getArmy = function(detachmentDataIndex, armyUnitIndex) {
 		if(detachmentData[detachmentDataIndex] == null) {
@@ -115,9 +117,12 @@ function ArmyState() {
 		return detachmentData[detachmentDataIndex].getArmy(armyUnitIndex);
 	};
 	
-	this.setArmy = function(detachmentDataIndex, armyUnitIndex, army) {
-		detachmentData[detachmentDataIndex] = new DetachmentData();
-		detachmentData[detachmentDataIndex].setArmy(armyUnitIndex, army);
+	this.addDetachment = function(army) {
+		var detachmentDataIndex = this.getLastArmyIndex() + 1;
+		var detachment = new DetachmentData(detachmentDataIndex);
+		detachment.setArmy(0, army);
+		detachmentData[detachmentDataIndex] = detachment;
+		return detachment;
 	};
 	
 	this.getArmyCount = function() {
@@ -146,10 +151,6 @@ function ArmyState() {
 			}
 		}
 		return -1;
-	};
-	
-	this.getEntityCount = function(entityslotId) {
-		return this.entityCount[entityslotId];
 	};
 	
 	this.lookupId = function(localId) {

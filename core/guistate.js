@@ -54,7 +54,7 @@ function GuiState() {
 	};
 	
 	this.getText = function(key) {
-		this.text[key];
+		return this.text[key];
 	};
 	
 	this.addTexts = function(textsParam) {

@@ -70,7 +70,6 @@ function SummaryGui() {
 		_gui.getElement("#copytext").html(_guiState.text["copymessage"]);
 		_gui.getElement("#printButton").html(_guiState.text["print"]);
 		_gui.getElement("#saveFileButton").html(_guiState.text["savefile"]);
-		_gui.getElement("#fileLoaderLabel").html(_guiState.text["loadfile"]);
 	};
 	
 	this.selectAllIfSmall = function(event) {
@@ -343,7 +342,7 @@ function SummaryGui() {
 				if (hasMultipleDetachments) {
 					string += " [" + (i + 1) + "] ";
 				}
-				string += _guiState.text[army.armyPrefix];
+				string += _guiState.text["army." + army.armyPrefix];
 				string += " (" + _guiState.text[detachmentData.detachmentType.name];
 				if(isFirst) {
 					string += ", " + _guiState.text["primaryDetachment"];
