@@ -88,7 +88,6 @@ function Controller() {
 		var detachmentData = _armyState.addDetachment(_systemState.armies[armyId]);
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
 		var armyUnit = detachmentData.getArmyUnit(0);
-		_dataReader.readTextsArmy(armyUnit);
 
 		_dataReader.loadArmy(armyUnit, detachmentDataIndex, 0);
 		_armyState.getDetachmentData(detachmentDataIndex).resetArmy();
@@ -107,6 +106,24 @@ function Controller() {
 	this.deleteDetachment = function(detachmentDataIndex) {
 		_armyState.removeDetachment(detachmentDataIndex);
 		_dispatcher.triggerEvent("postDeleteDetachment", { detachmentDataIndex: detachmentDataIndex });
+	};
+
+	this.addExtension = function(detachmentDataIndex, extensionId) {
+		if(extensionId == -1) {
+			return;
+		}
+		_gui.startLongRunningProcess();
+		var armyUnit = _armyState.addExtension(detachmentDataIndex, _systemState.extensions[extensionId]);
+		var armyUnitIndex = armyUnit.getArmyUnitIndex();
+
+		_dataReader.loadArmy(armyUnit, detachmentDataIndex, armyUnitIndex);
+		_armyState.getArmyUnit(detachmentDataIndex, armyUnitIndex).resetArmy();
+		_dispatcher.triggerEvent("postAddExtension", { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnitIndex, extensionId: armyUnit.getArmy().armyId });
+	};
+
+	this.deleteExtension = function(detachmentDataIndex, armyUnitIndex) {
+		var extensionId = _armyState.removeExtension(detachmentDataIndex, armyUnitIndex);
+		_dispatcher.triggerEvent("postDeleteExtension", { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnitIndex, extensionId: extensionId });
 	};
 	
 	this.addEntry = function(detachmentDataIndex, armyUnitIndex, entityslotId, doEntityCalculations) {

@@ -35,6 +35,8 @@ function ChooserGui() {
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteExtension, _dispatcher.PHASE_STATE);
 	};
 	
 	this.onPostChangeFocCount = function(event) {
@@ -92,8 +94,21 @@ function ChooserGui() {
 	this.onPostChangeSpecialDisplay = function(event) {
 		this.refreshEntries();
 	};
-	
-	
+
+	this.onPostAddExtension = function(event, additionalData) {
+		var detachmentData = _armyState.getDetachmentData(additionalData.detachmentDataIndex);
+		var armyUnit = detachmentData.getArmyUnit(additionalData.armyUnitIndex);
+		this.renderSlotEntries(armyUnit, additionalData.armyUnitIndex, detachmentData, additionalData.detachmentDataIndex);
+	};
+
+	this.onPostDeleteExtension = function(event) {
+		// TODO
+		//this.refreshSlotHeadings();
+		//this.renderUnitSelectionTabs();
+		//this.renderEntries();
+		//this.refresh();
+	};
+
 	this.refresh = function() {
 		this.refreshSlotHeadings();
 		this.refreshEntries();
@@ -238,6 +253,7 @@ function ChooserGui() {
 	};
 	
 	this.renderSlotEntries = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex) {
+		var hasSeparator = {};
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if(!entityslot.enabled) {
@@ -247,9 +263,14 @@ function ChooserGui() {
 			var slotentryList = _gui.getElement("#slotentryChooserList" + entityslot.slotId);
 			var entity = armyUnit.getFromEntityPool(entityslot.entityId);
 			var entityName = armyUnit.getText(entity.entityName);
-			
+
 			var cssClasses = this.getCssForEntry(armyUnit, entityslot);
-			
+
+			if(isUndefined(hasSeparator[entityslot.slotId]) && armyUnitIndex > 0) {
+				slotentryList.append("<hr />");
+				hasSeparator[entityslot.slotId] = true;
+			}
+
 			var xli = li(/*"&raquo; " +*/ entityName,
 					"chooserEntry" + detachmentDataIndex + "_" + armyUnitIndex + "_" + entityslotId, cssClasses);
 			xli.on(_guiState.clickEvent, {
@@ -266,6 +287,7 @@ function ChooserGui() {
 //				xli.append(span(" (" + _guiState.text["max"] + ")", null,
 //				"maxAppendix ok"));
 //			}
+			this.setSlotVisibility(_systemState.slots[entityslot.slotId], true);
 			slotentryList.append(xli);
 		}
 	};
@@ -308,23 +330,23 @@ function ChooserGui() {
 		var isOk = true;
 
 		var isFirst = true;
-		var countPerArmyPerSlot = traverseArmyUnit(this, getChooserCountForArmy, {slotId: slotId});
-        var countPerSlot = [];
-        for(var i = 0; i < countPerArmyPerSlot.length; i++) {
-            var countPerArmy = countPerArmyPerSlot[i];
-            if(countPerArmy == null) {
+		var countPerDetachmentData = traverseArmyUnit(this, getChooserCountForArmy, {slotId: slotId});
+        var count = [];
+        for(var i = 0; i < countPerDetachmentData.length; i++) {
+            var countPerArmyUnit = countPerDetachmentData[i];
+            if(countPerArmyUnit == null) {
                 continue;
             }
-            for(var j = 0; j < countPerArmy.length; j++) {
-                if(isUndefined(countPerSlot[j])) {
-                    countPerSlot[j] = 0;
+            for(var j = 0; j < countPerArmyUnit.length; j++) {
+                if(isUndefined(count[i])) {
+                    count[i] = 0;
                 }
-                countPerSlot[j] += countPerArmy[j];
+                count[i] += countPerArmyUnit[j];
             }
         }
 		
-		for(var i = 0; i < countPerSlot.length; i++) {
-			var slotCount = countPerSlot[i]; 
+		for(var i = 0; i < count.length; i++) {
+			var slotCount = count[i];
 			//if(slotCount == null) {
 			//	continue;
 			//}
@@ -469,5 +491,14 @@ function ChooserGui() {
 		unitsToShow = event.data.unitsToShow;
 		event.data.target.refreshEntries();
 	};
-	
+
+	this.setSlotVisibility = function(slot, visible) {
+		slot.visible = visible;
+		var slotElement = _gui.getElement("#slotRow" + slot.slotId);
+		if(visible) {
+			slotElement.removeClass("invisible");
+		} else {
+			slotElement.addClass("invisible");
+		}
+	};
 }

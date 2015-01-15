@@ -120,7 +120,7 @@ function ArmyState() {
 	this.addDetachment = function(army) {
 		var detachmentDataIndex = this.getLastArmyIndex() + 1;
 		var detachment = new DetachmentData(detachmentDataIndex);
-		detachment.setArmy(0, army);
+		detachment.setArmy(army);
 		detachmentData[detachmentDataIndex] = detachment;
 		return detachment;
 	};
@@ -152,6 +152,15 @@ function ArmyState() {
 		}
 		return -1;
 	};
+
+	this.addExtension = function(detachmentDataIndex, extension) {
+		return detachmentData[detachmentDataIndex].addExtension(extension);
+	};
+
+	this.removeExtension = function(detachmentDataIndex, armyUnitIndex) {
+		return detachmentData[detachmentDataIndex].removeExtension(armyUnitIndex);
+	};
+
 	
 	this.lookupId = function(localId) {
 		return this.armyLookup[localId];

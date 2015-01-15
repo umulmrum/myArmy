@@ -34,8 +34,8 @@ function DetachmentData(detachmentDataIndexParam) {
 	
 	this.stateLinkPart = null;
 	
-	var armyUnits = {};
-//	var armyUnitCount = 0;
+	var armyUnits = [];
+	var maxArmyUnitIndex = 0;
 
 	this.getDetachmentDataIndex = function() {
 		return detachmentDataIndex;
@@ -52,11 +52,33 @@ function DetachmentData(detachmentDataIndexParam) {
 		return armyUnits;
 	};
 	
-	this.setArmy = function(armyUnitIndex, army) {
-		if(isUndefined(armyUnits[armyUnitIndex])) {
-			armyUnits[armyUnitIndex] = new ArmyUnit();
+	this.setArmy = function(army) {
+		armyUnits[0] = new ArmyUnit(0, army);
+		maxArmyUnitIndex++;
+	};
+
+	this.addExtension = function(extension) {
+		var newArmyUnitIndex = maxArmyUnitIndex++;
+		var armyUnit = new ArmyUnit(newArmyUnitIndex, extension);
+		armyUnits[newArmyUnitIndex] = armyUnit;
+		return armyUnit;
+	};
+
+	this.removeExtension = function(armyUnitIndex) {
+		if(((this.getArmyUnitCount() -1) < armyUnitIndex) || (armyUnits[armyUnitIndex].getArmy(0) == null)) {
+			return;
 		}
-		armyUnits[armyUnitIndex].setArmy(army);
+		var armyUnit = armyUnits[armyUnitIndex];
+		var extensionId = armyUnit.getArmy(armyUnitIndex).armyId;
+		for(var j = 0; j < armyUnit.getSelectionCount(); j++) {
+			var entityslot = armyUnit.getSelection(j);
+			removeEntitySlotLocalIds(entityslot);
+			_armyState.totalPoints -= entityslot.entity.totalCost;
+			_armyState.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
+		}
+		armyUnit.setArmy(null);
+		_persistence.createStatelink();
+		return extensionId;
 	};
 	
 	this.getArmyUnit = function(armyUnitIndex) {
@@ -115,5 +137,14 @@ function DetachmentData(detachmentDataIndexParam) {
 	
 	this.setPools = function(armyUnitIndex, pools) {
 		armyUnits[armyUnitIndex].setPools(pools);
+	};
+
+	this.hasExtension = function(extensionId) {
+		for(var i in armyUnits) {
+			if(armyUnits[i].getArmy().armyId == extensionId) {
+				return true;
+			}
+		}
+		return false;
 	};
 }

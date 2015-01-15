@@ -29,6 +29,7 @@ function Gui() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmyAction, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachmentAction, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
@@ -49,6 +50,11 @@ function Gui() {
 	
 	this.onPostChangeArmy = function(event, additionalData) {
 		this.refreshAll();
+		this.stopLongRunningProcess();
+	};
+
+	this.onPostAddExtension = function(event, additionalData) {
+		//this.refreshAll();
 		this.stopLongRunningProcess();
 	};
 

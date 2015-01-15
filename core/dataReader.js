@@ -131,7 +131,7 @@ function DataReader() {
 
         for (var i = 0; i < slots.length; i++) {
             var mySlot = slots[i];
-            _systemState.slots[mySlot.slotId] = new Slot(mySlot.slotId, mySlot.slotName, mySlot.order);
+            _systemState.slots[mySlot.id] = new Slot(mySlot.id, mySlot.name, mySlot.order);
         }
         for (var i = 0; i < special.length; i++) {
             var mySpecial = special[i];
@@ -145,17 +145,23 @@ function DataReader() {
         }
         system.detachmentTypes = detachmentTypes;
 
-		_systemState.armies = {};
-		
+		_systemState.armies = parseArmies(armies);
+		_systemState.extensions = parseArmies(extensions);
+
+	};
+
+	function parseArmies(armies) {
+		var retValue = [];
 		for(var i = 0; i < armies.length; i++) {
 			var obj = armies[i];
 			var armyId = obj.id;
 			var armyName = obj.name;
 			var armyPrefix = obj.prefix;
 			var armyGroup = obj.group;
-			_systemState.armies[armyId] = new Army(armyId, armyName, armyPrefix, armyGroup);
+			retValue[armyId] = new Army(armyId, armyName, armyPrefix, armyGroup);
 		}
-	};
+		return retValue;
+	}
 	
 	this.readArmy = function(data, additionalParams) {
 		this.readArmydata(additionalParams.detachmentDataIndex, additionalParams.armyUnitIndex, data);
@@ -234,6 +240,7 @@ function DataReader() {
 	};
 	
 	this.loadArmy = function(armyUnit, detachmentDataIndex, armyUnitIndex) {
+		this.readTextsArmy(armyUnit);
 		var armyPath = getArmyPath(armyUnit.getArmy()) + "army.json";
 		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnitIndex });
 	};

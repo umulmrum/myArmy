@@ -42,11 +42,13 @@
 	/*display: table-row;*/
 	max-width: 45em;
 	display: inline-block;
+	vertical-align: top;
 }
 
 .detachmentCreator {
 	background-color: #EEEEEE;
 	border: 1px solid #DADADA;
+	width: 26.5em;
 }
 
 .detachmentBoxContent {
@@ -64,6 +66,20 @@
 
 .detachmentContainer {
 	padding: 3px;
+}
+
+.extension {
+	font-size: 0.75em;
+	border: 1px solid #DADADA;
+	padding: 2px;
+}
+
+.extensionDelete {
+	margin-right: 2px;
+	background: url('img/cross_small.png') no-repeat center;
+	width: 12px;
+	display: inline-block;
+	cursor: pointer;
 }
 
 /*****************************

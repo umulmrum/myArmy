@@ -28,11 +28,11 @@ function System(systemId, systemName, systemPrefix) {
 	this.systemName = systemName;
 	this.systemPrefix = systemPrefix;
     this.defaultSlotCost = 1;
-    this.slots = {};
+    //this.slots = {};
 	this.special = {};
 	this.detachmentTypes = {};
-    this.armies = {};
-    this.extensions = {};
+    //this.armies = {};
+    //this.extensions = {};
 }
 
 /**
@@ -61,8 +61,8 @@ function Slot(slotId, slotName, order) {
  * 
  */
 function Special(specialId, specialName) {
-	this.specialId = specialId;
-	this.specialName = specialName;
+	this.id = specialId;
+	this.name = specialName;
 	this.display = true;
 }
 

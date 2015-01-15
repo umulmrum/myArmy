@@ -26,4 +26,5 @@ function SystemState() {
 	
 	this.slots = {}; // all slots for the current game system
 	this.armies = {}; // all armies for the current game system
+	this.extensions = {};
 }

@@ -58,6 +58,7 @@ function Persistence() {
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postAddExtension", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		//_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_ACTION);
 		
 		jQuery.event.add(window, "hashchange", function() {
@@ -157,9 +158,6 @@ function Persistence() {
 
         var value = val(q, i);
         var detachmentTypeId = parseInt(value, BASE);
-        //_armyState.setDetachmentData(detachmentDataIndex, new DetachmentData());
-        //_controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
-
         var armyUnitIndex = 0;
 
         i += value.length;
@@ -183,12 +181,23 @@ function Persistence() {
 
 	function restoreArmy(fileVersion, q, i, detachmentDataIndex, armyUnitIndex, detachmentTypeId) {
 
-        if(armyUnitIndex != 0) {
-            alert("not implemented yet :-)");
-        }
         var value = val(q, i);
-        var armyid = parseInt(value, BASE);
-        _controller.addDetachment(armyid, detachmentTypeId);
+        var armyId = parseInt(value, BASE);
+		var isExtension = false;
+		if(fileVersion < 2) {
+			if(isUndefined(_systemState.armies[armyId]) && !isUndefined(_systemState.extensions[armyId])) {
+				isExtension = true;
+			}
+		} else {
+			if(armyUnitIndex > 0) {
+				isExtension = true;
+			}
+		}
+		if(isExtension) {
+			_controller.addExtension(detachmentDataIndex, armyId);
+		} else {
+			_controller.addDetachment(armyId, detachmentTypeId);
+		}
         i = i + value.length;
 
         while(i < q.length) {
@@ -211,7 +220,7 @@ function Persistence() {
 				i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
 				break;
 			case MARKER.ENTITY:
-				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, detachmentDataIndex, 0);
+				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, detachmentDataIndex, armyUnitIndex);
 				break;
 			case MARKER.ALLYENTITY:
 				// legacy
@@ -447,7 +456,11 @@ function Persistence() {
 	}
 	
 	function createStateLinkForArmyUnit(armyUnit) {
-		var state = MARKER.ARMY + armyUnit.getArmy().armyId.toString(BASE);
+		var army = armyUnit.getArmy();
+		if(army == null) {
+			return "";
+		}
+		var state = MARKER.ARMY + army.armyId.toString(BASE);
 		for(var i in armyUnit.getSelections()) {
 			var entityslot = armyUnit.getSelection(i);
 			state += entityslot.state;

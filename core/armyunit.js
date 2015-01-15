@@ -23,9 +23,10 @@
 /**
  * A single army detachment's data
  */
-function ArmyUnit() {
-	
-	var army = null;
+function ArmyUnit(armyUnitIndexParam, armyParam) {
+
+	var armyUnitIndex = armyUnitIndexParam;
+	var army = armyParam;
 	
 	// static data (these variables do only depend on the army type, so will not changed after the army data was read)
 	var entityPool = {}; // all entities related to the current army type
@@ -89,6 +90,10 @@ function ArmyUnit() {
 		changeModelCountPool(entityslot, entityslot.entity.currentCount, 0);
 		_armyState.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
 		entityslots[entityslot.entityslotId].dirty = true;
+	};
+
+	this.getArmyUnitIndex = function() {
+		return armyUnitIndex;
 	};
 
     this.getArmy = function() {
