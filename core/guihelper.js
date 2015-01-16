@@ -177,8 +177,8 @@ function getSlotHeadingText(slot) {
 	return text;
 }
 
-function getSlotHeadingForArmy(detachmentData, armyIndex, additionalParams) {
-    var armyUnit = detachmentData.getArmyUnit(0);
+function getSlotHeadingForArmy(detachmentData, detachmentDataIndex, additionalParams) {
+    var armyUnit = detachmentData.getArmyUnit("a0");
 	if(!isUndefined(armyUnit.getText(additionalParams.slotName))) {
 		return armyUnit.getText(additionalParams.slotName);
 	} else {

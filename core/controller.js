@@ -87,9 +87,9 @@ function Controller() {
 
 		var detachmentData = _armyState.addDetachment(_systemState.armies[armyId]);
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
-		var armyUnit = detachmentData.getArmyUnit(0);
+		var armyUnit = detachmentData.getArmyUnit("a0");
 
-		_dataReader.loadArmy(armyUnit, detachmentDataIndex, 0);
+		_dataReader.loadArmy(armyUnit, detachmentDataIndex);
 		_armyState.getDetachmentData(detachmentDataIndex).resetArmy();
 		if(!isUndefined(detachmentTypeId)) {
 			this.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
@@ -108,6 +108,11 @@ function Controller() {
 		_dispatcher.triggerEvent("postDeleteDetachment", { detachmentDataIndex: detachmentDataIndex });
 	};
 
+	this.cloneDetachment = function(detachmentDataIndex) {
+		window.location.hash += _armyState.getDetachmentData(detachmentDataIndex).stateLinkPart;
+		//_dispatcher.triggerEvent("postChangeArmy", { detachmentDataIndex: detachmentDataIndex });
+	};
+
 	this.addExtension = function(detachmentDataIndex, extensionId) {
 		if(extensionId == -1) {
 			return;
@@ -116,7 +121,7 @@ function Controller() {
 		var armyUnit = _armyState.addExtension(detachmentDataIndex, _systemState.extensions[extensionId]);
 		var armyUnitIndex = armyUnit.getArmyUnitIndex();
 
-		_dataReader.loadArmy(armyUnit, detachmentDataIndex, armyUnitIndex);
+		_dataReader.loadArmy(armyUnit, detachmentDataIndex);
 		_armyState.getArmyUnit(detachmentDataIndex, armyUnitIndex).resetArmy();
 		_dispatcher.triggerEvent("postAddExtension", { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnitIndex, extensionId: armyUnit.getArmy().armyId });
 	};

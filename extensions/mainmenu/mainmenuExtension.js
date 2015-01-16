@@ -87,9 +87,15 @@ function MainmenuExtension() {
 			_controller.addDetachment(this.value);
 		});
 		_gui.getElement("#resetButton").on(_guiState.clickEvent, function() {
+			if(!confirm(_guiState.getText("message.confirmAllSelectionsDelete"))) {
+				return;
+			}
 			_controller.resetArmylist();
 		});
 		_gui.getElement("#deleteAllDetachmentsButton").on(_guiState.clickEvent, function() {
+			if(!confirm(_guiState.getText("message.confirmAllDetachmentsDelete"))) {
+				return;
+			}
 			_controller.deleteAllDetachments();
 		});
 		_gui.getElement("#creditsButton").on(_guiState.clickEvent, function() {

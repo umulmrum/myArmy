@@ -239,10 +239,10 @@ function DataReader() {
 		traverseArmyUnit(null, checkPoolsAvailable);
 	};
 	
-	this.loadArmy = function(armyUnit, detachmentDataIndex, armyUnitIndex) {
+	this.loadArmy = function(armyUnit, detachmentDataIndex) {
 		this.readTextsArmy(armyUnit);
 		var armyPath = getArmyPath(armyUnit.getArmy()) + "army.json";
-		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnitIndex });
+		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnit.getArmyUnitIndex() });
 	};
 	
 	function readOptions(detachmentDataIndex, entity, optionListsJson) {

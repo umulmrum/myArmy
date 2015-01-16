@@ -249,7 +249,7 @@ function SummaryGui() {
 
 	function traverseSelections(detachmentDataIndex, detachmentData, slot, armyRenderer) {
 		var data = [];
-        for(var i = 0; i < detachmentData.getArmyUnitCount(); i++) {
+        for(var i in detachmentData.getArmyUnits()) {
             var armyUnit = detachmentData.getArmyUnit(i);
             if(armyUnit == null) {
                 continue;
@@ -335,7 +335,7 @@ function SummaryGui() {
 				if (detachmentData == null) {
 					continue;
 				}
-				var army = detachmentData.getArmyUnit(0).getArmy();
+				var army = detachmentData.getArmyUnit("a0").getArmy();
 				if (!isFirst) {
 					string += "\n";
 				}
@@ -348,6 +348,17 @@ function SummaryGui() {
 					string += ", " + _guiState.text["primaryDetachment"];
 				}
 				string += ")";
+
+				for(var j in detachmentData.getArmyUnits()) {
+					army = detachmentData.getArmy(j);
+					if(army == null) {
+						continue;
+					}
+					string += "\n__- ";
+					string += _guiState.getText("army." + army.armyPrefix);
+				}
+
+
 				isFirst = false;
 			}
 

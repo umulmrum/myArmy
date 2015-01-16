@@ -32,6 +32,7 @@ function DesignerGui() {
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
@@ -160,7 +161,7 @@ function DesignerGui() {
 		var entryContent = null;
 		var optionContainer = null;
 
-		entry = li(null, "entry_" + entityslotLocalId, "entry");
+		entry = li(null, "entry_" + entityslotLocalId, "entry", { "data-localid": entityslotLocalId });
 		entryContent = div(null, "entryContent_" + entityslotLocalId, "entryContent", null);
 		entry.append(entryContent);
 		optionContainer = table();
@@ -205,10 +206,41 @@ function DesignerGui() {
 
 		this.renderEntryActions(armyUnit, entry, entityslot);
 	};
-	
+
+	/**
+	 * Determines the display position of a selection. The order is as follows:
+	 * - order by detachmentData
+	 * - in each detachmentData, order by armyUnit
+	 * - in each armyUnit use the order given in the selections parameter
+	 *
+	 * @param selections
+	 * @param entityslot
+	 * @returns {number}
+	 */
 	function getEntryPosition(selections, entityslot) {
 		var position = 0;
 		var i = 0;
+
+		for(i = 0; i < entityslot.detachmentDataIndex; i++) {
+			if(_armyState.getDetachmentData(i) != null) {
+                var detachmentData = _armyState.getDetachmentData(i);
+                for(var j in detachmentData.getArmyUnits()) {
+					var armyUnit = detachmentData.getArmyUnit(j);
+					position += armyUnit.getSelectionCountPerSlot(entityslot.slotId);
+                }
+			}
+		}
+
+		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+		for(var i in detachmentData.getArmyUnits()) {
+			var armyUnit = detachmentData.getArmyUnit(i);
+			if(armyUnit.getArmyUnitIndex() == entityslot.armyUnitIndex) {
+				break;
+			}
+			position += armyUnit.getSelectionCountPerSlot(entityslot.slotId);
+		}
+
+		i = 0;
 		while(i < selections.length) {
 			var sel = selections[i];
 			if(sel.slotId == entityslot.slotId) {
@@ -219,17 +251,7 @@ function DesignerGui() {
 			}
 			i++;
 		}
-		
-		for(i = 0; i < entityslot.detachmentDataIndex; i++) {
-			if(_armyState.getDetachmentData(i) != null) {
-                var detachmentData = _armyState.getDetachmentData(i);
-                for(var j = 0; j < detachmentData.getArmyUnitCount(); j++) {
-                    if(detachmentData.getArmyUnit(j) != null) {
-				        position += detachmentData.getArmyUnit(j).getSelectionCountPerSlot(entityslot.slotId);
-                    }
-                }
-			}
-		}
+
 		return position;
 	}
 
@@ -755,7 +777,7 @@ function DesignerGui() {
 	
 	this.removeInvalidEntries = function() {
 		$(".entry").each(function(index, element) {
-			var localId = element.id.split('_')[1];
+			var localId = element.dataset.localid;
 			if(_armyState.lookupId(localId) == null) {
 				element.remove();
 			}

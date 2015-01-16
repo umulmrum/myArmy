@@ -114,7 +114,7 @@ function doTraverseArmyUnit(detachmentData, detachmentDataIndex, additionalParam
 	var caller = additionalParams["_caller"];
 	var callback = additionalParams["_callback"];
 	var armyUnits = detachmentData.getArmyUnits();
-	var retValue = [];
+	var retValue = {};
 	for(var armyUnitIndex in armyUnits) {
 		var armyUnit = armyUnits[armyUnitIndex];
 		retValue[armyUnitIndex] = callback.call(caller, armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams);

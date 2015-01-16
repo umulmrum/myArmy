@@ -102,11 +102,9 @@ function ChooserGui() {
 	};
 
 	this.onPostDeleteExtension = function(event) {
-		// TODO
-		//this.refreshSlotHeadings();
-		//this.renderUnitSelectionTabs();
-		//this.renderEntries();
-		//this.refresh();
+		this.refreshSlotHeadings();
+		this.renderEntries();
+		this.refresh();
 	};
 
 	this.refresh = function() {
@@ -227,7 +225,7 @@ function ChooserGui() {
 		if(_armyState.getArmyCount() == 0) {
 			return;
 		}
-		if(_armyState.getArmy(unitsToShow, 0) == null) {
+		if(_armyState.getArmy(unitsToShow, "a0") == null) {
 			unitsToShow = _armyState.getFirstArmyIndex();
 		}
 		
@@ -266,7 +264,7 @@ function ChooserGui() {
 
 			var cssClasses = this.getCssForEntry(armyUnit, entityslot);
 
-			if(isUndefined(hasSeparator[entityslot.slotId]) && armyUnitIndex > 0) {
+			if(isUndefined(hasSeparator[entityslot.slotId]) && armyUnit.isExtension()) {
 				slotentryList.append("<hr />");
 				hasSeparator[entityslot.slotId] = true;
 			}
@@ -337,7 +335,7 @@ function ChooserGui() {
             if(countPerArmyUnit == null) {
                 continue;
             }
-            for(var j = 0; j < countPerArmyUnit.length; j++) {
+            for(var j in countPerArmyUnit) {
                 if(isUndefined(count[i])) {
                     count[i] = 0;
                 }
@@ -404,7 +402,7 @@ function ChooserGui() {
 	};
 	
 	this.refreshEntries = function() {
-		if(_armyState.getArmy(unitsToShow, 0) == null) {
+		if(_armyState.getArmy(unitsToShow, "a0") == null) {
 			unitsToShow = _armyState.getFirstArmyIndex();
 		}
 		for ( var i in _systemState.slots) {

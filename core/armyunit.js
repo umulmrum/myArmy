@@ -23,7 +23,7 @@
 /**
  * A single army detachment's data
  */
-function ArmyUnit(armyUnitIndexParam, armyParam) {
+function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 
 	var armyUnitIndex = armyUnitIndexParam;
 	var army = armyParam;
@@ -43,6 +43,8 @@ function ArmyUnit(armyUnitIndexParam, armyParam) {
 	var pools = {};
 	
 	var texts = {};
+
+	var extension = isExtensionParam;
 	
 	this.resetArmy = function() {
 		selections = [];
@@ -98,10 +100,6 @@ function ArmyUnit(armyUnitIndexParam, armyParam) {
 
     this.getArmy = function() {
         return army;
-    };
-
-    this.setArmy = function(armyParam) {
-        army = armyParam;
     };
 
 	this.getEntityPool = function() {
@@ -188,4 +186,11 @@ function ArmyUnit(armyUnitIndexParam, armyParam) {
 		texts = textsParam;
 	};
 
+	this.hasSelections = function() {
+		return this.getSelectionCount() > 0;
+	};
+
+	this.isExtension = function() {
+		return extension;
+	};
 }

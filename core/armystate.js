@@ -26,17 +26,20 @@
  */
 function ArmyState() {
 	
-	var detachmentData = [];
 	this.pointsPerSlot = {}; // the current points values per slot
-	
+
 	this.totalPoints = 0;
 	this.focCount = 1;
 	this.stateLink = null;
-	
-	this.maxLocalId = 0; // each item (entityslot, entity, optionList, option) that has been added to the current army gets assigned a temporary ID. 
-						// This variable will hold the current maximum so that new items can get a subsequent ID. 
+
+	this.maxLocalId = 0; // each item (entityslot, entity, optionList, option) that has been added to the current army gets assigned a temporary ID.
+						// This variable will hold the current maximum so that new items can get a subsequent ID.
 	this.armyLookup = {};
-	
+
+	var detachmentData = [];
+	var maxDetachmentIndex = 0;
+	var detachmentCount = 0;
+
 	this.resetArmy = function() {
 		for(var i = 0; i < detachmentData.length; i++) {
 			detachmentData[i].resetArmy();
@@ -69,8 +72,7 @@ function ArmyState() {
                 this.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
             }
         }
-		//detachmentData.splice(detachmentDataIndex, 1);
-		//this.setArmy(detachmentDataIndex, null);
+		detachmentCount--;
 
 		_persistence.createStatelink();
 	};
@@ -118,21 +120,18 @@ function ArmyState() {
 	};
 	
 	this.addDetachment = function(army) {
-		var detachmentDataIndex = this.getLastArmyIndex() + 1;
+		var detachmentDataIndex = maxDetachmentIndex;
 		var detachment = new DetachmentData(detachmentDataIndex);
-		detachment.setArmy(army);
+		detachment.addArmyUnit(army);
 		detachmentData[detachmentDataIndex] = detachment;
+		detachmentCount++;
+		maxDetachmentIndex++;
+
 		return detachment;
 	};
 	
 	this.getArmyCount = function() {
-		var count = 0;
-		for(var i = 0; i < detachmentData.length; i++) {
-			if(detachmentData[i].getArmy(0) != null) {
-				count++;
-			}
-		}
-		return count;
+		return detachmentCount;
 	};
 	
 	this.getFirstArmyIndex = function() {
@@ -154,7 +153,7 @@ function ArmyState() {
 	};
 
 	this.addExtension = function(detachmentDataIndex, extension) {
-		return detachmentData[detachmentDataIndex].addExtension(extension);
+		return detachmentData[detachmentDataIndex].addArmyUnit(extension);
 	};
 
 	this.removeExtension = function(detachmentDataIndex, armyUnitIndex) {

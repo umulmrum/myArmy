@@ -198,6 +198,7 @@ function Persistence() {
 		} else {
 			_controller.addDetachment(armyId, detachmentTypeId);
 		}
+		var armyUnitId = "a" + armyUnitIndex;
         i = i + value.length;
 
         while(i < q.length) {
@@ -220,11 +221,11 @@ function Persistence() {
 				i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
 				break;
 			case MARKER.ENTITY:
-				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, detachmentDataIndex, armyUnitIndex);
+				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, detachmentDataIndex, armyUnitId);
 				break;
 			case MARKER.ALLYENTITY:
 				// legacy
-				i = restoreEntity(fileVersion, q, i + MARKER.ALLYENTITY.length, 1, 0);
+				i = restoreEntity(fileVersion, q, i + MARKER.ALLYENTITY.length, 1, "a0");
 				break;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreArmy");
@@ -451,7 +452,7 @@ function Persistence() {
             var armyUnit = detachmentData.getArmyUnit(armyUnitIndex);
             state += createStateLinkForArmyUnit(armyUnit);
         }
-
+		detachmentData.stateLinkPart = state;
 		return state;
 	}
 	

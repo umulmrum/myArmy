@@ -34,8 +34,9 @@ function DetachmentData(detachmentDataIndexParam) {
 	
 	this.stateLinkPart = null;
 	
-	var armyUnits = [];
+	var armyUnits = {};
 	var maxArmyUnitIndex = 0;
+	var armyUnitCount = 0;
 
 	this.getDetachmentDataIndex = function() {
 		return detachmentDataIndex;
@@ -52,15 +53,12 @@ function DetachmentData(detachmentDataIndexParam) {
 		return armyUnits;
 	};
 	
-	this.setArmy = function(army) {
-		armyUnits[0] = new ArmyUnit(0, army);
-		maxArmyUnitIndex++;
-	};
-
-	this.addExtension = function(extension) {
-		var newArmyUnitIndex = maxArmyUnitIndex++;
-		var armyUnit = new ArmyUnit(newArmyUnitIndex, extension);
+	this.addArmyUnit = function(army) {
+		var newArmyUnitIndex = "a" + maxArmyUnitIndex;
+		var armyUnit = new ArmyUnit(newArmyUnitIndex, army, (maxArmyUnitIndex > 0));
 		armyUnits[newArmyUnitIndex] = armyUnit;
+		armyUnitCount++;
+		maxArmyUnitIndex++;
 		return armyUnit;
 	};
 
@@ -76,7 +74,8 @@ function DetachmentData(detachmentDataIndexParam) {
 			_armyState.totalPoints -= entityslot.entity.totalCost;
 			_armyState.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
 		}
-		armyUnit.setArmy(null);
+		delete armyUnits[armyUnitIndex];
+		armyUnitCount--;
 		_persistence.createStatelink();
 		return extensionId;
 	};
@@ -85,12 +84,9 @@ function DetachmentData(detachmentDataIndexParam) {
 		return armyUnits[armyUnitIndex];
 	};
 	
-	this.setArmyUnit = function(armyUnitIndex, armyUnit) {
-		armyUnits[armyUnitIndex] = army;
-	};
-	
 	this.getArmyUnitCount = function() {
-		return getObjectSize(armyUnits);
+		//return getObjectSize(armyUnits);
+		return armyUnitCount;
 	};
 	
 	this.resetArmy = function() {
@@ -142,6 +138,15 @@ function DetachmentData(detachmentDataIndexParam) {
 	this.hasExtension = function(extensionId) {
 		for(var i in armyUnits) {
 			if(armyUnits[i].getArmy().armyId == extensionId) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	this.hasSelections = function() {
+		for(var i in armyUnits) {
+			if(armyUnits[i].hasSelections()) {
 				return true;
 			}
 		}
