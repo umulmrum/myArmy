@@ -91,13 +91,13 @@ function traverseOptions(armyUnit, entityOrOption, callback) {
 }
 
 function traverseDetachmentData(caller, callback, additionalParams) {
-	var retValue = [];
-	for(var detachmentDataIndex = 0; detachmentDataIndex < _armyState.getDetachmentDataCount(); detachmentDataIndex++) {
+	var retValue = {};
+	for(var detachmentDataIndex in _armyState.getDetachments()) {
 		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
-		if(detachmentData.getArmyUnitCount() == 0) {
-			retValue[detachmentDataIndex] = null;
-			continue;
-		}
+		//if(detachmentData.getArmyUnitCount() == 0) {
+		//	retValue[detachmentDataIndex] = null;
+		//	continue;
+		//}
 		retValue[detachmentDataIndex] = callback.call(caller, detachmentData, detachmentDataIndex, additionalParams);
 	}
 	return retValue;

@@ -74,6 +74,7 @@ function DesignerGui() {
 
 	this.onPostDeleteDetachment = function(event) {
 		this.removeInvalidEntries();
+		this.refreshSlotEntries();
 	};
 	
 	this.onPreCallFragment = function(event, additionalData) {
@@ -221,13 +222,14 @@ function DesignerGui() {
 		var position = 0;
 		var i = 0;
 
-		for(i = 0; i < entityslot.detachmentDataIndex; i++) {
-			if(_armyState.getDetachmentData(i) != null) {
-                var detachmentData = _armyState.getDetachmentData(i);
-                for(var j in detachmentData.getArmyUnits()) {
-					var armyUnit = detachmentData.getArmyUnit(j);
-					position += armyUnit.getSelectionCountPerSlot(entityslot.slotId);
-                }
+		for(i in _armyState.getDetachments()) {
+			var detachmentData = _armyState.getDetachmentData(i);
+			if(detachmentData.getDetachmentDataIndex() == entityslot.detachmentDataIndex) {
+				break;
+			}
+			for(var j in detachmentData.getArmyUnits()) {
+				var armyUnit = detachmentData.getArmyUnit(j);
+				position += armyUnit.getSelectionCountPerSlot(entityslot.slotId);
 			}
 		}
 
@@ -264,10 +266,14 @@ function DesignerGui() {
 			entityCost = entity.totalCost + " " + _guiState.text["points"];
 		}
 		entryHeader = div(null, null, "entryHeader commonHighlight");
-		if(_armyState.getArmyCount() > 1) {
-			var armyIndexCss = (entity.minCount < entity.maxCount) ? "entryArmyIndexWithModelCount" : "entryArmyIndex";
-			var armyIndexElement = span(entityslot.detachmentDataIndex + 1, null, armyIndexCss);
+			var armyIndexCss = "entryArmyIndex";
+			if(entity.minCount < entity.maxCount) {
+				armyIndexCss += " entryArmyIndexWithModelCount";
+			}
+			var armyIndexElement = span(_armyState.getDetachmentData(entityslot.detachmentDataIndex).getPosition(), null, armyIndexCss);
 			entryHeader.append(armyIndexElement);
+		if(_armyState.getDetachmentCount() < 2) {
+			armyIndexElement.addClass("invisible");
 		}
 		var entityNameElement = span(entityName, null, "entryName");
 		entryHeader.append(entityNameElement);
@@ -432,12 +438,8 @@ function DesignerGui() {
 	
 	this.renderEntryActions = function(armyUnit, container, entityslot) {
 		var entryButtons = null;
-		var deleteButtonImg = null;
-		var cloneButtonImg = null;
 		var collapseButton = null;
-		var collapseButtonImg = null;
 		var expandButton = null;
-		var expandButtonImg = null;
 		var hasOptions = entityslot.entity.hasOptions();
 
 			entryButtons = div(null, null, "entryButtons");
@@ -523,7 +525,7 @@ function DesignerGui() {
 		var optionContainer = entry.find(".optionContainer table");
 		var entryContent = entry.find("#entryContent_" + entityslot.localId);
 
-		this.refreshEntryHeader(armyUnit, entryContent, entity);
+		this.refreshEntryHeader(armyUnit, entryContent, entityslot);
 
 		if (entity.minCount < entity.maxCount) {
 			this.refreshModelCountHeader(entryContent, entity, entityslot);
@@ -543,8 +545,10 @@ function DesignerGui() {
 		this.refreshEntryActions(entry, entityslot);
 	};
 
-	this.refreshEntryHeader = function(armyUnit, container, entity) {
+	this.refreshEntryHeader = function(armyUnit, container, entityslot) {
 
+		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex)
+		var entity = entityslot.entity;
 		var entryHeader = null;
 		var entityName = armyUnit.getText(entity.entityName);
 		var entityCost = "";
@@ -552,6 +556,13 @@ function DesignerGui() {
 			entityCost = entity.totalCost + " " + _guiState.text["points"];
 		}
 		entryHeader = container.find(".entryHeader");
+		var armyIndexElement = entryHeader.find(".entryArmyIndex");
+		armyIndexElement.html(detachmentData.getPosition());
+		if(_armyState.getDetachmentCount() > 1) {
+			armyIndexElement.removeClass("invisible");
+		} else {
+			armyIndexElement.addClass("invisible");
+		}
 		entryHeader.find(".entryName").html(entityName);
 		entryHeader.find(".entryPoints").html(entityCost);
 	};

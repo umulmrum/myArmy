@@ -226,7 +226,7 @@ function Pool(detachmentDataIndex, name, start) {
 	if (isNumber(start)) {
 		this.start = start;
 	} else if (start.indexOf(":") != -1) {
-		if (detachmentDataIndex == 0) {
+		if (detachmentDataIndex == "d0") {
 			this.start = parseInt(start.substring(0, start.indexOf(":")));
 		} else {
 			this.start = parseInt(start.substring(start.indexOf(":") + 1));

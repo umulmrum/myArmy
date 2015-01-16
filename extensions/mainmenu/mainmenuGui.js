@@ -35,9 +35,8 @@ function MainmenuGui() {
 
 	this.onPostInit = function(event) {
 		this.renderArmySelectBox();
-		//this.renderFirstDetachmentSelect();
-		//this.addNewArmySelects();
 		this.renderDetachmentBoxes();
+		this.checkMaxDetachments();
 		this.refreshAll();
 	};
 
@@ -51,15 +50,16 @@ function MainmenuGui() {
 	};
 
 	this.onPostChangeArmy = function(event, additionalData) {
-		//var lastArmyIndex = _armyState.getLastArmyIndex();
-		//this.addArmySelect(lastArmyIndex + 1);
 		this.renderDetachmentBox(additionalData.detachmentDataIndex);
 		this.resetArmySelect();
+		this.checkMaxDetachments();
 	};
 
 	this.onPostDeleteDetachment = function(event, additionalData) {
 		this.removeDetachmentBox(additionalData.detachmentDataIndex);
+		this.refreshDetachmentBoxIndexes();
 		this.resetArmySelect();
+		this.checkMaxDetachments();
 	};
 
 	this.onPostChangeFocCount = function(event) {
@@ -76,24 +76,22 @@ function MainmenuGui() {
 		this.resetArmySelect();
 	};
 
-	this.refreshSystemChooser = function() {
-		// there is only one system available at the moment
-		return;
-
-
-		var systemSelectElement = _gui.getElement("#systemSelect");
-		systemSelectElement.children().remove();
-		systemSelectElement.append(option("", "-1"));
-		var currentSystem = _systemState.system;
-
-		for (var i = 0; i < _systems.length; i++) {
-			var systemId = _systems[i].systemId;
-			var systemName = _systems[i].systemName;
-			systemSelectElement.append(option(systemName, systemId,
-					currentSystem != null
-							&& systemId == currentSystem.systemId));
-		}
-	};
+	// there is only one system available at the moment
+	//this.refreshSystemChooser = function() {
+    //
+	//	var systemSelectElement = _gui.getElement("#systemSelect");
+	//	systemSelectElement.children().remove();
+	//	systemSelectElement.append(option("", "-1"));
+	//	var currentSystem = _systemState.system;
+     //
+	//	for (var i = 0; i < _systems.length; i++) {
+	//		var systemId = _systems[i].systemId;
+	//		var systemName = _systems[i].systemName;
+	//		systemSelectElement.append(option(systemName, systemId,
+	//				currentSystem != null
+	//						&& systemId == currentSystem.systemId));
+	//	}
+	//};
 
 	this.renderArmySelectBox = function() {
 		
@@ -182,7 +180,7 @@ function MainmenuGui() {
 
 	this.renderDetachmentBoxes = function() {
 		$("#detachmentBoxContainer").children().remove();
-		for(var i = 0; i < _armyState.getDetachmentDataCount(); i++) {
+		for(var i in _armyState.getDetachments()) {
 			this.renderDetachmentBox(i);
 		}
 	};
@@ -193,9 +191,10 @@ function MainmenuGui() {
 		var detachmentBoxContent = div(null, null, "detachmentBoxContent");
 
 		var header = div(null, null, "entryHeader commonHighlight");
-		header.append(span(detachmentDataIndex + 1, null, "entryArmyIndex"));
+		var position = _armyState.getDetachmentData(detachmentDataIndex).getPosition();
+		header.append(span(position, null, "entryArmyIndex"));
 		var headingText = _guiState.getText("army." + _armyState.getArmy(detachmentDataIndex, "a0").armyPrefix);
-		if(detachmentDataIndex == 0) {
+		if(position == 1) {
 			headingText += " (" + _guiState.getText("primaryDetachment") + ")";
 		}
 		header.append(div(headingText, null, "entryName"));
@@ -230,7 +229,7 @@ function MainmenuGui() {
 			_controller.deleteDetachment(detachmentDataIndex);
 		});
 		buttons.append(deleteButton);
-		var cloneButton = div(null, null, "entryButton cloneButton", { title: _guiState.getText("clone"), alt: _guiState.getText("clone") });
+		var cloneButton = div(null, null, "entryButton cloneButton cloneDetachmentButton", { title: _guiState.getText("clone"), alt: _guiState.getText("clone") });
 		cloneButton.on(_guiState.clickEvent, { detachmentDataIndex: detachmentDataIndex }, function() {
 			_controller.cloneDetachment(detachmentDataIndex);
 		});
@@ -240,9 +239,20 @@ function MainmenuGui() {
 
 		_gui.getElement("#detachmentBoxContainer").append(detachmentBox);
 	};
+
+	this.refreshDetachmentBoxIndexes = function() {
+		for(var detachmentDataIndex in _armyState.getDetachments()) {
+			var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+			_gui.getElement("#detachmentBox" + detachmentDataIndex).find(".entryArmyIndex").html(detachmentData.getPosition());
+		}
+	};
+
+	this.refreshDetachmentBox = function(detachmentDataIndex) {
+		// TODO
+	};
 	
 	function getDetachmentTypeSelectbox(detachmentDataIndex) {
-		var isPrimary = (detachmentDataIndex == 0);
+		var isPrimary = (detachmentDataIndex == "d0");
 		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
 		var selectBox = select("detachmentTypeSelect" + detachmentDataIndex);
 //		selectBox.append(option(_guiState.text["chooseDetachmenttype"], -1));
@@ -377,17 +387,18 @@ function MainmenuGui() {
 		_gui.getElement("#optionsHeading").html(_guiState.text["viewOptions"]);
 		_gui.getElement("#linksHeading").html(_guiState.text["links"]);
 		_gui.getElement("#resetButton").html(_guiState.text["reset"]);
-		_gui.getElement(".detachmentCreatorHeading").html(_guiState.text["newDetachment"]);
+		_gui.getElement("#detachmentCreatorHeading").html(_guiState.text["newDetachment"]);
 		_gui.getElement("#deleteAllDetachmentsButton").html(_guiState.text["deleteAllDetachments"]);
 		_gui.getElement("#fileLoaderLabel").html(_guiState.text["loadArmy"]);
+		_gui.getElement("#maxDetachmentsReachedMessage").html(_guiState.text["message.maxDetachmentsReached"]);
 
-		if (_systemState.system != null) {
-
-			for(var i = 0; i <= 10; i++) {
-				//this.refreshDetachmentTypeSelectbox(i);
-				//this.refreshArmySelectbox(i);
-			}
-		}
+		//if (_systemState.system != null) {
+        //
+		//	for(var i = 0; i <= 10; i++) {
+		//		//this.refreshDetachmentTypeSelectbox(i);
+		//		//this.refreshArmySelectbox(i);
+		//	}
+		//}
 	};
 	
 	this.refreshSpecialContainer = function() {
@@ -417,4 +428,17 @@ function MainmenuGui() {
 		}
 	};
 
+	this.checkMaxDetachments = function() {
+		if(_armyState.getDetachmentCount() >= 10) {
+			_gui.getElement("#armySelect").addClass("invisible");
+			_gui.getElement("#detachmentCreatorHeading").addClass("invisible");
+			_gui.getElement("#maxDetachmentsReachedMessage").removeClass("invisible");
+			_gui.getElement(".cloneDetachmentButton").addClass("invisible");
+		} else {
+			_gui.getElement("#armySelect").removeClass("invisible");
+			_gui.getElement("#detachmentCreatorHeading").removeClass("invisible");
+			_gui.getElement("#maxDetachmentsReachedMessage").addClass("invisible");
+			_gui.getElement(".cloneDetachmentButton").removeClass("invisible");
+		}
+	};
 }

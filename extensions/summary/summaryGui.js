@@ -160,7 +160,7 @@ function SummaryGui() {
 	
 	this.refreshSummary = function() {
 
-		if (_armyState.getArmyCount() == 0) {
+		if (_armyState.getDetachmentCount() == 0) {
 			return;
 		}
 
@@ -206,11 +206,8 @@ function SummaryGui() {
 		var selectionData = {};
 		for ( var i in sortedSlots) {
 			var slot = sortedSlots[i];
-			for ( var j = 0; j < _armyState.getArmyCount(); j++) {
+			for ( var j in _armyState.getDetachments()) {
 				var detachmentData = _armyState.getDetachmentData(j);
-				if (detachmentData == null) {
-					continue;
-				}
 				if (isUndefined(selectionData[j])) {
 					selectionData[j] = {};
 				}
@@ -261,15 +258,15 @@ function SummaryGui() {
                     continue;
                 }
                 var entity = slotEntry.entity;
-                data.push(renderEntity(detachmentDataIndex, armyUnit, entity, armyRenderer));
+                data.push(renderEntity(detachmentData.getPosition(), armyUnit, entity, armyRenderer));
             }
         }
 		return data;
 	}
 
-	function renderEntity(detachmentDataIndex, armyUnit, entity, armyRenderer) {
+	function renderEntity(position, armyUnit, entity, armyRenderer) {
 		var s = "";
-		s += armyRenderer.renderEntityHeading(detachmentDataIndex, armyUnit, entity);
+		s += armyRenderer.renderEntityHeading(position, armyUnit, entity);
 		s += armyRenderer.renderEntityCost(entity);
 		s += "\n";
 
@@ -327,10 +324,9 @@ function SummaryGui() {
 		this.renderArmyLabel = function() {
 
 			var string = "";
-			var hasMultipleDetachments = _armyState.getArmyCount() > 1;
+			var hasMultipleDetachments = _armyState.getDetachmentCount() > 1;
 			var isFirst = true;
-			var armyCount = _armyState.getArmyCount();
-			for ( var i = 0; i < armyCount; i++) {
+			for ( var i in _armyState.getDetachments()) {
 				var detachmentData = _armyState.getDetachmentData(i);
 				if (detachmentData == null) {
 					continue;
@@ -340,7 +336,7 @@ function SummaryGui() {
 					string += "\n";
 				}
 				if (hasMultipleDetachments) {
-					string += " [" + (i + 1) + "] ";
+					string += " [" + detachmentData.getPosition() + "] ";
 				}
 				string += _guiState.text["army." + army.armyPrefix];
 				string += " (" + _guiState.text[detachmentData.detachmentType.name];
@@ -350,10 +346,10 @@ function SummaryGui() {
 				string += ")";
 
 				for(var j in detachmentData.getArmyUnits()) {
-					army = detachmentData.getArmy(j);
-					if(army == null) {
+					if(j == "a0") {
 						continue;
 					}
+					army = detachmentData.getArmy(j);
 					string += "\n__- ";
 					string += _guiState.getText("army." + army.armyPrefix);
 				}
@@ -372,12 +368,25 @@ function SummaryGui() {
 			s += " (";
 
 			var isFirst = true;
-			var countPerSlot = traverseArmyUnit(this, getChooserCountForArmy, {
-				slotId : slot.slotId
-			});
 
-			for ( var i = 0; i < countPerSlot.length; i++) {
-				var slotCount = countPerSlot[i];
+			var countPerDetachmentData = traverseArmyUnit(this, getChooserCountForArmy, {slotId: slot.slotId});
+			var count = {};
+			for(var i in countPerDetachmentData) {
+				var countPerArmyUnit = countPerDetachmentData[i];
+				if(countPerArmyUnit == null) {
+					continue;
+				}
+				for(var j in countPerArmyUnit) {
+					if(isUndefined(count[i])) {
+						count[i] = 0;
+					}
+					count[i] += countPerArmyUnit[j];
+				}
+			}
+
+
+			for(var i in count) {
+				var slotCount = count[i];
 				if (slotCount == null) {
 					continue;
 				}
@@ -394,17 +403,13 @@ function SummaryGui() {
 			return s;
 		};
 		
-		this.renderSlotHeadingSingle = function(slot, armyIndex) {
+		this.renderSlotHeadingSingle = function(slot, detachmentDataIndex) {
 			var s = "";
 			s += "---------- ";
 			s += getSlotHeadingText(slot);
 			s += " (";
 
-			var countPerSlot = traverseArmyUnit(this, getChooserCountForArmy, {
-				slotId : slot.slotId
-			});
-			
-			s += countPerSlot[armyIndex];
+			s += getChooserCountForDetachment(_armyState.getDetachmentData(detachmentDataIndex), slot.slotId);
 
 			s += ")";
 			s += " ----------";
@@ -517,11 +522,11 @@ function SummaryGui() {
 
 	function DefaultArmyRenderer() {
 
-		this.renderEntityHeading = function(detachmentDataIndex, armyUnit, entity) {
+		this.renderEntityHeading = function(position, armyUnit, entity) {
 			var s = "";
 
-			if (_armyState.getArmyCount() > 1) {
-				s += "[" + (detachmentDataIndex + 1) + "] ";
+			if (_armyState.getDetachmentCount() > 1) {
+				s += "[" + position + "] ";
 			}
 
 			if (entity.currentCount > 1) {
@@ -567,8 +572,8 @@ function SummaryGui() {
 
 		this.armyRenderer = armyRenderer;
 
-		this.renderEntityHeading = function(detachmentDataIndex, armyUnit, entity) {
-			return this.armyRenderer.renderEntityHeading(detachmentDataIndex, armyUnit,
+		this.renderEntityHeading = function(position, armyUnit, entity) {
+			return this.armyRenderer.renderEntityHeading(position, armyUnit,
 					entity);
 		};
 
@@ -634,8 +639,8 @@ function SummaryGui() {
 //		this.lineStarter = '............................................................................................';
 		this.lineStarter = '______________________________________________';
 
-		this.renderEntityHeading = function(detachmentDataIndex, armyUnit, entity) {
-			return this.armyRenderer.renderEntityHeading(detachmentDataIndex, armyUnit,
+		this.renderEntityHeading = function(position, armyUnit, entity) {
+			return this.armyRenderer.renderEntityHeading(position, armyUnit,
 					entity);
 		};
 
@@ -680,10 +685,10 @@ function SummaryGui() {
 			return armyRenderer.renderEntity();
 		};
 
-		this.renderEntityHeading = function(detachmentDataIndex, armyUnit, entity) {
+		this.renderEntityHeading = function(position, armyUnit, entity) {
 			var s = "";
 			s += "[b]";
-			s += this.armyRenderer.renderEntityHeading(detachmentDataIndex, armyUnit,
+			s += this.armyRenderer.renderEntityHeading(position, armyUnit,
 					entity);
 			s += "[/b]";
 			return s;

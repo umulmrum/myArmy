@@ -44,8 +44,9 @@ function MainmenuExtension() {
 			<select id="systemSelect" class="invisible"></select> \
 		</div> \
 		<div id="detachmentCreator" class="detachmentCreator detachmentBox">\
-			<span class="detachmentCreatorHeading">:</span>\
+			<span id="detachmentCreatorHeading"></span>\
 			<select id="armySelect" />\
+			<span id="maxDetachmentsReachedMessage" class="invisible"></span>\
 		</div>\
 		<ul id="detachmentBoxContainer"></ul>\
 		<!--span id="detachmentBox0" class="detachmentBox"></span><br /> \

@@ -59,7 +59,7 @@ function Persistence() {
 		_dispatcher.bindEvent("postChangeArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postAddExtension", this, this.createStatelink, _dispatcher.PHASE_STATE);
-		//_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_ACTION);
+		_dispatcher.bindEvent("postDeleteDetachment", this, this.createStatelink, _dispatcher.PHASE_ACTION);
 		
 		jQuery.event.add(window, "hashchange", function() {
 			if(_guiState.hashEventEnabled) {
@@ -71,11 +71,6 @@ function Persistence() {
 	
 	this.onPostStateRefresh = function(event) {
 		this.createStatelink();
-	};
-
-	this.onPostDeleteDetachment = function(event, additionalData) {
-		this.createStatelink();
-		init();
 	};
 
 	this.restoreState = function() {
@@ -136,11 +131,11 @@ function Persistence() {
 		while(i < q.length) {
 			switch(q[i]) {
                 case MARKER.DETACHMENT:
-                    i = restoreDetachment(fileVersion, q, i + MARKER.DETACHMENT.length, detachmentDataIndex);
+                    i = restoreDetachment(fileVersion, q, i + MARKER.DETACHMENT.length, "d" + detachmentDataIndex);
                     detachmentDataIndex++;
                     break;
 				case MARKER.ARMY:
-					i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, detachmentDataIndex, 0);
+					i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, "d" + detachmentDataIndex, 0);
 					detachmentDataIndex++;
 					break;
 				case MARKER.FOC:
@@ -428,9 +423,9 @@ function Persistence() {
 			state += MARKER.FOC + _armyState.getFocCount().toString(BASE);
 		}
 	
-		if (_armyState.getArmyCount() != 0) {
+		if (_armyState.getDetachmentCount() != 0) {
 			var stateLinksPerArmy = traverseDetachmentData(this, createStateLinkForDetachmentData);
-			for(var i = 0; i < stateLinksPerArmy.length; i++) {
+			for(var i in stateLinksPerArmy) {
 				if(stateLinksPerArmy[i] != null) {
 					state += stateLinksPerArmy[i];
 				}

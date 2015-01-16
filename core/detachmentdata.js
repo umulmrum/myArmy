@@ -33,6 +33,7 @@ function DetachmentData(detachmentDataIndexParam) {
 	this.entityslotCount = {}; // the number of selectable entityslots per slot
 	
 	this.stateLinkPart = null;
+	var position = 0;
 	
 	var armyUnits = {};
 	var maxArmyUnitIndex = 0;
@@ -63,9 +64,10 @@ function DetachmentData(detachmentDataIndexParam) {
 	};
 
 	this.removeExtension = function(armyUnitIndex) {
-		if(((this.getArmyUnitCount() -1) < armyUnitIndex) || (armyUnits[armyUnitIndex].getArmy(0) == null)) {
-			return;
-		}
+		return this.removeArmyUnit(armyUnitIndex);
+	};
+
+	this.removeArmyUnit = function(armyUnitIndex) {
 		var armyUnit = armyUnits[armyUnitIndex];
 		var extensionId = armyUnit.getArmy(armyUnitIndex).armyId;
 		for(var j = 0; j < armyUnit.getSelectionCount(); j++) {
@@ -151,5 +153,13 @@ function DetachmentData(detachmentDataIndexParam) {
 			}
 		}
 		return false;
+	};
+	
+	this.getPosition = function() {
+		return position;
+	};
+
+	this.setPosition = function(positionParam) {
+		position = positionParam;
 	};
 }

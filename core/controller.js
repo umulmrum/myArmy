@@ -94,7 +94,7 @@ function Controller() {
 		if(!isUndefined(detachmentTypeId)) {
 			this.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
 		} else {
-			if(detachmentDataIndex == 0) {
+			if(detachmentDataIndex == "d0") {
 				this.changeDetachmentType(detachmentDataIndex, "1");
 			} else {
 				this.changeDetachmentType(detachmentDataIndex, "2");

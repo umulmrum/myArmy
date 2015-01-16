@@ -160,7 +160,7 @@ function getSlotHeadingText(slot) {
 	var armyTexts = traverseDetachmentData(null, getSlotHeadingForArmy, {slotName: slot.slotName});
 	var text = "";
 	var isFirst = true;
-	for(var i = 0; i < armyTexts.length; i++) {
+	for(var i in armyTexts) {
 		var armyText = armyTexts[i];
 		if(armyText == null) {
 			continue;
@@ -189,4 +189,12 @@ function getSlotHeadingForArmy(detachmentData, detachmentDataIndex, additionalPa
 function getChooserCountForArmy (armyUnit, armyUnitIndex, detachmentData, armyIndex, additionalParams) {
 	// support multiple entities per slot by using fractions and round them up here
 	return Math.ceil(armyUnit.getSelectionCost(additionalParams.slotId));
+}
+
+function getChooserCountForDetachment(detachmentData, slotId) {
+	var count = 0;
+	for(var i in detachmentData.getArmyUnits()) {
+		count += detachmentData.getArmyUnit(i).getSelectionCost(slotId);
+	}
+	return Math.ceil(count);
 }

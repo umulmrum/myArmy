@@ -22,7 +22,7 @@
 
 function ChooserGui() {
 	
-	var unitsToShow = 0;
+	var unitsToShow = "d0";
 	
 	this.init = function() {
 		_dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, _dispatcher.PHASE_STATE);
@@ -206,12 +206,13 @@ function ChooserGui() {
 	this.renderUnitSelectionTabs = function() {
 		$(".tabRow").remove();
 		var tabRow = ol(null, null, "tabRow unitTabRow", null);
-		if(_armyState.getArmyCount() < 2) {
+		if(_armyState.getDetachmentCount() < 2) {
 			tabRow.addClass("invisible");
 		}
 		
-		for(var i = 0; i < _armyState.getDetachmentDataCount(); i++) {
-			var xLi = li(i + 1, null, "tab unitTab", null);
+		for(var i in  _armyState.getDetachments()) {
+			var detachmentData = _armyState.getDetachmentData(i);
+			var xLi = li(detachmentData.getPosition(), "unitSelectionTab" + i, "tab unitTab", null);
 			if(unitsToShow == i) {
 				xLi.addClass("selectedTab");
 			}
@@ -222,15 +223,15 @@ function ChooserGui() {
 	};
 	
 	this.renderEntries = function() {
-		if(_armyState.getArmyCount() == 0) {
+		if(_armyState.getDetachmentCount() == 0) {
 			return;
 		}
-		if(_armyState.getArmy(unitsToShow, "a0") == null) {
-			unitsToShow = _armyState.getFirstArmyIndex();
-		}
+		//if(_armyState.getArmy(unitsToShow, "a0") == null) {
+		//	unitsToShow = _armyState.getFirstArmyIndex();
+		//}
 		
 		var tabRows = _gui.getElement(".designContainer").find(".tabRow");
-		if(_armyState.getArmyCount() < 2) {
+		if(_armyState.getDetachmentCount() < 2) {
 			tabRows.addClass("invisible");
 		} else {
 			tabRows.removeClass("invisible");
@@ -329,8 +330,8 @@ function ChooserGui() {
 
 		var isFirst = true;
 		var countPerDetachmentData = traverseArmyUnit(this, getChooserCountForArmy, {slotId: slotId});
-        var count = [];
-        for(var i = 0; i < countPerDetachmentData.length; i++) {
+        var count = {};
+        for(var i in countPerDetachmentData) {
             var countPerArmyUnit = countPerDetachmentData[i];
             if(countPerArmyUnit == null) {
                 continue;
@@ -343,7 +344,7 @@ function ChooserGui() {
             }
         }
 		
-		for(var i = 0; i < count.length; i++) {
+		for(var i in count) {
 			var slotCount = count[i];
 			//if(slotCount == null) {
 			//	continue;
@@ -402,9 +403,9 @@ function ChooserGui() {
 	};
 	
 	this.refreshEntries = function() {
-		if(_armyState.getArmy(unitsToShow, "a0") == null) {
-			unitsToShow = _armyState.getFirstArmyIndex();
-		}
+		//if(_armyState.getArmy(unitsToShow, "a0") == null) {
+		//	unitsToShow = _armyState.getFirstArmyIndex();
+		//}
 		for ( var i in _systemState.slots) {
 			this.refreshEntriesForSlot(_systemState.slots[i]);
 		}
@@ -435,7 +436,7 @@ function ChooserGui() {
 		var tabRow = rowElement.find(".tabRow");
 		var tabs = tabRow.children();
 		tabs.removeClass("selectedTab");
-		tabs.filter(":eq(" + unitsToShow + ")").addClass("selectedTab");
+		tabs.filter("#unitSelectionTab" + unitsToShow).addClass("selectedTab");
 	};
 	
 	this.refreshForArmyUnit = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {

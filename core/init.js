@@ -57,7 +57,7 @@ function init() {
     }
 	
     // TODO decouple
-	if(_armyState.getArmyCount() > 0) {
+	if(_armyState.getDetachmentCount() > 0) {
 		_guiState.currentContent = "design";
 	} else {
 		_guiState.currentContent = "mainmenu";
