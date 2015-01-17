@@ -30,7 +30,9 @@ function DetachmentData(detachmentDataIndexParam) {
 	
 	// static data (these variables do only depend on the army type, so will not changed after the army data was read)
 	this.allowedAllies = [];
+	var allowedExtensions = {};
 	this.entityslotCount = {}; // the number of selectable entityslots per slot
+	var detachmentTypes = {};
 	
 	this.stateLinkPart = null;
 	var position = 0;
@@ -162,4 +164,28 @@ function DetachmentData(detachmentDataIndexParam) {
 	this.setPosition = function(positionParam) {
 		position = positionParam;
 	};
+
+	this.getDetachmentTypes = function() {
+		return detachmentTypes;
+	};
+
+	this.getDetachmentType = function(id) {
+		return detachmentTypes[id];
+	};
+
+	this.setDetachmentTypes = function(detachmentTypesParam) {
+		detachmentTypes = detachmentTypesParam;
+	};
+
+	this.addDetachmentTypes = function(detachmentTypesParam) {
+		$.extend(true, detachmentTypes, detachmentTypesParam);
+	};
+
+	this.setAllowedExtensions = function(extensionsParam) {
+		allowedExtensions = extensionsParam;
+	};
+
+	this.isExtensionAllowed = function(extensionId) {
+		return allowedExtensions.hasOwnProperty(extensionId);
+	}
 }

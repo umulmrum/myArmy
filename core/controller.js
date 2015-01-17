@@ -69,8 +69,8 @@ function Controller() {
 	};
 	
 	this.changeDetachmentType = function(detachmentDataIndex, detachmentTypeId) {
-		var detachmentType = _systemState.system.detachmentTypes[detachmentTypeId];
 		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		var detachmentType = detachmentData.getDetachmentType(detachmentTypeId);
 		if(detachmentData == null) {
 			return;
 		}

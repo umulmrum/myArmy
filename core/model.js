@@ -72,6 +72,8 @@ function Army(armyId, armyName, armyPrefix, armyGroup) {
 	this.armyPrefix = armyPrefix;
 	this.armyGroup = armyGroup;
 	this.pools = {};
+	this.detachmentTypes = {};
+	this.extensions=  {};
 }
 
 function EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken,

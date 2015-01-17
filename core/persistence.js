@@ -441,7 +441,7 @@ function Persistence() {
 	
 	function createStateLinkForDetachmentData(detachmentData) {
 		
-		var state = MARKER.DETACHMENT + detachmentData.detachmentType.id;
+		var state = MARKER.DETACHMENT + detachmentData.detachmentType.id.toString(BASE);
 
         for(var armyUnitIndex in detachmentData.getArmyUnits()) {
             var armyUnit = detachmentData.getArmyUnit(armyUnitIndex);

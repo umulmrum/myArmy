@@ -87,6 +87,13 @@ function DataReader() {
 		if(army != null) {
 			this.readTexts(getArmyPath(army) + "textarmy", $.proxy(armyUnit.setTexts, armyUnit));
 		}
+		var detachmentTexts = {};
+		for(var bundlekey in _guiState.text) {
+			if(bundlekey.indexOf("detachment.") == 0) {
+				detachmentTexts[bundlekey] = _guiState.getText(bundlekey);
+			}
+		}
+		armyUnit.addTexts(detachmentTexts);
 	};
 	
 	this.readTexts = function(filepath, callback) {
@@ -96,9 +103,6 @@ function DataReader() {
 	
 	this.readTextsSuccess = function(data, additionalParams) {
 		additionalParams.callback(data);
-//		for(var i in data) {
-//			additionalParams.target[i] = data[i];
-//		}
 	};
 	
 	this.readSystems = function() {
@@ -206,6 +210,15 @@ function DataReader() {
 		var entityslots = data.entityslots || [];
 		for(var i = 0; i < entityslots.length; i++) {
 			var obj = entityslots[i];
+
+			var restricted = coalesce(obj.restricted, false);
+			if(restricted) {
+				var armyRestrictions = obj.armyRestrictions || [];
+				if($.inArray(detachmentData.getArmy("a0").armyId, armyRestrictions) == -1) {
+					continue;
+				}
+			}
+
 			var entityslotId = obj.esId;
 			var entityId = obj.eId;
 			var slotId = obj.sId;
@@ -226,7 +239,25 @@ function DataReader() {
 				detachmentData.increaseEntityslotCount(slotId);
 			}
 		}
-		
+
+		var detachmentTypes = {};
+		var detachmentTypesObj = data.detachmentTypes || [];
+
+		for(var i = 0; i < detachmentTypesObj.length; i++) {
+			var obj = detachmentTypesObj[i];
+			detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.minSlotCounts, obj.maxSlotCounts, isUndefined(obj.canBePrimary) ? true : obj.canBePrimary);
+		}
+		detachmentData.addDetachmentTypes(detachmentTypes);
+
+		if(!armyUnit.isExtension()) {
+			var extensions = {};
+			var extensionObj = data.extensions || [];
+			for(var i in extensionObj) {
+				extensions[extensionObj[i]] = "1";
+			}
+			detachmentData.setAllowedExtensions(extensions);
+		}
+
 		var entityPool = armyUnit.getEntityPool();
 		resolveDeepOptions(entityPool);
 		resolveLocalPoolChain(armyUnit);

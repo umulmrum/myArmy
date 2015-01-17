@@ -67,6 +67,7 @@ function ArmyState() {
 		detachmentCount++;
 		maxDetachmentIndex++;
 		setDetachmentPositions();
+		detachment.setDetachmentTypes($.extend(true, {}, _systemState.system.detachmentTypes));
 
 		return detachment;
 	};

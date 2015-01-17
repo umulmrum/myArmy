@@ -331,7 +331,8 @@ function SummaryGui() {
 				if (detachmentData == null) {
 					continue;
 				}
-				var army = detachmentData.getArmyUnit("a0").getArmy();
+				var armyUnit = detachmentData.getArmyUnit("a0");
+				var army = armyUnit.getArmy();
 				if (!isFirst) {
 					string += "\n";
 				}
@@ -339,7 +340,7 @@ function SummaryGui() {
 					string += " [" + detachmentData.getPosition() + "] ";
 				}
 				string += _guiState.text["army." + army.armyPrefix];
-				string += " (" + _guiState.text[detachmentData.detachmentType.name];
+				string += " (" + armyUnit.getText(detachmentData.detachmentType.name);
 				if(isFirst) {
 					string += ", " + _guiState.text["primaryDetachment"];
 				}

@@ -31,7 +31,7 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	// static data (these variables do only depend on the army type, so will not changed after the army data was read)
 	var entityPool = {}; // all entities related to the current army type
 	var entityslots = {}; // all the selectable entityslots
-	
+
 	// dynamic data (will reflect the user's selections)
 	var selections = []; // the entityslots the user selected to be in his army
 	var selectionCountPerSlot = {}; //the number of entityslots per slot
@@ -186,6 +186,10 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 		texts = textsParam;
 	};
 
+	this.addTexts = function(textsParam) {
+		$.extend(texts, textsParam);
+	};
+
 	this.hasSelections = function() {
 		return this.getSelectionCount() > 0;
 	};
@@ -193,4 +197,5 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	this.isExtension = function() {
 		return extension;
 	};
+
 }
