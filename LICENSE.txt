@@ -1,4 +1,4 @@
-Copyright (C) 2012-2014 Stefan Kruppa
+Copyright (C) 2012-2015 Stefan Kruppa
 
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007

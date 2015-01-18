@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 Stefan Kruppa
+ * Copyright 2012-2015 Stefan Kruppa
  * 
  * This file is part of myArmy.
  *
