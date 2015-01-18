@@ -255,7 +255,7 @@ function State() {
 				}
 			}
 		}
-	};
+	}
 
 	function resolveOptionListMinMax(entity, baseEntity, optionList) {
 		var parentEntity = _armyState.lookupId(optionList.parentEntity);
@@ -269,7 +269,7 @@ function State() {
 		if(optionList.currentMaxTaken < 0) {
 			optionList.currentMaxTaken = 0;
 		}
-	};
+	}
 
 	function resolveOptionMinMax(entity, baseEntity, optionList, option) {
 		var parentEntity = _armyState.lookupId(optionList.parentEntity);
@@ -283,7 +283,7 @@ function State() {
 		if(option.currentMaxTaken < 0) {
 			option.currentMaxTaken = 0;
 		}
-	};
+	}
 
 	/**
 	 * 
@@ -320,7 +320,7 @@ function State() {
 		entity.currentCostPerModel = costObj[0];
 		entity.currentCost = costObj[1];
 		entity.totalCost = costObj[0] * entity.currentCount + costObj[1];
-	};
+	}
 
 	function calculateOptionCost(entity, option, costObj) {
 		var optionCostObj = [0, 0];

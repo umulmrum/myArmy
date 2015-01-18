@@ -45,10 +45,18 @@
 	vertical-align: top;
 }
 
-.detachmentCreator {
+#detachmentCreator {
 	background-color: #EEEEEE;
 	border: 1px solid #DADADA;
 	width: 26.5em;
+	display: table;
+	padding: 5px;
+}
+
+#detachmentCreator span {
+	display: table-cell;
+	width: 50%;
+	text-align: center;
 }
 
 .detachmentBoxContent {
@@ -66,6 +74,15 @@
 
 .detachmentContainer {
 	padding: 3px;
+}
+
+.detachmentContainerRow {
+	display: table
+}
+
+.detachmentContainerRow span {
+	display: table-cell;
+	width: 50%;
 }
 
 .extension {
@@ -86,7 +103,17 @@
  *     small devices
  *****************************/
 @media screen and (max-width: 580px) {
-	
+
+	#detachmentCreator {
+		display:block;
+		width: 99%;
+	}
+
+	#detachmentCreator span {
+		display: block;
+		width: 100%;
+	}
+
 	.detachmentBox select {
 		display: block;
 		width: 100%;

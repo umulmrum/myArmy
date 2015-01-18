@@ -111,7 +111,6 @@ function wasClick(event) {
 	
 	var newStartX = event.originalEvent.changedTouches[0].pageX;
 	var newStartY = event.originalEvent.changedTouches[0].pageY;
-	var retValue = (Math.abs(newStartX - _startX) <= 5 && Math.abs(newStartY - _startY) <= 5);
-	return retValue;
+	return (Math.abs(newStartX - _startX) <= 5 && Math.abs(newStartY - _startY) <= 5);
 }
 

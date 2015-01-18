@@ -151,11 +151,11 @@ function DataReader() {
 
 		_systemState.armies = parseArmies(armies);
 		_systemState.extensions = parseArmies(extensions);
-
+		//$.extend(true, _systemState.armies, _systemState.extensions);
 	};
 
 	function parseArmies(armies) {
-		var retValue = [];
+		var retValue = {};
 		for(var i = 0; i < armies.length; i++) {
 			var obj = armies[i];
 			var armyId = obj.id;

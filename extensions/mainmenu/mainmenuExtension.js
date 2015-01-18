@@ -43,22 +43,12 @@ function MainmenuExtension() {
 		<div class="invisible"> \
 			<select id="systemSelect" class="invisible"></select> \
 		</div> \
-		<div id="detachmentCreator" class="detachmentCreator detachmentBox">\
+		<div id="detachmentCreator" class="detachmentBox">\
 			<span id="detachmentCreatorHeading"></span>\
-			<select id="armySelect" />\
+			<span><select id="armySelect" /></span>\
 			<span id="maxDetachmentsReachedMessage" class="invisible"></span>\
 		</div>\
 		<ul id="detachmentBoxContainer"></ul>\
-		<!--span id="detachmentBox0" class="detachmentBox"></span><br /> \
-		<span id="detachmentBox1" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox2" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox3" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox4" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox5" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox6" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox7" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox8" class="detachmentBox invisible"></span> \
-		<span id="detachmentBox9" class="detachmentBox invisible"></span--> \
 		<div><a id="resetButton"></a></div> \
 		<div><a id="deleteAllDetachmentsButton"></a></div> \
 	</div> \

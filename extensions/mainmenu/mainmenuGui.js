@@ -108,38 +108,34 @@ function MainmenuGui() {
 			return _guiState.text["army." + a.armyPrefix] > _guiState.text["army." + b.armyPrefix] ? 1 : -1;
 		});
 		
-		//var detachmentBoxElement = _gui.getElement("#detachmentBox0");
-		//detachmentBoxElement.children().remove();
-		//detachmentBoxElement.append(getDetachmentTypeSelectbox(0));
-		
 		var armySelectElement = _gui.getElement("#armySelect");
 
 		//armySelectElement.children().remove();
 		armySelectElement.append(jQuery('<option></option>').val("-1").html("> " +_guiState.text["chooseFaction"] + " <"));
 		
-		var lastArmyGroup = -1;
+		var previousArmyGroup = -1;
 		var optgroup = "";
 		
 		for (var j = 0; j < sortedArmies.length; j++) {
-			if (sortedArmies[j].armyGroup != lastArmyGroup) {
-				lastArmyGroup = sortedArmies[j].armyGroup;
+			//document.writeln(sortedArmies[j].armyGroup);
+		}
+		for (var j = 0; j < sortedArmies.length; j++) {
+			var army = sortedArmies[j];
+			if (army.armyGroup != previousArmyGroup) {
+				previousArmyGroup = army.armyGroup;
 				if (j > 0) {
-					armySelectElement
-					.append('<option disabled="true"></option>');
+					armySelectElement.append('<option disabled="true"></option>');
 				}
 				optgroup = jQuery('<optgroup label=""></optgroup>');
 				armySelectElement.append(optgroup);
 			}
-			var armyId = sortedArmies[j].armyId;
-			var armyName = _guiState.text["army." + _systemState.armies[armyId].armyPrefix];
-			
-			optgroup.append(option(armyName, armyId));
+			var armyName = _guiState.text["army." + _systemState.armies[army.armyId].armyPrefix];
+			optgroup.append(option(armyName, army.armyId));
 		}
 	};
 
 	this.refreshArmySelect = function(armyIndex) {
 		var armySelectElement = _gui.getElement("#armySelect" + armyIndex);
-//		var mainDetachmentData = _armyState.getDetachmentData(0);
 		var armyUnit = _armyState.getArmyUnit(armyIndex, "a0");
 		var armyId = (armyUnit != null && armyUnit.getArmy() != null) ? armyUnit.getArmy().armyId : -1;
 		armySelectElement.find("option").each(function(index, element) {
@@ -187,34 +183,32 @@ function MainmenuGui() {
 
 	this.renderDetachmentBox = function(detachmentDataIndex) {
 
+		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
 		var detachmentBox = li("", "detachmentBox" + detachmentDataIndex, "detachmentBox");
 		var detachmentBoxContent = div(null, null, "detachmentBoxContent");
 
 		var header = div(null, null, "entryHeader commonHighlight");
-		var position = _armyState.getDetachmentData(detachmentDataIndex).getPosition();
+		var position = detachmentData.getPosition();
 		header.append(span(position, null, "entryArmyIndex"));
-		var headingText = _guiState.getText("army." + _armyState.getArmy(detachmentDataIndex, "a0").armyPrefix);
-		if(position == 1) {
-			headingText += " (" + _guiState.getText("primaryDetachment") + ")";
-		}
+		var headingText = getDetachmentBoxHeadingText(detachmentData);
 		header.append(div(headingText, null, "entryName"));
 		detachmentBoxContent.append(header);
 
 		var body = div(null, null, "optionContainer detachmentContainer");
-		var extensions = div();
-		extensions.append(span(_guiState.getText("extensions") + ": "));
-		extensions.append(getExtensionSelectbox(detachmentDataIndex));
+		var extensions = div(null, null, "detachmentContainerRow");
+		extensions.append(span(_guiState.getText("extensions"), null, "extensionLabel"));
+		extensions.append(span(getExtensionSelectbox(detachmentDataIndex)));
+		body.append(extensions);
 		var extensionListElement = div(null, "extensionList" + detachmentDataIndex, "extensionList");
 		var extensionList = getExtensionList(detachmentDataIndex);
 		for(var i = 0; i < extensionList.length; i++) {
 			extensionListElement.append(extensionList[i]);
 		}
-		extensions.append(extensionListElement);
-		body.append(extensions);
+		body.append(extensionListElement);
 
-		var detachmentType = div();
-		detachmentType.append(span(_guiState.getText("detachmentType") + ": "));
-		detachmentType.append(getDetachmentTypeSelectbox(detachmentDataIndex));
+		var detachmentType = div(null, null, "detachmentContainerRow");
+		detachmentType.append(span(_guiState.getText("detachmentType"), null, "detachmentTypeLabel"));
+		detachmentType.append(span(getDetachmentTypeSelectbox(detachmentDataIndex)));
 		body.append(detachmentType);
 
 		detachmentBoxContent.append(body);
@@ -240,6 +234,14 @@ function MainmenuGui() {
 		_gui.getElement("#detachmentBoxContainer").append(detachmentBox);
 	};
 
+	function getDetachmentBoxHeadingText(detachmentData) {
+		var headingText = _guiState.getText("army." + _armyState.getArmy(detachmentData.getDetachmentDataIndex(), "a0").armyPrefix);
+		if(detachmentData.getPosition() == 1) {
+			headingText += " (" + _guiState.getText("primaryDetachment") + ")";
+		}
+		return headingText;
+	}
+
 	this.refreshDetachmentBoxIndexes = function() {
 		for(var detachmentDataIndex in _armyState.getDetachments()) {
 			var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
@@ -248,20 +250,23 @@ function MainmenuGui() {
 	};
 
 	this.refreshDetachmentBox = function(detachmentDataIndex) {
-		// TODO
+		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		var detachmentBox = _gui.getElement("#detachmentBox" + detachmentDataIndex);
+
+		var headingText = getDetachmentBoxHeadingText(detachmentData);
+		detachmentBox.find(".entryName").html(headingText);
+		detachmentBox.find(".extensionLabel").html(_guiState.getText("extensions"));
+		detachmentBox.find(".detachmentTypeLabel").html(_guiState.getText("detachmentType"));
 	};
 	
 	function getDetachmentTypeSelectbox(detachmentDataIndex) {
 		var isPrimary = (detachmentDataIndex == "d0");
 		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
 		var selectBox = select("detachmentTypeSelect" + detachmentDataIndex);
-//		selectBox.append(option(_guiState.text["chooseDetachmenttype"], -1));
-		
+
 		selectBox.on("change", { armyIndex: detachmentDataIndex}, function(event) {
 			_controller.changeDetachmentType(detachmentDataIndex, this.value);
 		});
-
-		//selectBox.append(getDetachmentTypeOptions(_systemState.system.detachmentTypes, detachmentData.detachmentType.id, isPrimary, _guiState));
 		selectBox.append(getDetachmentTypeOptions(detachmentData.getDetachmentTypes(), detachmentData.detachmentType.id, isPrimary, detachmentData.getArmyUnit("a0")));
 
 		return selectBox;
@@ -373,16 +378,7 @@ function MainmenuGui() {
 	this.addExtension = function(detachmentDataIndex, armyUnitIndex) {
 		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
 		var extensionListElement = _gui.getElement("#extensionList" + detachmentDataIndex);
-
 		extensionListElement.append(getExtensionElement(_guiState.getText("army." + detachmentData.getArmyUnit(armyUnitIndex).getArmy().armyPrefix), detachmentDataIndex, armyUnitIndex));
-
-
-		//var extensionList = extensionListElement.html();
-		//if(extensionList != "") {
-		//	extensionList += ", ";
-		//}
-		//extensionList += _guiState.getText("army." + detachmentData.getArmyUnit(armyUnitIndex).getArmy().armyPrefix);
-		//extensionListElement.html(extensionList);
 	};
 	
 	/**
@@ -402,13 +398,14 @@ function MainmenuGui() {
 		_gui.getElement("#fileLoaderLabel").html(_guiState.text["loadArmy"]);
 		_gui.getElement("#maxDetachmentsReachedMessage").html(_guiState.text["message.maxDetachmentsReached"]);
 
-		//if (_systemState.system != null) {
-        //
-		//	for(var i = 0; i <= 10; i++) {
-		//		//this.refreshDetachmentTypeSelectbox(i);
-		//		//this.refreshArmySelectbox(i);
-		//	}
-		//}
+		if (_systemState.system != null) {
+
+			for(var i in _armyState.getDetachments()) {
+				//this.refreshDetachmentTypeSelectbox(i);
+				//this.refreshArmySelectbox(i);
+				this.refreshDetachmentBox(i);
+			}
+		}
 	};
 	
 	this.refreshSpecialContainer = function() {

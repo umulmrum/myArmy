@@ -132,13 +132,6 @@ function DesignerGui() {
 		}
 	};
 	
-	//this.getHasElements = function(detachmentData, armyIndex, additionalParams) {
-	//	if(detachmentData.army == null) {
-	//		return false;
-	//	}
-	//	return detachmentData.entityslotCount[additionalParams.slotId] > 0;
-	//};
-	
 	this.renderSelectionsForSlot = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {
 		var selections = armyUnit.getSelections();
 		for (var j = 0; j < selections.length; j++) {

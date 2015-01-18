@@ -88,11 +88,6 @@ function DetachmentData(detachmentDataIndexParam) {
 		return armyUnits[armyUnitIndex];
 	};
 	
-	this.getArmyUnitCount = function() {
-		//return getObjectSize(armyUnits);
-		return armyUnitCount;
-	};
-	
 	this.resetArmy = function() {
 		for(var i in armyUnits) {
 			armyUnits[i].resetArmy();

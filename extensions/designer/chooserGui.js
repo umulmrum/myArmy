@@ -63,6 +63,7 @@ function ChooserGui() {
 	};
 
 	this.onPostDeleteDetachment = function(event) {
+		this.resetUnitsToShow();
 		this.refreshSlotHeadings();
 		this.renderUnitSelectionTabs();
 		this.renderEntries();
@@ -153,8 +154,6 @@ function ChooserGui() {
 			var slotId = slot.slotId;
 			var slotName = _guiState.text[slot.slotName];
 
-//			var visible = $.inArray(true, traverseDetachmentData(this, this.checkSlotVisible, { slotId : slotId })) > -1;
-
 			slotCount++;
 
 			var slotRow = div(null, "slotRow" + slotId, "containerChild");
@@ -185,9 +184,6 @@ function ChooserGui() {
 			slotRow.append(slotentryListWrapper);
 
 			slotMenuItem = span(slotName, "slotMenuItem" + slotId, "menuButton");
-			if (!slot.visible) {
-//				slotMenuItem.addClass("invisible empty");
-			}
 			slotMenuItem.on(_guiState.clickEvent, {	slotId : slotId	}, function(event) {
 				showSlot(event.data.slotId);
 			});
@@ -198,11 +194,6 @@ function ChooserGui() {
 
 	};
 
-//	this.checkSlotVisible = function(detachmentData, armyIndex, additionalParams) {
-//		return !isUndefined(detachmentData.entityslotCount[additionalParams.slotId])
-//				&& (detachmentData.entityslotCount[additionalParams.slotId] > 0);
-//	};
-	
 	this.renderUnitSelectionTabs = function() {
 		$(".tabRow").remove();
 		var tabRow = ol(null, null, "tabRow unitTabRow", null);
@@ -226,10 +217,7 @@ function ChooserGui() {
 		if(_armyState.getDetachmentCount() == 0) {
 			return;
 		}
-		//if(_armyState.getArmy(unitsToShow, "a0") == null) {
-		//	unitsToShow = _armyState.getFirstArmyIndex();
-		//}
-		
+
 		var tabRows = _gui.getElement(".designContainer").find(".tabRow");
 		if(_armyState.getDetachmentCount() < 2) {
 			tabRows.addClass("invisible");
@@ -244,7 +232,6 @@ function ChooserGui() {
 			} else {
 				_gui.getElement("#slotMenuItem" + slot.slotId).addClass("invisible empty");
 			}
-//			this.renderSlotEntriesChooserForSlot(_systemState.slots[i]);
 			var slotentryList = _gui.getElement("#slotentryChooserList" + slot.slotId);
 			slotentryList.children().remove();
 		}
@@ -499,5 +486,9 @@ function ChooserGui() {
 		} else {
 			slotElement.addClass("invisible");
 		}
+	};
+
+	this.resetUnitsToShow = function () {
+		unitsToShow = _armyState.getFirstDetachment().getDetachmentDataIndex();
 	};
 }

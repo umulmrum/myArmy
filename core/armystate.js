@@ -77,12 +77,6 @@ function ArmyState() {
         for(var i in detachment.getArmyUnits()) {
             var armyUnit = detachment.getArmyUnit(i);
 			detachment.removeArmyUnit(i);
-            //for(var j = 0; j < armyUnit.getSelectionCount(); j++) {
-                //var entityslot = armyUnit.getSelection(j);
-                //removeEntitySlotLocalIds(entityslot);
-                //this.totalPoints -= entityslot.entity.totalCost;
-                //this.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
-            //}
         }
 		delete detachmentData[detachmentDataIndex];
 		detachmentCount--;
@@ -97,11 +91,11 @@ function ArmyState() {
 			detachmentData[i].setPosition(pos++);
 		}
 	}
-	
-	this.recalculate = function() {
-		this.totalPoints = 0;
-		this.resetPointsPerSlot();
-		this.stateLink = null;
+
+	this.getFirstDetachment = function() {
+		for(var i in detachmentData) {
+			return detachmentData[i];
+		}
 	};
 	
 	this.addToIdLookup = function(element) {
@@ -144,24 +138,6 @@ function ArmyState() {
 		return detachmentData[detachmentDataIndex].getArmy(armyUnitIndex);
 	};
 	
-	//this.getFirstArmyIndex = function() {
-	//	for(var i = 0; i < detachmentData.length; i++) {
-	//		if(detachmentData[i].getArmy(0) != null) {
-	//			return i;
-	//		}
-	//	}
-	//	return -1;
-	//};
-    //
-	//this.getLastArmyIndex = function() {
-	//	for(var i = detachmentData.length - 1; i >= 0; i--) {
-	//		if(detachmentData[i].getArmy(0) != null) {
-	//			return i;
-	//		}
-	//	}
-	//	return -1;
-	//};
-
 	this.addExtension = function(detachmentDataIndex, extension) {
 		return detachmentData[detachmentDataIndex].addArmyUnit(extension);
 	};

@@ -36,11 +36,16 @@ select {
     padding: 2px 4px 2px 2px;
     border: 1px solid #BBBBBB;
 	background-color: white;
+	width: 100%;
 }
 
 a {
 	cursor: pointer;
 	text-decoration: underline;
+}
+
+optgroup {
+	padding: 0;
 }
 
 option {

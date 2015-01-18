@@ -252,15 +252,15 @@ function Gui() {
 	
 	this.displayErrorMessage = function(message) {
 		displayMessage(message, "Error");
-	}
+	};
 	
 	this.displaySuccessMessage = function(message) {
 		displayMessage(message, "Success");
-	}
+	};
 	
 	this.displayInfoMessage = function(message) {
 		displayMessage(message, "Info");
-	}
+	};
 	
 	function displayMessage(message, type) {
 		var messageBar = _gui.getElement('.messageBar');
@@ -268,7 +268,7 @@ function Gui() {
 		messageElement.html(message);
 		messageBar.removeClass();
 		messageBar.addClass("messageBar message" + type);
-	};
+	}
 
 	this.hideMessages = function() {
 		var messageBar = _gui.getElement('.messageBar');
@@ -300,7 +300,7 @@ function Gui() {
 			}
 			this.getElement(".menu").addClass("invisible");
 		}
-	}
+	};
 	
 	/*****************************
 	 *     fragments end
