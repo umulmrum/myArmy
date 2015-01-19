@@ -195,6 +195,14 @@ function ChooserGui() {
 	};
 
 	this.renderUnitSelectionTabs = function() {
+
+		if(_armyState.getDetachmentData(unitsToShow) == null) {
+			var firstDetachment = _armyState.getFirstDetachment();
+			if(firstDetachment != null) {
+				unitsToShow = firstDetachment.getDetachmentDataIndex();
+			}
+		}
+
 		$(".tabRow").remove();
 		var tabRow = ol(null, null, "tabRow unitTabRow", null);
 		if(_armyState.getDetachmentCount() < 2) {
@@ -489,6 +497,9 @@ function ChooserGui() {
 	};
 
 	this.resetUnitsToShow = function () {
-		unitsToShow = _armyState.getFirstDetachment().getDetachmentDataIndex();
+		var firstDetachment = _armyState.getFirstDetachment();
+		if(firstDetachment != null) {
+			unitsToShow = firstDetachment.getDetachmentDataIndex();
+		}
 	};
 }

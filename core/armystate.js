@@ -96,6 +96,7 @@ function ArmyState() {
 		for(var i in detachmentData) {
 			return detachmentData[i];
 		}
+		return null;
 	};
 	
 	this.addToIdLookup = function(element) {

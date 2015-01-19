@@ -114,8 +114,7 @@ function MainmenuGui() {
 		armySelectElement.append(jQuery('<option></option>').val("-1").html("> " +_guiState.text["chooseFaction"] + " <"));
 		
 		var previousArmyGroup = -1;
-		var optgroup = "";
-		
+
 		for (var j = 0; j < sortedArmies.length; j++) {
 			//document.writeln(sortedArmies[j].armyGroup);
 		}
@@ -126,11 +125,9 @@ function MainmenuGui() {
 				if (j > 0) {
 					armySelectElement.append('<option disabled="true"></option>');
 				}
-				optgroup = jQuery('<optgroup label=""></optgroup>');
-				armySelectElement.append(optgroup);
 			}
 			var armyName = _guiState.text["army." + _systemState.armies[army.armyId].armyPrefix];
-			optgroup.append(option(armyName, army.armyId));
+			armySelectElement.append(option(armyName, army.armyId));
 		}
 	};
 
