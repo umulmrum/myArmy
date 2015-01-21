@@ -264,7 +264,7 @@ function MainmenuGui() {
 		selectBox.on("change", { armyIndex: detachmentDataIndex}, function(event) {
 			_controller.changeDetachmentType(detachmentDataIndex, this.value);
 		});
-		selectBox.append(getDetachmentTypeOptions(detachmentData.getDetachmentTypes(), detachmentData.detachmentType.id, isPrimary, detachmentData.getArmyUnit("a0")));
+		selectBox.append(getDetachmentTypeOptions(detachmentData.getDetachmentTypes(), detachmentData.detachmentType.id, isPrimary, detachmentData));
 
 		return selectBox;
 	}

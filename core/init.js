@@ -31,6 +31,7 @@ var _persistence = null;
 var _controller = null;
 var _guiState = null;
 var _gui = null;
+var _textService = null;
 var _extensionManager = null;
 
 /**
@@ -82,6 +83,8 @@ function initVars() {
 	_guiState = new GuiState();
 	_gui = new Gui();
 	_gui.init();
+	_textService = new TextService();
+	_textService.init();
 	_extensionManager = new ExtensionManager();
 }
 

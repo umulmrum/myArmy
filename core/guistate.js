@@ -52,7 +52,11 @@ function GuiState() {
 	this.resetTexts = function() {
 		this.text = {};
 	};
-	
+
+	this.getTexts = function() {
+		return this.text;
+	};
+
 	this.getText = function(key) {
 		return this.text[key];
 	};

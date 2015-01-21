@@ -41,6 +41,8 @@ function DetachmentData(detachmentDataIndexParam) {
 	var maxArmyUnitIndex = 0;
 	var armyUnitCount = 0;
 
+	var texts = {};
+
 	this.getDetachmentDataIndex = function() {
 		return detachmentDataIndex;
 	};
@@ -86,6 +88,13 @@ function DetachmentData(detachmentDataIndexParam) {
 	
 	this.getArmyUnit = function(armyUnitIndex) {
 		return armyUnits[armyUnitIndex];
+	};
+
+	this.getFirstArmyUnit = function() {
+		for(var i in armyUnits) {
+			return armyUnits[i];
+		}
+		return null;
 	};
 	
 	this.resetArmy = function() {
@@ -182,5 +191,21 @@ function DetachmentData(detachmentDataIndexParam) {
 
 	this.isExtensionAllowed = function(extensionId) {
 		return allowedExtensions.hasOwnProperty(extensionId);
-	}
+	};
+
+	this.getTexts = function() {
+		return texts;
+	};
+
+	this.getText = function(key) {
+		return texts[key];
+	};
+
+	this.setTexts = function(textsParam) {
+		texts = textsParam;
+	};
+
+	this.addTexts = function(textsParam) {
+		$.extend(texts, textsParam);
+	};
 }

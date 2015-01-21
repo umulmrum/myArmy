@@ -340,7 +340,7 @@ function SummaryGui() {
 					string += " [" + detachmentData.getPosition() + "] ";
 				}
 				string += _guiState.text["army." + army.armyPrefix];
-				string += " (" + armyUnit.getText(detachmentData.detachmentType.name);
+				string += " (" + detachmentData.getText(detachmentData.detachmentType.name);
 				if(isFirst) {
 					string += ", " + _guiState.text["primaryDetachment"];
 				}

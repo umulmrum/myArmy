@@ -87,13 +87,6 @@ function DataReader() {
 		if(army != null) {
 			this.readTexts(getArmyPath(army) + "textarmy", $.proxy(armyUnit.setTexts, armyUnit));
 		}
-		var detachmentTexts = {};
-		for(var bundlekey in _guiState.text) {
-			if(bundlekey.indexOf("detachment.") == 0) {
-				detachmentTexts[bundlekey] = _guiState.getText(bundlekey);
-			}
-		}
-		armyUnit.addTexts(detachmentTexts);
 	};
 	
 	this.readTexts = function(filepath, callback) {
