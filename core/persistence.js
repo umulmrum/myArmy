@@ -26,7 +26,9 @@
  * See the documentation on how the code is being created and parsed.
  */
 function Persistence() {
-	
+
+	var currentFileVersion = "2";
+
 	// we use 36 as the base of our number pool. This means that the
 	// resulting string will contain 0-9 and a-z (lower-case) for the
 	// saved values. This shortens the resulting strings, as
@@ -36,7 +38,7 @@ function Persistence() {
 	
 	// we use marker characters to distinguish tokens from values. Every marker
 	// must be written in upper-case so that there is no collision with the
-	// values in base36 encoding.
+	// values in base36 encoding. They also may only have length 1 each.
 	var MARKER = {};
 	// add every marker character!
 	MARKER.SET = {Y:1,D:1,A:1,F:1,E:1,C:1,L:1,O:1,U:1,N:1,T:1};
@@ -157,6 +159,14 @@ function Persistence() {
 
         i += value.length;
 
+		// first load all armies in the detachment, so the they can interact (e.g. extensions add detachment types)
+		var armyUnitIdList = findArmyUnits(fileVersion, q, i);
+		_controller.addDetachment(armyUnitIdList[0], "1");
+		for(var j = 1; j < armyUnitIdList.length; j++) {
+			_controller.addExtension(detachmentDataIndex, armyUnitIdList[j]);
+		}
+		_controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
+
         while(i < q.length) {
             switch(q[i]) {
                 case MARKER.DETACHMENT:
@@ -174,24 +184,36 @@ function Persistence() {
         return i+1;
     }
 
+	function findArmyUnits(fileVersion, q, i) {
+		var armyUnits = [];
+		do {
+			if(q[i] == MARKER.ARMY) {
+				i++;
+				var value = val(q, i);
+				armyUnits.push(parseInt(value, BASE));
+				i += value.length;
+			} else {
+				i++;
+			}
+		} while(i < q.length && q[i] != MARKER.DETACHMENT);
+		return armyUnits;
+	}
+
 	function restoreArmy(fileVersion, q, i, detachmentDataIndex, armyUnitIndex, detachmentTypeId) {
 
         var value = val(q, i);
         var armyId = parseInt(value, BASE);
 		var isExtension = false;
 		if(fileVersion < 2) {
+			// in older versions each army was loaded when it "appeared" in the saved string
 			if(isUndefined(_systemState.armies[armyId]) && !isUndefined(_systemState.extensions[armyId])) {
 				isExtension = true;
 			}
-		} else {
-			if(armyUnitIndex > 0) {
-				isExtension = true;
+			if(isExtension) {
+				_controller.addExtension(detachmentDataIndex, armyId);
+			} else {
+				_controller.addDetachment(armyId, detachmentTypeId);
 			}
-		}
-		if(isExtension) {
-			_controller.addExtension(detachmentDataIndex, armyId);
-		} else {
-			_controller.addDetachment(armyId, detachmentTypeId);
 		}
 		var armyUnitId = "a" + armyUnitIndex;
         i = i + value.length;
@@ -417,7 +439,7 @@ function Persistence() {
 			return;
 		}
 	
-		var state = "2"; // version of link format (zero-based; if none is given, we assume 0 when loading an army)
+		var state = currentFileVersion; // version of link format (zero-based; if none is given, we assume 0 when loading an army)
 		state += MARKER.SYSTEM + _systemState.system.systemId.toString(BASE);
 		if(_armyState.getFocCount() > 1) {
 			state += MARKER.FOC + _armyState.getFocCount().toString(BASE);
