@@ -28,7 +28,7 @@ function ChooserGui() {
 		_dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postPrepareGui", this, this.onPostPrepareGui, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
@@ -55,7 +55,7 @@ function ChooserGui() {
 		this.refresh();
 	};
 	
-	this.onPostChangeArmy = function(event) {
+	this.onPostAddDetachment = function(event) {
 		this.refreshSlotHeadings();
 		this.renderUnitSelectionTabs();
 		this.renderEntries();

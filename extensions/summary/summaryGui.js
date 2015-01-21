@@ -25,7 +25,7 @@ function SummaryGui() {
 	this.init = function() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
-		//_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		//_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("summary.postChangeOptions", this, this.onPostChangeOptions, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("summary.postSelectAll", this, this.onPostSelectAll, _dispatcher.PHASE_STATE);
@@ -49,7 +49,7 @@ function SummaryGui() {
 		this.refreshElements();
 	};
 
-	this.onPostChangeArmy = function(event, additionalData) {
+	this.onPostAddDetachment = function(event, additionalData) {
 		this.refreshElements();
 	};
 

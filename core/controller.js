@@ -100,7 +100,7 @@ function Controller() {
 				this.changeDetachmentType(detachmentDataIndex, "2");
 			}
 		}
-		_dispatcher.triggerEvent("postChangeArmy", { detachmentDataIndex: detachmentDataIndex, newArmyId: armyId });
+		_dispatcher.triggerEvent("postAddDetachment", { detachmentDataIndex: detachmentDataIndex, newArmyId: armyId });
 	};
 
 	this.deleteDetachment = function(detachmentDataIndex) {
@@ -110,7 +110,7 @@ function Controller() {
 
 	this.cloneDetachment = function(detachmentDataIndex) {
 		window.location.hash += _armyState.getDetachmentData(detachmentDataIndex).stateLinkPart;
-		//_dispatcher.triggerEvent("postChangeArmy", { detachmentDataIndex: detachmentDataIndex });
+		//_dispatcher.triggerEvent("postAddDetachment", { detachmentDataIndex: detachmentDataIndex });
 	};
 
 	this.addExtension = function(detachmentDataIndex, extensionId) {

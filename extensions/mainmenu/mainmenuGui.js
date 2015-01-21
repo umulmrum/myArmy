@@ -26,7 +26,7 @@ function MainmenuGui() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeSystem", this, this.onPostChangeSystem, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
@@ -49,7 +49,7 @@ function MainmenuGui() {
 		//this.renderFirstDetachmentSelect();
 	};
 
-	this.onPostChangeArmy = function(event, additionalData) {
+	this.onPostAddDetachment = function(event, additionalData) {
 		this.renderDetachmentBox(additionalData.detachmentDataIndex);
 		this.resetArmySelect();
 		this.checkMaxDetachments();

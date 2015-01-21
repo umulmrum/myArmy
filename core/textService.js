@@ -4,7 +4,7 @@ function TextService() {
 
     this.init = function() {
         _dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
-        _dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmyAction, _dispatcher.PHASE_ACTION);
+        _dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachmentAction, _dispatcher.PHASE_ACTION);
         _dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
         _dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
     };
@@ -17,7 +17,7 @@ function TextService() {
         this.refreshAllDetachmentTexts();
     };
 
-    this.onPostChangeArmyAction = function(event, additionalData) {
+    this.onPostAddDetachmentAction = function(event, additionalData) {
         var detachmentData = _armyState.getDetachmentData(additionalData.detachmentDataIndex);
         this.addCommonTextsToDetachment(detachmentData);
         this.addArmyUnitTextsToDetachment(detachmentData, detachmentData.getFirstArmyUnit());

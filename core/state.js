@@ -34,7 +34,7 @@ function State() {
 		_dispatcher.bindEvent("postChangeFocCount", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postInit", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_ACTION);
+		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_ACTION);
 	};
 	
@@ -70,7 +70,7 @@ function State() {
 		}
 	};
 	
-	this.onPostChangeArmy = function(event, additionalData) {
+	this.onPostAddDetachment = function(event, additionalData) {
 		if(additionalData.armyId != -1) {
 			this.refreshDirtyThings(true);
 		}

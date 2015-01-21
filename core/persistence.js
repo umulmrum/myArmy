@@ -58,7 +58,7 @@ function Persistence() {
 	this.init = function() {
 		_dispatcher.bindEvent("postStateRefresh", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.createStatelink, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postAddDetachment", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postResetArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postAddExtension", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.createStatelink, _dispatcher.PHASE_ACTION);

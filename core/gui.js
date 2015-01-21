@@ -27,8 +27,8 @@ function Gui() {
 
 	this.init = function() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmyAction, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postChangeArmy", this, this.onPostChangeArmy, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachmentAction, _dispatcher.PHASE_ACTION);
+		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachmentAction, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
@@ -46,11 +46,11 @@ function Gui() {
 		jQuery.event.add(window, "resize", this.onResizeContainer);
 	};
 
-	this.onPostChangeArmyAction = function(event, additionalData) {
+	this.onPostAddDetachmentAction = function(event, additionalData) {
 		this.checkSlotVisibility();
 	};
 	
-	this.onPostChangeArmy = function(event, additionalData) {
+	this.onPostAddDetachment = function(event, additionalData) {
 		this.refreshAll();
 		this.stopLongRunningProcess();
 	};
