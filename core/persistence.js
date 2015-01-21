@@ -91,7 +91,7 @@ function Persistence() {
 			}
 			switch (q[i]) {
 			case MARKER.SYSTEM:
-				i = restoreSystem(fileVersion, q, i + MARKER.SYSTEM.length);
+				i = restoreSystem(fileVersion, q, i + 1);
 				break;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreState");
@@ -133,15 +133,15 @@ function Persistence() {
 		while(i < q.length) {
 			switch(q[i]) {
                 case MARKER.DETACHMENT:
-                    i = restoreDetachment(fileVersion, q, i + MARKER.DETACHMENT.length, "d" + detachmentDataIndex);
+                    i = restoreDetachment(fileVersion, q, i + 1, "d" + detachmentDataIndex);
                     detachmentDataIndex++;
                     break;
 				case MARKER.ARMY:
-					i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, "d" + detachmentDataIndex, 0);
+					i = restoreArmy(fileVersion, q, i + 1, "d" + detachmentDataIndex, 0);
 					detachmentDataIndex++;
 					break;
 				case MARKER.FOC:
-					i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
+					i = restoreFoc(fileVersion, q, i + 1);
 					break;
 				default:
 					alert("Unexpected token '" + q[i] + "' in restoreSystem");
@@ -173,7 +173,7 @@ function Persistence() {
                     return i;
                     break;
                 case MARKER.ARMY:
-                    i = restoreArmy(fileVersion, q, i + MARKER.ARMY.length, detachmentDataIndex, armyUnitIndex, detachmentTypeId);
+                    i = restoreArmy(fileVersion, q, i + 1, detachmentDataIndex, armyUnitIndex, detachmentTypeId);
                     armyUnitIndex++;
                     break;
                 default:
@@ -222,27 +222,27 @@ function Persistence() {
 			switch(q[i]) {
 			case MARKER.DETACHMENT:
                 if(fileVersion < 2) {
-				    i = restoreDetachmentType(fileVersion, q, i + MARKER.DETACHMENT.length, detachmentDataIndex);
+				    i = restoreDetachmentType(fileVersion, q, i + 1, detachmentDataIndex);
                 } else {
                     return i;
                 }
 				break;
 			case MARKER.ARMY:
 				if(fileVersion == 0) {
-					i = restoreCurrentArmyLegacy(fileVersion, q, i + MARKER.ARMY.length);
+					i = restoreCurrentArmyLegacy(fileVersion, q, i + 1);
 				} else {
 					return i;
 				}
 				break;
 			case MARKER.FOC:
-				i = restoreFoc(fileVersion, q, i + MARKER.FOC.length);
+				i = restoreFoc(fileVersion, q, i + 1);
 				break;
 			case MARKER.ENTITY:
-				i = restoreEntity(fileVersion, q, i + MARKER.ENTITY.length, detachmentDataIndex, armyUnitId);
+				i = restoreEntity(fileVersion, q, i + 1, detachmentDataIndex, armyUnitId);
 				break;
 			case MARKER.ALLYENTITY:
 				// legacy
-				i = restoreEntity(fileVersion, q, i + MARKER.ALLYENTITY.length, 1, "a0");
+				i = restoreEntity(fileVersion, q, i + 1, 1, "a0");
 				break;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreArmy");
@@ -290,10 +290,10 @@ function Persistence() {
 		while(i < q.length) {
 			switch(q[i]) {
 			case MARKER.COUNT:
-				i = restoreModelcount(fileVersion, q, i + MARKER.COUNT.length, entity);
+				i = restoreModelcount(fileVersion, q, i + 1, entity);
 				break;
 			case MARKER.OPTIONLIST:
-				i = restoreOptionList(fileVersion, q, i + MARKER.OPTIONLIST.length, entity, entity);
+				i = restoreOptionList(fileVersion, q, i + 1, entity, entity);
 				break;
 			case MARKER.ENTITY:
 				return i;
@@ -305,7 +305,7 @@ function Persistence() {
                 return i;
                 break;
 			case MARKER.ALLYENTITY:
-				i = restoreEntity(fileVersion, q, i + MARKER.ALLYENTITY.length, 1);
+				i = restoreEntity(fileVersion, q, i + 1, 1);
 				break;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreEntity ");
@@ -339,7 +339,7 @@ function Persistence() {
 		while(i < q.length) {
 			switch(q[i]) {
 			case MARKER.OPTION:
-				i = restoreOption(fileVersion, q, i + MARKER.OPTION.length, parentEntity, baseEntity, optionList);
+				i = restoreOption(fileVersion, q, i + 1, parentEntity, baseEntity, optionList);
 				break;
 			case MARKER.OPTIONLIST: // only when returning from restoreOption
 				return i;
@@ -374,16 +374,16 @@ function Persistence() {
 		while(i < q.length) {
 			switch(q[i]) {
 			case MARKER.OPTION:
-				i = restoreOption(fileVersion, q, i + MARKER.OPTION.length, parentEntity, baseEntity, optionList);
+				i = restoreOption(fileVersion, q, i + 1, parentEntity, baseEntity, optionList);
 				break;
 			case MARKER.SUBOPTION:
-				i = restoreSuboption(fileVersion, q, i + MARKER.SUBOPTION.length, parentEntity, baseEntity, option);
+				i = restoreSuboption(fileVersion, q, i + 1, parentEntity, baseEntity, option);
 				break;
 			case MARKER.SUBOPTION_END:
 				return i;
 				break;
 			case MARKER.COUNT:
-				i = restoreOptionCount(fileVersion, q, i + MARKER.COUNT.length, parentEntity, optionList, option);
+				i = restoreOptionCount(fileVersion, q, i + 1, parentEntity, optionList, option);
 				break;
 			case MARKER.OPTIONLIST:
 				return i;
@@ -416,10 +416,10 @@ function Persistence() {
 		while(i < q.length) {
 			switch(q[i]) {
 			case MARKER.OPTIONLIST:
-				i = restoreOptionList(fileVersion, q, i + MARKER.OPTIONLIST.length, option, baseEntity);
+				i = restoreOptionList(fileVersion, q, i + 1, option, baseEntity);
 				break;
 			case MARKER.SUBOPTION_END:
-				return i + MARKER.SUBOPTION_END.length;
+				return i + 1;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreSuboption");
 				return i + 1;
@@ -522,7 +522,7 @@ function Persistence() {
 					for(var k in option.optionLists) {
 						tempOptionString += createStateForOptionList(entity, option.optionLists[k]);
 					}
-					if(tempOptionString.length > MARKER.SUBOPTION.length) {
+					if(tempOptionString.length > 1) {
 						optionString += tempOptionString;
 						optionString += MARKER.SUBOPTION_END;
 					}
