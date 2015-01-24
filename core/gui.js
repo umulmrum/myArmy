@@ -318,7 +318,7 @@ function Gui() {
 	var map = {};
 	
 	this.getElement = function(name) {
-		if (!map.hasOwnProperty(name)) {
+		if (!map.hasOwnProperty(name) || map[name] == null) {
 			var element = $(name);
 			if(element.length > 0) {
 //				return element;

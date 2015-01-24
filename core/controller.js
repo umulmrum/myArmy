@@ -20,7 +20,7 @@
 
 "use strict";
 
-function Controller() {
+function Controller(modificationService) {
 	
 	/**
 	 * 
@@ -68,15 +68,29 @@ function Controller() {
 		}
 	};
 	
-	this.changeDetachmentType = function(detachmentDataIndex, detachmentTypeId) {
+	this.changeDetachmentType = function(detachmentDataIndex, detachmentTypeId, addFormationSelections) {
 		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
 		var detachmentType = detachmentData.getDetachmentType(detachmentTypeId);
 		if(detachmentData == null) {
 			return;
 		}
 		detachmentData.detachmentType = detachmentType;
+
+		var changedEntityslots = false;
+		var changedSelections = false;
+		if(detachmentType.isFormation()) {
+			changedEntityslots = true;
+			if(addFormationSelections) {
+				changedSelections = true;
+				detachmentData.resetArmy();
+				_persistence.restoreFragment(detachmentType.formationData, detachmentData, { deletable: false, clonable: false });
+			}
+		}
+		if(detachmentType.hasModifications()) {
+			modificationService.applyModifications(detachmentData, detachmentData.detachmentType.modifications);
+		}
 		
-		_dispatcher.triggerEvent("postChangeDetachmentType", { armyIndex: detachmentDataIndex, newDetachmentTypeId: detachmentTypeId });
+		_dispatcher.triggerEvent("postChangeDetachmentType", { detachmentDataIndex: detachmentDataIndex, newDetachmentType: detachmentType, changedEntityslots: changedEntityslots, changedSelections: changedSelections, });
 	};
 
 	this.addDetachment = function(armyId, detachmentTypeId) {
@@ -131,12 +145,16 @@ function Controller() {
 		_dispatcher.triggerEvent("postDeleteExtension", { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnitIndex, extensionId: extensionId });
 	};
 	
-	this.addEntry = function(detachmentDataIndex, armyUnitIndex, entityslotId, doEntityCalculations) {
+	this.addEntry = function(detachmentDataIndex, armyUnitIndex, entityslotId, doEntityCalculations, options) {
         var armyUnit = _armyState.getArmyUnit(detachmentDataIndex, armyUnitIndex);
 		var entityslot = armyUnit.getEntityslot(entityslotId).clone();
 		var entityId = entityslot.entityId;
 		var entity = armyUnit.getFromEntityPool(entityId).clone();
 		entityslot.entity = entity;
+		options = options || {};
+		for(var i in options) {
+			entityslot[i] = options[i];
+		}
 		
 		armyUnit.addEntry(entityslot, doEntityCalculations);
 		

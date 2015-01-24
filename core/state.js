@@ -26,7 +26,7 @@
 function State() {
 	
 	this.init = function() {
-		_dispatcher.bindEvent("postAddSelection", this, this.sortSelections, _dispatcher.PHASE_ACTION);
+		_dispatcher.bindEvent("postAddSelection", this, this.onPostAddSelection, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postAddSelection", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postRemoveSelection", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postChangeModelCount", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
@@ -37,9 +37,13 @@ function State() {
 		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_ACTION);
 	};
-	
-	this.sortSelections = function(event, additionalData) {
+
+	this.onPostAddSelection = function(event, additionalData) {
 		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
+		this.sortSelections(armyUnit);
+	};
+
+	this.sortSelections = function(armyUnit) {
 		var sortedSelections = armyUnit.getSelections().sort(function(a, b) {
 			var slotA = _systemState.slots[a.slotId];
 			var slotB = _systemState.slots[b.slotId];
@@ -65,9 +69,12 @@ function State() {
 	};
 	
 	this.onPostChangeDetachmentType = function(event, additionalData) {
-		if(additionalData.newDetachmentTypeId != -1) {
-			this.refreshDirtyThings(true);
+		for(var i in _armyState.getDetachments()) {
+			for(var j in _armyState.getDetachmentData(i).getArmyUnits()) {
+				this.sortSelections(_armyState.getArmyUnit(i, j));
+			}
 		}
+		this.refreshDirtyThings(true);
 	};
 	
 	this.onPostAddDetachment = function(event, additionalData) {
@@ -154,23 +161,25 @@ function State() {
 		var costBefore = (-1) * entity.totalCost;
 		_armyState.addTotalPoints(costBefore);
 		_armyState.addPointsPerSlot(entityslot.slotId, costBefore);
-		calculateOptionState(entity, entity);
+		calculateOptionState(entityslot, entity, entity);
 		calculateEntityCost(entity);
 		_persistence.calculateEntityslotSaveState(entityslot);
 		_armyState.addTotalPoints(entity.totalCost);
 		_armyState.addPointsPerSlot(entityslot.slotId, entity.totalCost);
 	};
 
-	function calculateOptionState(entity, baseEntity) {
+	function calculateOptionState(entityslot, entity, baseEntity) {
 		if (isUndefined(entity.optionLists)) {
 			return;
 		}
+		var entityFromPool = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(entity.entityId);
 		for ( var i in entity.optionLists) {
 			var optionList = entity.optionLists[i];
-			resolveOptionListMinMax(entity, baseEntity, optionList);
+			/* we always use the optionList from the entity pool to compare against - this way we have a single source of information which is more easy to modify */
+			resolveOptionListMinMax(entity, baseEntity, optionList, entityFromPool.optionLists[i]);
 			for ( var j in optionList.options) {
 				var option = optionList.options[j];
-				resolveOptionMinMax(entity, baseEntity, optionList, option);
+				resolveOptionMinMax(entity, baseEntity, optionList, option, entityFromPool.optionLists[i].options[j]);
 				resolveOptionPoolAvailable(option);
 				resolveOptionLocalPoolAvailable(baseEntity, option);
 				if (option.currentMaxTaken <= 0
@@ -227,7 +236,7 @@ function State() {
 				}
 
 				if (!option.disabled && option.selected) {
-					calculateOptionState(option, baseEntity);
+					calculateOptionState(entityslot, option, baseEntity);
 				}
 			}
 
@@ -247,7 +256,7 @@ function State() {
 						doSelectOption(optionList, option, option.currentCount
 								+ Math.min(diff, optionDiff));
 						diff -= optionDiff;
-						calculateOptionState(option, baseEntity);
+						calculateOptionState(entityslot, option, baseEntity);
 						if (diff <= 0) {
 							break;
 						}
@@ -257,29 +266,29 @@ function State() {
 		}
 	}
 
-	function resolveOptionListMinMax(entity, baseEntity, optionList) {
+	function resolveOptionListMinMax(entity, baseEntity, optionList, compareOptionList) {
 		var parentEntity = _armyState.lookupId(optionList.parentEntity);
 		optionList.currentMinTaken = resolveMinMax(entity, parentEntity, baseEntity, optionList,
-				null, optionList.minTaken, 0);
+				null, compareOptionList.minTaken, 0);
 		if(optionList.currentMinTaken < 0) {
 			optionList.currentMinTaken = 0;
 		}
 		optionList.currentMaxTaken = resolveMinMax(entity, parentEntity, baseEntity, optionList,
-				null, optionList.maxTaken, Number.MAX_VALUE);
+				null, compareOptionList.maxTaken, Number.MAX_VALUE);
 		if(optionList.currentMaxTaken < 0) {
 			optionList.currentMaxTaken = 0;
 		}
 	}
 
-	function resolveOptionMinMax(entity, baseEntity, optionList, option) {
+	function resolveOptionMinMax(entity, baseEntity, optionList, option, compareOption) {
 		var parentEntity = _armyState.lookupId(optionList.parentEntity);
 		option.currentMinTaken = resolveMinMax(entity, parentEntity, baseEntity, optionList,
-				option, option.minTaken, 0);
+				option, compareOption.minTaken, 0);
 		if(option.currentMinTaken < 0) {
 			option.currentMinTaken = 0;
 		}
 		option.currentMaxTaken = resolveMinMax(entity, parentEntity, baseEntity, optionList,
-				option, option.maxTaken, 1);
+				option, compareOption.maxTaken, 1);
 		if(option.currentMaxTaken < 0) {
 			option.currentMaxTaken = 0;
 		}

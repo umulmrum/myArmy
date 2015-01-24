@@ -27,6 +27,7 @@ function MainmenuGui() {
 		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeSystem", this, this.onPostChangeSystem, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
@@ -55,6 +56,10 @@ function MainmenuGui() {
 		this.checkMaxDetachments();
 	};
 
+	this.onPostChangeDetachmentType = function(event, additionalData) {
+		this.refreshDetachmentTypeSelectbox(additionalData.detachmentDataIndex);
+	};
+
 	this.onPostDeleteDetachment = function(event, additionalData) {
 		this.removeDetachmentBox(additionalData.detachmentDataIndex);
 		this.refreshDetachmentBoxIndexes();
@@ -68,7 +73,8 @@ function MainmenuGui() {
 
 	this.onPostAddExtension = function (event, additionalData) {
 		this.addExtension(additionalData.detachmentDataIndex, additionalData.armyUnitIndex);
-		this.resetExtensionSelect(additionalData.detachmentDataIndex, additionalData.extensionId)
+		this.resetExtensionSelect(additionalData.detachmentDataIndex, additionalData.extensionId);
+		this.refreshDetachmentTypeSelectbox(additionalData.detachmentDataIndex);
 	};
 
 	this.onPostDeleteExtension = function(event, additionalData) {
@@ -262,12 +268,26 @@ function MainmenuGui() {
 		var selectBox = select("detachmentTypeSelect" + detachmentDataIndex);
 
 		selectBox.on("change", { armyIndex: detachmentDataIndex}, function(event) {
-			_controller.changeDetachmentType(detachmentDataIndex, this.value);
+			var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+			if(detachmentData.getDetachmentType(this.value).isFormation() && detachmentData.hasSelections() && !confirm(_guiState.getText("message.confirmFormationSelect"))) {
+				return;
+			}
+			_controller.changeDetachmentType(detachmentDataIndex, this.value, true);
 		});
 		selectBox.append(getDetachmentTypeOptions(detachmentData.getDetachmentTypes(), detachmentData.detachmentType.id, isPrimary, detachmentData));
+		//if(detachmentData.detachmentType.hasModifications()) {
+		//	selectBox.prop("disabled", true);
+		//}
 
 		return selectBox;
 	}
+
+	this.refreshDetachmentTypeSelectbox = function(detachmentDataIndex) {
+		var selectBox = _gui.getElement("#detachmentTypeSelect" + detachmentDataIndex);
+		if(selectBox != null) {
+			selectBox.replaceWith(getDetachmentTypeSelectbox(detachmentDataIndex));
+		}
+	};
 
 	function getDetachmentTypeOptions(detachmentTypes, selectedDetachmentTypeId, isPrimary, textSource) {
 		var retValue = [];
@@ -340,17 +360,17 @@ function MainmenuGui() {
 		extensionSelect.find("option[value=" + extensionId + "]").removeAttr("disabled");
 	};
 	
-	this.refreshDetachmentTypeSelectbox = function(detachmentDataIndex) {
-		var selectBox = _gui.getElement("#detachmentTypeSelect" + detachmentDataIndex);
-		if(selectBox == null) {
-			return;
-		}
-		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
-		selectBox.find("option").each(function(index) {
-			var detachmentType = detachmentData.getDetachmentType(selectBox[0].options[index].value);
-			selectBox[0].options[index].innerHTML = _guiState.text[detachmentType.name];
-		});
-	};
+	//this.refreshDetachmentTypeSelectbox = function(detachmentDataIndex) {
+	//	var selectBox = _gui.getElement("#detachmentTypeSelect" + detachmentDataIndex);
+	//	if(selectBox == null) {
+	//		return;
+	//	}
+	//	var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+	//	selectBox.find("option").each(function(index) {
+	//		var detachmentType = detachmentData.getDetachmentType(selectBox[0].options[index].value);
+	//		selectBox[0].options[index].innerHTML = _guiState.text[detachmentType.name];
+	//	});
+	//};
 	
 	this.refreshArmySelectbox = function(armyIndex) {
 		var selectBox = _gui.getElement("#armySelect" + armyIndex);

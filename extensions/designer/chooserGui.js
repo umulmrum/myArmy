@@ -90,6 +90,7 @@ function ChooserGui() {
 	
 	this.onPostChangeDetachmentType = function(event, additionalData) {
 		this.refreshSlotHeadings();
+		this.refreshEntries();
 	};
 	
 	this.onPostChangeSpecialDisplay = function(event) {
@@ -472,6 +473,9 @@ function ChooserGui() {
 			cssClass += " invisible";
 		}
 		if(!_gui.checkDisplay(armyUnit.getFromEntityPool(entityslot.entityId))) {
+			cssClass += " invisible";
+		}
+		if(!entityslot.visible) {
 			cssClass += " invisible";
 		}
 		

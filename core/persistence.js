@@ -216,6 +216,11 @@ function Persistence() {
 			}
 		}
 		var armyUnitId = "a" + armyUnitIndex;
+		var detachmentType = _armyState.getDetachmentData(detachmentDataIndex).detachmentType;
+		var options = {};
+		if(detachmentType.isFormation()) {
+			options = { deletable: false, clonable: false };
+		}
         i = i + value.length;
 
         while(i < q.length) {
@@ -238,7 +243,7 @@ function Persistence() {
 				i = restoreFoc(fileVersion, q, i + 1);
 				break;
 			case MARKER.ENTITY:
-				i = restoreEntity(fileVersion, q, i + 1, detachmentDataIndex, armyUnitId);
+				i = restoreEntity(fileVersion, q, i + 1, detachmentDataIndex, armyUnitId, options);
 				break;
 			case MARKER.ALLYENTITY:
 				// legacy
@@ -275,7 +280,7 @@ function Persistence() {
 		return i + value.length;
 	}
 	
-	function restoreEntity(fileVersion, q, i, detachmentDataIndex, armyUnitIndex) {
+	function restoreEntity(fileVersion, q, i, detachmentDataIndex, armyUnitIndex, options) {
 		var value = val(q, i);
 		var entityslotId = parseInt(value, BASE);
 		i = i + value.length;
@@ -285,7 +290,7 @@ function Persistence() {
 				i++;
 			}
 		} else {
-			var entity = _controller.addEntry(detachmentDataIndex, armyUnitIndex, entityslotId, false);
+			var entity = _controller.addEntry(detachmentDataIndex, armyUnitIndex, entityslotId, false, options);
 		}
 		while(i < q.length) {
 			switch(q[i]) {
@@ -427,6 +432,32 @@ function Persistence() {
 		}
 		return i+1;
 	}
+
+	this.restoreFragment = function(q, detachmentData, options) {
+		var armyUnit = detachmentData.getFirstArmyUnit();
+		var i = 0;
+
+		while(i < q.length) {
+			switch(q[i]) {
+				case MARKER.ARMY:
+					i++;
+					var value = val(q, i);
+					var newArmyUnit = detachmentData.getArmyUnitForArmyId(parseInt(value));
+					if(newArmyUnit == null) {
+						alert("Could not find armyUnit for armyId " + value);
+					}
+					armyUnit = newArmyUnit;
+					i += value.length;
+					break;
+				case MARKER.ENTITY:
+					i = restoreEntity(currentFileVersion, q, i + 1, detachmentData.getDetachmentDataIndex(), armyUnit.getArmyUnitIndex(), options);
+					break;
+				default:
+					alert("Unexpected token '" + q[i] + "' in restoreFragment");
+					return;
+			}
+		}
+	};
 	
 	this.createStatelink = function() {
 		var stateLink = window.location.href;

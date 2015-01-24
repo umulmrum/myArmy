@@ -90,6 +90,15 @@ function DetachmentData(detachmentDataIndexParam) {
 		return armyUnits[armyUnitIndex];
 	};
 
+	this.getArmyUnitForArmyId = function(armyId) {
+		for(var i in armyUnits) {
+			if(armyUnits[i].getArmy().armyId == armyId) {
+				return armyUnits[i];
+			}
+		}
+		return null;
+	};
+
 	this.getFirstArmyUnit = function() {
 		for(var i in armyUnits) {
 			return armyUnits[i];

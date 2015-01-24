@@ -33,6 +33,7 @@ function DesignerGui() {
 		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
@@ -76,7 +77,13 @@ function DesignerGui() {
 		this.removeInvalidEntries();
 		this.refreshSlotEntries();
 	};
-	
+
+	this.onPostChangeDetachmentType = function(event, additionalData) {
+		if(additionalData.changedSelections) {
+			this.renderSlotEntries();
+		}
+	};
+
 	this.onPreCallFragment = function(event, additionalData) {
 		if(additionalData.newFragment == "designer") {
 			if(!_guiState.isSmallDevice) {
@@ -438,17 +445,25 @@ function DesignerGui() {
 			entryButtons = div(null, null, "entryButtons");
 
 			var deleteButton = div("", null, "entryButton deleteButton");
-			deleteButton.on(_guiState.clickEvent, function() {
-				_controller.deleteEntry(entityslot);
-				return false;
-			});
+			if(entityslot.deletable) {
+				deleteButton.on(_guiState.clickEvent, function() {
+					_controller.deleteEntry(entityslot);
+					return false;
+				});
+			} else {
+				deleteButton.addClass("invisible");
+			}
 			entryButtons.append(deleteButton);
 
 			var cloneButton = div("", null, "entryButton cloneButton");
-			cloneButton.on(_guiState.clickEvent, function() {
-				_controller.cloneEntry(entityslot);
-				return false;
-			});
+			if(entityslot.clonable) {
+				cloneButton.on(_guiState.clickEvent, function() {
+					_controller.cloneEntry(entityslot);
+					return false;
+				});
+			} else {
+				cloneButton.addClass("invisible");
+			}
 			entryButtons.append(cloneButton);
 
 			if (hasOptions) {

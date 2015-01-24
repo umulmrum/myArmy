@@ -38,12 +38,22 @@ function System(systemId, systemName, systemPrefix) {
 /**
  * DetachmentType holds data for army detachments.
  */
-function DetachmentType(id, name, minSlotCounts, maxSlotCounts, canBePrimary) {
+function DetachmentType(id, name, minSlotCounts, maxSlotCounts, canBePrimary, formationData, modifications) {
 	this.id = id;
 	this.name = name;
 	this.minSlotCounts = minSlotCounts;
 	this.maxSlotCounts = maxSlotCounts;
 	this.canBePrimary = canBePrimary;
+	this.formationData = formationData;
+	this.modifications = modifications;
+
+	this.isFormation = function() {
+		return !isUndefined(this.formationData);
+	};
+
+	this.hasModifications = function() {
+		return !isUndefined(this.modifications);
+	};
 }
 
 /**
@@ -90,6 +100,9 @@ function EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, 
 	this.fillsPool = fillsPool;
 	this.needsPool = needsPool;
 	this.enabled = enabled;
+	this.visible = true;
+	this.deletable = true;
+	this.clonable = true;
 
 	this.init = function() {
 		this.localId = null;
@@ -154,15 +167,18 @@ function Entity(entityId, entityName, cost, costPerModel, minCount, maxCount, sp
 
 function OptionList(optionListId, minTaken, maxTaken) {
 	this.optionListId = optionListId;
-	this.minTaken = minTaken;
-	this.maxTaken = maxTaken;
+	if(minTaken != null) {
+		this.minTaken = minTaken;
+	}
+	if(maxTaken != null) {
+		this.maxTaken = maxTaken;
+	}
 	this.currentCount = 0;
 	this.options = {};
 	this.parentEntity = -1;
 
 	this.clone = function() {
-		var cloned = new OptionList(this.optionListId, this.minTaken,
-				this.maxTaken);
+		var cloned = new OptionList(this.optionListId, null, null);
 		cloned.currentCount = this.currentCount;
 		cloned.options = cloneObject(this.options);
 		return cloned;

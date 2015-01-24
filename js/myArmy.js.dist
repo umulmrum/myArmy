@@ -47,6 +47,7 @@ loadScript("core/textService.js");
 loadScript("core/dataReader.js");
 loadScript("core/util.js");
 loadScript("core/pool.js");
+loadScript("core/ModificationService.js");
 loadScript("core/extensionManager.js");
 loadScript("extensions/mainmenu/mainmenuExtension.js");
 loadScript("extensions/mainmenu/mainmenuGui.js");

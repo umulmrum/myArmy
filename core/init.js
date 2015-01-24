@@ -79,7 +79,7 @@ function initVars() {
 	_armyState = new ArmyState();
 	_persistence = new Persistence();
 	_persistence.init();
-	_controller = new Controller();
+	_controller = new Controller(new ModificationService());
 	_guiState = new GuiState();
 	_gui = new Gui();
 	_gui.init();
