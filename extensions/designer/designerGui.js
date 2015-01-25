@@ -79,7 +79,10 @@ function DesignerGui() {
 	};
 
 	this.onPostChangeDetachmentType = function(event, additionalData) {
+		if(additionalData.newDetachmentType.isFormation()) {
+		}
 		if(additionalData.changedSelections) {
+			this.removeInvalidEntries();
 			this.renderSlotEntries();
 		}
 	};

@@ -194,6 +194,10 @@ function DetachmentData(detachmentDataIndexParam) {
 		$.extend(true, detachmentTypes, detachmentTypesParam);
 	};
 
+	this.getAllowedExtensions = function() {
+		return allowedExtensions;
+	};
+
 	this.setAllowedExtensions = function(extensionsParam) {
 		allowedExtensions = extensionsParam;
 	};

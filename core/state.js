@@ -177,6 +177,7 @@ function State() {
 			var optionList = entity.optionLists[i];
 			/* we always use the optionList from the entity pool to compare against - this way we have a single source of information which is more easy to modify */
 			resolveOptionListMinMax(entity, baseEntity, optionList, entityFromPool.optionLists[i]);
+			var optionListHasActiveOptions = false;
 			for ( var j in optionList.options) {
 				var option = optionList.options[j];
 				resolveOptionMinMax(entity, baseEntity, optionList, option, entityFromPool.optionLists[i].options[j]);
@@ -188,6 +189,7 @@ function State() {
 					option.disabled = true;
 				} else {
 					option.disabled = false;
+					optionListHasActiveOptions = true;
 				}
 				/*
 				 * the maxTaken value might have been diminished, so reduce the
@@ -196,6 +198,9 @@ function State() {
 				if ((option.currentCount > option.currentMaxTaken)) {
 					doSelectOption(optionList, option, option.currentMaxTaken);
 				}
+			}
+			if(!optionListHasActiveOptions) {
+				optionList.currentMaxTaken = 0;
 			}
 			for ( var j in optionList.options) {
 				var option = optionList.options[j];
@@ -306,7 +311,9 @@ function State() {
 			return defaultValue;
 		} else {
 			var entitySlot = _armyState.lookupId(entity.parentEntityslot);
-			var pool = _armyState.getArmyUnit(entitySlot.detachmentDataIndex, entitySlot.armyUnitIndex).getPools();
+			var armyUnit = _armyState.getArmyUnit(entitySlot.detachmentDataIndex, entitySlot.armyUnitIndex);
+			var entityCount = armyUnit.getEntityCounts();
+			var pool = armyUnit.getPools();
 			return parseInt(eval(value));
 		}
 	}

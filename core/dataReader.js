@@ -138,7 +138,7 @@ function DataReader() {
         var detachmentTypes = {};
         for(var i = 0; i < data.detachmentTypes.length; i++) {
             var obj = data.detachmentTypes[i];
-            detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.minSlotCounts, obj.maxSlotCounts, isUndefined(obj.canBePrimary) ? true : obj.canBePrimary, null, obj.modifications);
+            detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.group, obj.minSlotCounts, obj.maxSlotCounts, isUndefined(obj.canBePrimary) ? true : obj.canBePrimary, null, obj.modifications);
         }
         system.detachmentTypes = detachmentTypes;
 
@@ -239,7 +239,7 @@ function DataReader() {
 		for(var i = 0; i < detachmentTypesObj.length; i++) {
 			var obj = detachmentTypesObj[i];
 			var canBePrimary = isUndefined(obj.canBePrimary) ? true : obj.canBePrimary;
-			detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.minSlotCounts, obj.maxSlotCounts, canBePrimary, obj.formationData, obj.modifications);
+			detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.group, obj.minSlotCounts, obj.maxSlotCounts, canBePrimary, obj.formationData, obj.modifications);
 		}
 		detachmentData.addDetachmentTypes(detachmentTypes);
 

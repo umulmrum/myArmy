@@ -457,6 +457,7 @@ function Persistence() {
 					return;
 			}
 		}
+		traverseArmyUnit(this, doEntityCalculations);
 	};
 	
 	this.createStatelink = function() {

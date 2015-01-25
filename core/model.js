@@ -38,9 +38,10 @@ function System(systemId, systemName, systemPrefix) {
 /**
  * DetachmentType holds data for army detachments.
  */
-function DetachmentType(id, name, minSlotCounts, maxSlotCounts, canBePrimary, formationData, modifications) {
+function DetachmentType(id, name, group, minSlotCounts, maxSlotCounts, canBePrimary, formationData, modifications) {
 	this.id = id;
 	this.name = name;
+	this.group = group;
 	this.minSlotCounts = minSlotCounts;
 	this.maxSlotCounts = maxSlotCounts;
 	this.canBePrimary = canBePrimary;

@@ -13,7 +13,7 @@ function ModificationService() {
                     if (modification == null) {
                         continue;
                     }
-                    applyModificationToArmyUnit(modificationType, modification, affectedArmyUnit);
+                    applyModificationToArmyUnit(modificationType, modification, detachmentData, affectedArmyUnit);
                 }
             //}
         }
@@ -30,12 +30,13 @@ function ModificationService() {
         }
     }
 
-    function applyModificationToArmyUnit(modificationType, modification, armyUnit) {
+    function applyModificationToArmyUnit(modificationType, modification, detachmentData, armyUnit) {
         switch(modificationType) {
             case "entityslot_whitelist":
                 applyEntityslotWhitelist(modification, armyUnit);
                 break;
             case "extension_whitelist":
+                applyExtensionWhitelist(modification, detachmentData, armyUnit);
                 break;
             case "entity_changes":
                 applyEntityChanges(modification, armyUnit);
@@ -53,6 +54,22 @@ function ModificationService() {
                 entityslot.visible = false;
             }
         }
+    }
+
+    function applyExtensionWhitelist(modification, detachmentData, armyUnit) {
+        if(armyUnit.getArmyUnitIndex() == "a0") {
+            var extensions = {};
+            for(var i in modification) {
+                extensions[modification[i]] = "1";
+            }
+            detachmentData.setAllowedExtensions(extensions);
+            return;
+        }
+        var armyId = armyUnit.getArmy().armyId;
+        if($.inArray(armyId, modification) == -1) {
+            detachmentData.removeArmyUnit(armyUnit.getArmyUnitIndex());
+        }
+
     }
 
     function applyEntityChanges(modification, armyUnit) {
@@ -76,12 +93,6 @@ function ModificationService() {
             }
             changedEntityIds.push(changedEntity.entityId);
         }
-        //for(var i in armyUnit.getSelections()) {
-        //    var selection = armyUnit.getSelection(i);
-        //    if($.inArray(selection.entityId, changedEntityIds) != -1) {
-        //        selection.dirty = true;
-        //    }
-        //}
     }
 
     function applyOptionListChanges(optionListChanges, optionLists) {

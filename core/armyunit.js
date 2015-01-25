@@ -47,6 +47,11 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	var extension = isExtensionParam;
 	
 	this.resetArmy = function() {
+
+		for(var i in selections) {
+			removeEntitySlotLocalIds(selections[i]);
+		}
+
 		selections = [];
 		selectionCountPerSlot = {};
 		selectionCost = {};
@@ -149,7 +154,11 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
     this.getSelection = function(id) {
         return selections[id];
     };
-	
+
+	this.getEntityCounts = function() {
+		return entityCount;
+	};
+
 	this.getEntityCount = function(entityslotId) {
 		return entityCount[entityslotId];
 	};
