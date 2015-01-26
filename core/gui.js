@@ -329,6 +329,10 @@ function Gui() {
 		}
 		return map[name];
 	};
+
+	this.removeElement = function(name) {
+		delete map[name];
+	};
 	
 	/*****************************
 	 *   HTML element cache end

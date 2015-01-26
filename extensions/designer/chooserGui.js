@@ -90,7 +90,8 @@ function ChooserGui() {
 	
 	this.onPostChangeDetachmentType = function(event, additionalData) {
 		this.refreshSlotHeadings();
-		this.refreshEntries();
+		this.renderEntries();
+		this.refresh();
 	};
 	
 	this.onPostChangeSpecialDisplay = function(event) {

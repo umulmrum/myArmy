@@ -47,7 +47,6 @@ function MainmenuGui() {
 
 	this.onPostChangeSystem = function(event) {
 		this.renderArmySelectBox();
-		//this.renderFirstDetachmentSelect();
 	};
 
 	this.onPostAddDetachment = function(event, additionalData) {
@@ -57,9 +56,7 @@ function MainmenuGui() {
 	};
 
 	this.onPostChangeDetachmentType = function(event, additionalData) {
-		this.refreshDetachmentTypeSelectbox(additionalData.detachmentDataIndex);
-		this.refreshExtensionSelectbox(additionalData.detachmentDataIndex);
-		this.refreshExtensionList(additionalData.detachmentDataIndex);
+		this.refreshDetachmentBox(additionalData.detachmentDataIndex);
 	};
 
 	this.onPostDeleteDetachment = function(event, additionalData) {
@@ -75,14 +72,14 @@ function MainmenuGui() {
 
 	this.onPostAddExtension = function (event, additionalData) {
 		this.addExtension(additionalData.detachmentDataIndex, additionalData.armyUnitIndex);
-		this.resetExtensionSelect(additionalData.detachmentDataIndex, additionalData.extensionId);
-		this.refreshDetachmentTypeSelectbox(additionalData.detachmentDataIndex);
+		this.refreshDetachmentBox(additionalData.detachmentDataIndex);
+		//this.resetExtensionSelect(additionalData.detachmentDataIndex, additionalData.extensionId);
 	};
 
 	this.onPostDeleteExtension = function(event, additionalData) {
 		this.removeExtension(additionalData.detachmentDataIndex, additionalData.armyUnitIndex, additionalData.extensionId);
 		this.resetArmySelect();
-		this.refreshExtensionSelectbox(additionalData.detachmentDataIndex);
+		this.refreshDetachmentBox(additionalData.detachmentDataIndex);
 	};
 
 	// there is only one system available at the moment
@@ -293,13 +290,16 @@ function MainmenuGui() {
 	this.refreshDetachmentTypeSelectbox = function(detachmentDataIndex) {
 		var selectBox = _gui.getElement("#detachmentTypeSelect" + detachmentDataIndex);
 		if(selectBox != null) {
+			_gui.removeElement("#detachmentTypeSelect" + detachmentDataIndex);
 			selectBox.replaceWith(getDetachmentTypeSelectbox(detachmentDataIndex));
 		}
 	};
 
 	this.refreshExtensionSelectbox = function(detachmentDataIndex) {
 		var selectBox = _gui.getElement("#extensionSelect" + detachmentDataIndex);
+		//var selectBox = $("#extensionSelect" + detachmentDataIndex);
 		if(selectBox != null) {
+			_gui.removeElement("#extensionSelect" + detachmentDataIndex);
 			selectBox.replaceWith(getExtensionSelectbox(detachmentDataIndex));
 		}
 	};
@@ -307,6 +307,7 @@ function MainmenuGui() {
 	this.refreshExtensionList = function(detachmentDataIndex) {
 		var list = _gui.getElement("#extensionList" + detachmentDataIndex);
 		if(list != null) {
+			_gui.removeElement("#extensionList" + detachmentDataIndex);
 			list.replaceWith(getExtensionListElement(detachmentDataIndex));
 		}
 	};
@@ -353,7 +354,7 @@ function MainmenuGui() {
 		});
 
 		selectBox.append(option("> " +_guiState.text["chooseExtension"] + " <", "-1", true));
-		var hasExtensions = false;
+		var hasSelectableExtensions = false;
 		for(var i in _systemState.extensions) {
 			var extension = _systemState.extensions[i];
 			if(!detachmentData.isExtensionAllowed(extension.armyId)) {
@@ -365,11 +366,11 @@ function MainmenuGui() {
 			if(alreadySelected) {
 				optionElement.attr("disabled", "disabled");
 			} else {
-				hasExtensions = true;
+				hasSelectableExtensions = true;
 			}
 			selectBox.append(optionElement);
 		}
-		selectBox.prop("disabled", !hasExtensions);
+		selectBox.prop("disabled", !hasSelectableExtensions);
 		return selectBox;
 	}
 

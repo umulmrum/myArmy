@@ -34,7 +34,6 @@ function DesignerGui() {
 		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
 	};
@@ -45,7 +44,7 @@ function DesignerGui() {
 	
 	this.onPostAddSelection = function(event, additionalData) {
 		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
-		this.renderEntry(armyUnit, additionalData.entityslot.localId);
+		this.renderEntry(armyUnit, additionalData.entityslot);
 	};
 	
 	this.onPostRemoveSelection = function(event, additionalData) {
@@ -71,6 +70,7 @@ function DesignerGui() {
 	
 	this.onPostAddDetachment = function(event) {
 		this.removeInvalidEntries();
+		this.refreshSlotEntries();
 	};
 
 	this.onPostDeleteDetachment = function(event) {
@@ -79,22 +79,12 @@ function DesignerGui() {
 	};
 
 	this.onPostChangeDetachmentType = function(event, additionalData) {
-		if(additionalData.newDetachmentType.isFormation()) {
-		}
 		if(additionalData.changedSelections) {
 			this.removeInvalidEntries();
-			this.renderSlotEntries();
+			this.renderSelectionsForDetachment(_armyState.getDetachmentData(additionalData.detachmentDataIndex));
 		}
 	};
 
-	this.onPreCallFragment = function(event, additionalData) {
-		if(additionalData.newFragment == "designer") {
-			if(!_guiState.isSmallDevice) {
-				showChooser();
-			}
-		}
-	};
-	
 	this.onPostSelectOption = function(event, additionalData) {
 		var option = _armyState.lookupId(additionalData.optionLocalId);
 		if (option.currentMaxTaken > 1) {
@@ -134,6 +124,16 @@ function DesignerGui() {
 	this.refreshSlotEntries = function() {
 		traverseArmyUnit(this, this.refreshSlotEntriesForArmy);
 	};
+
+	this.renderSelectionsForDetachment = function(detachmentData) {
+		for(var i in detachmentData.getArmyUnits()) {
+			var armyUnit = detachmentData.getArmyUnit(i);
+			for(var j in armyUnit.getSelections()) {
+				var selection = armyUnit.getSelection(j);
+				this.renderEntry(armyUnit, selection);
+			}
+		}
+	};
 	
 	this.refreshSlotEntriesForArmy = function(armyUnit) {
 		for(var i in armyUnit.getSelections()) {
@@ -146,7 +146,7 @@ function DesignerGui() {
 		var selections = armyUnit.getSelections();
 		for (var j = 0; j < selections.length; j++) {
 			if(selections[j].slotId == additionalParams.slotId) {
-				this.renderEntry(armyUnit, selections[j].localId);
+				this.renderEntry(armyUnit, selections[j]);
 			}
 		}
 	};
@@ -155,8 +155,7 @@ function DesignerGui() {
 	 * Renders an entity from scratch.
 	 * Use this when adding/cloning an entity or restoring a persisted army.
 	 */
-	this.renderEntry = function(armyUnit, entityslotLocalId) {
-		var entityslot = _armyState.lookupId(entityslotLocalId);
+	this.renderEntry = function(armyUnit, entityslot) {
 		var entity = entityslot.entity;
 		var container = _gui.getElement("#slotentryDesignerList" + entityslot.slotId);
 		var isCollapsed = entityslot.optionDisplayState == _guiState.OPTION_DISPLAYSTATE.COLLAPSED;
@@ -165,8 +164,8 @@ function DesignerGui() {
 		var entryContent = null;
 		var optionContainer = null;
 
-		entry = li(null, "entry_" + entityslotLocalId, "entry", { "data-localid": entityslotLocalId });
-		entryContent = div(null, "entryContent_" + entityslotLocalId, "entryContent", null);
+		entry = li(null, "entry_" + entityslot.localId , "entry", { "data-localid": entityslot.localId });
+		entryContent = div(null, "entryContent_" + entityslot.localId , "entryContent", null);
 		entry.append(entryContent);
 		optionContainer = table();
 		
