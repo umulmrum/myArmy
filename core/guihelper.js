@@ -188,13 +188,13 @@ function getSlotHeadingForArmy(detachmentData, detachmentDataIndex, additionalPa
 
 function getChooserCountForArmy (armyUnit, armyUnitIndex, detachmentData, armyIndex, additionalParams) {
 	// support multiple entities per slot by using fractions and round them up here
-	return Math.ceil(armyUnit.getSelectionCost(additionalParams.slotId));
+	return Math.ceil(armyUnit.getSelectionSlotCost(additionalParams.slotId));
 }
 
 function getChooserCountForDetachment(detachmentData, slotId) {
 	var count = 0;
 	for(var i in detachmentData.getArmyUnits()) {
-		count += detachmentData.getArmyUnit(i).getSelectionCost(slotId);
+		count += detachmentData.getArmyUnit(i).getSelectionSlotCost(slotId);
 	}
 	return Math.ceil(count);
 }

@@ -28,7 +28,7 @@ function State() {
 	this.init = function() {
 		_dispatcher.bindEvent("postAddSelection", this, this.onPostAddSelection, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postAddSelection", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postRemoveSelection", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
+		_dispatcher.bindEvent("postRemoveSelection", this, this.onPostRemoveSelection, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postChangeModelCount", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postSelectOption", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
 		_dispatcher.bindEvent("postChangeFocCount", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
@@ -41,6 +41,12 @@ function State() {
 	this.onPostAddSelection = function(event, additionalData) {
 		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
 		this.sortSelections(armyUnit);
+		this.calculateAllSelectionSlotCosts(_armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex))
+	};
+
+	this.onPostRemoveSelection = function(event, additionalData) {
+		this.calculateAllSelectionSlotCosts(_armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex))
+		this.onDefaultEvent(event, additionalData);
 	};
 
 	this.sortSelections = function(armyUnit) {
@@ -381,5 +387,26 @@ function State() {
 			optionCostObj[1] = option.currentCount * optionCostObj[1];
 		}
 	}
+
+	this.calculateAllSelectionSlotCosts = function(armyUnit) {
+		for(var i in armyUnit.getSelections()) {
+			this.calculateSelectionSlotCost(armyUnit.getSelection(i));
+		}
+	};
+
+	this.calculateSelectionSlotCost = function(selection) {
+		var costBefore = selection.currentSlotCost;
+		var armyUnit = _armyState.getArmyUnit(selection.detachmentDataIndex, selection.armyUnitIndex);
+		var entityslotFromPool = armyUnit.getEntityslot(selection.entityslotId);
+		if (isNumber(entityslotFromPool.slotCost)) {
+			selection.currentSlotCost = entityslotFromPool.slotCost;
+		} else {
+			var entityCount = armyUnit.getEntityCounts();
+			selection.currentSlotCost =  parseFloat(eval(entityslotFromPool.slotCost));
+		}
+		if(costBefore != selection.currentSlotCost) {
+			armyUnit.addSelectionSlotCost(selection.slotId, selection.currentSlotCost - costBefore);
+		}
+	};
 
 }

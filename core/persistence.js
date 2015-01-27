@@ -108,6 +108,7 @@ function Persistence() {
 			registerEntityslotOptionsForPools(entityslot);
 			changePoolByEntityslot(entityslot, true);
 		}
+		armyUnit.recalculateSelectionSlotCost();
 	}
 	
 	function val(q, i) {

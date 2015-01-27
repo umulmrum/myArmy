@@ -385,7 +385,6 @@ function ChooserGui() {
 	}
 	
 	this.refreshDirtySlots = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex) {
-//		var dirtySlotIds = {}; // take object instead of array, so that we get a unique constraint for free
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if (entityslot.dirty) {

@@ -98,6 +98,7 @@ function EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, 
 	this.minTaken = minTaken;
 	this.maxTaken = maxTaken;
 	this.slotCost = slotCost;
+	this.currentSlotCost = 0;
 	this.fillsPool = fillsPool;
 	this.needsPool = needsPool;
 	this.enabled = enabled;

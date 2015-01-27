@@ -35,8 +35,8 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	// dynamic data (will reflect the user's selections)
 	var selections = []; // the entityslots the user selected to be in his army
 	var selectionCountPerSlot = {}; //the number of entityslots per slot
-	var selectionCost = {}; // the total slotCost per slot
-	var entityCount = {}; // a counter for each entityslotId - used for minTaken and maxTaken
+	var selectionSlotCost = {}; // the total slotCost per slot
+	var selectionCount = {}; // a counter for each entityslotId - used for minTaken and maxTaken
 	
 	var stateLinkPart = null;
 	
@@ -54,13 +54,13 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 
 		selections = [];
 		selectionCountPerSlot = {};
-		selectionCost = {};
+		selectionSlotCost = {};
 		for(var i in _systemState.slots) {
 			selectionCountPerSlot[i] = 0;
-			selectionCost[i] = 0;
+			selectionSlotCost[i] = 0;
 		}
-		for(var i in entityCount) {
-			entityCount[i] = 0;
+		for(var i in selectionCount) {
+			selectionCount[i] = 0;
 		}
 		stateLinkPart = null;
 		this.resetPools();
@@ -77,11 +77,11 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	this.addEntry = function(entityslot, doEntityCalculations) {
 		selections.push(entityslot);
 		selectionCountPerSlot[entityslot.slotId] = selectionCountPerSlot[entityslot.slotId] + 1;
-		selectionCost[entityslot.slotId] = selectionCost[entityslot.slotId] + entityslot.slotCost;
-		entityCount[entityslot.entityslotId] = entityCount[entityslot.entityslotId] + 1;
+		selectionCount[entityslot.entityslotId] = selectionCount[entityslot.entityslotId] + 1;
 		assignEntitySlotLocalId(entityslot);
 		if(doEntityCalculations) {
 			_state.calculateEntityState(entityslot);
+			//selectionSlotCost[entityslot.slotId] = selectionSlotCost[entityslot.slotId] + entityslot.currentSlotCost;
 		}
 		changeModelCountPool(entityslot, 0, entityslot.entity.currentCount);
 		entityslot.dirty = true;
@@ -91,12 +91,28 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	this.removeEntry = function(entityslot) {
 		removeItems(selections, entityslot);
 		selectionCountPerSlot[entityslot.slotId] = selectionCountPerSlot[entityslot.slotId] - 1;
-		selectionCost[entityslot.slotId] = selectionCost[entityslot.slotId] - entityslot.slotCost;
-		entityCount[entityslot.entityslotId] = entityCount[entityslot.entityslotId] - 1;
+		selectionSlotCost[entityslot.slotId] = selectionSlotCost[entityslot.slotId] - entityslot.currentSlotCost;
+		selectionCount[entityslot.entityslotId] = selectionCount[entityslot.entityslotId] - 1;
 		removeEntitySlotLocalIds(entityslot);
 		changeModelCountPool(entityslot, entityslot.entity.currentCount, 0);
 		_armyState.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
 		entityslots[entityslot.entityslotId].dirty = true;
+	};
+
+	this.addSelectionSlotCost = function(slotId, slotCost) {
+		selectionSlotCost[slotId] = selectionSlotCost[slotId] + slotCost;
+	};
+
+	this.recalculateSelectionSlotCost = function() {
+		selectionSlotCost = {};
+		for(var i in _systemState.slots) {
+			selectionSlotCost[i] = 0;
+		}
+		for(var i in selections) {
+			var selection = selections[i];
+			_state.calculateSelectionSlotCost(selection);
+			selectionSlotCost[_systemState.slots[selection.slotId]] = selection.currentSlotCost;
+		}
 	};
 
 	this.getArmyUnitIndex = function() {
@@ -147,8 +163,8 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
         return selectionCountPerSlot[slotId];
     };
 
-    this.getSelectionCost = function(slotId) {
-        return selectionCost[slotId];
+    this.getSelectionSlotCost = function(slotId) {
+        return selectionSlotCost[slotId];
     };
 
     this.getSelection = function(id) {
@@ -156,15 +172,15 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
     };
 
 	this.getEntityCounts = function() {
-		return entityCount;
+		return selectionCount;
 	};
 
 	this.getEntityCount = function(entityslotId) {
-		return entityCount[entityslotId];
+		return selectionCount[entityslotId];
 	};
 	
 	this.setEntityCount = function(entityslotId, count) {
-		entityCount[entityslotId] = count;
+		selectionCount[entityslotId] = count;
 	};
 	
 	this.addPool = function(pool) {
