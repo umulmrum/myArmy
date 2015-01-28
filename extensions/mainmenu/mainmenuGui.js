@@ -35,7 +35,7 @@ function MainmenuGui() {
 	};
 
 	this.onPostInit = function(event) {
-		this.renderArmySelectBox();
+		this.refreshArmySelectBox();
 		this.renderDetachmentBoxes();
 		this.checkMaxDetachments();
 		this.refreshAll();
@@ -46,7 +46,7 @@ function MainmenuGui() {
 	};
 
 	this.onPostChangeSystem = function(event) {
-		this.renderArmySelectBox();
+		this.refreshArmySelectBox();
 	};
 
 	this.onPostAddDetachment = function(event, additionalData) {
@@ -73,7 +73,6 @@ function MainmenuGui() {
 	this.onPostAddExtension = function (event, additionalData) {
 		this.addExtension(additionalData.detachmentDataIndex, additionalData.armyUnitIndex);
 		this.refreshDetachmentBox(additionalData.detachmentDataIndex);
-		//this.resetExtensionSelect(additionalData.detachmentDataIndex, additionalData.extensionId);
 	};
 
 	this.onPostDeleteExtension = function(event, additionalData) {
@@ -99,7 +98,15 @@ function MainmenuGui() {
 	//	}
 	//};
 
-	this.renderArmySelectBox = function() {
+	this.refreshArmySelectBox = function() {
+		var selectBox = _gui.getElement("#armySelect");
+		if(selectBox != null) {
+			selectBox.children().remove();
+			selectBox.append(getArmySelectBoxOptions());
+		}
+	};
+
+	function getArmySelectBoxOptions() {
 		
 		var sortedArmies = [];
 		for(var i in _systemState.armies) {
@@ -114,10 +121,10 @@ function MainmenuGui() {
 			return _guiState.text["army." + a.armyPrefix] > _guiState.text["army." + b.armyPrefix] ? 1 : -1;
 		});
 		
-		var armySelectElement = _gui.getElement("#armySelect");
+		var options = [];
 
 		//armySelectElement.children().remove();
-		armySelectElement.append(jQuery('<option></option>').val("-1").html("> " +_guiState.text["chooseFaction"] + " <"));
+		options.push(option("> " +_guiState.text["chooseFaction"] + " <", "-1"));
 		
 		var previousArmyGroup = -1;
 
@@ -129,52 +136,19 @@ function MainmenuGui() {
 			if (army.armyGroup != previousArmyGroup) {
 				previousArmyGroup = army.armyGroup;
 				if (j > 0) {
-					armySelectElement.append('<option disabled="true"></option>');
+					options.push('<option disabled="true"></option>');
 				}
 			}
 			var armyName = _guiState.text["army." + _systemState.armies[army.armyId].armyPrefix];
-			armySelectElement.append(option(armyName, army.armyId));
+			options.push(option(armyName, army.armyId));
 		}
-	};
 
-	this.refreshArmySelect = function(armyIndex) {
-		var armySelectElement = _gui.getElement("#armySelect" + armyIndex);
-		var armyUnit = _armyState.getArmyUnit(armyIndex, "a0");
-		var armyId = (armyUnit != null && armyUnit.getArmy() != null) ? armyUnit.getArmy().armyId : -1;
-		armySelectElement.find("option").each(function(index, element) {
-			var $element = $(element);
-			var elementValue = parseInt(element.value);
-			if(elementValue == armyId) {
-				element.selected = true;
-			}
-			if(element.value == -1) {
-				$element.html("> " + _guiState.text["army"] + " " + (armyIndex + 1) + " <");
-			} /*else if (armyIndex > 0 && ($.inArray(elementValue, mainDetachmentData.allowedAllies) == -1)) {
-				$element.addClass("bad");
-			} else {
-				$element.removeClass("bad");
-			}*/
-		});
-		
-		// mark select element as invalid if an invalid ally was selected
-		/*if(armyIndex > 0 && armyId != -1) {
-			if($.inArray(armyId, mainDetachmentData.allowedAllies) == -1) {
-				armySelectElement.addClass("bad");
-			} else {
-				armySelectElement.removeClass("bad");
-			}
-		}*/
-	};
+		return options;
+	}
 
 	this.resetArmySelect = function() {
 		var armySelect = _gui.getElement("#armySelect");
 		armySelect.val("-1").change();
-	};
-
-	this.resetExtensionSelect = function(detachmentDataIndex, extensionId) {
-		var extensionSelect = _gui.getElement("#extensionSelect" + detachmentDataIndex);
-		extensionSelect.val("-1").change();
-		extensionSelect.find("option[value=" + extensionId + "]").attr("disabled", "disabled");
 	};
 
 	this.renderDetachmentBoxes = function() {
@@ -414,34 +388,6 @@ function MainmenuGui() {
 		extensionSelect.find("option[value=" + extensionId + "]").removeAttr("disabled");
 	};
 	
-	//this.refreshDetachmentTypeSelectbox = function(detachmentDataIndex) {
-	//	var selectBox = _gui.getElement("#detachmentTypeSelect" + detachmentDataIndex);
-	//	if(selectBox == null) {
-	//		return;
-	//	}
-	//	var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
-	//	selectBox.find("option").each(function(index) {
-	//		var detachmentType = detachmentData.getDetachmentType(selectBox[0].options[index].value);
-	//		selectBox[0].options[index].innerHTML = _guiState.text[detachmentType.name];
-	//	});
-	//};
-	
-	this.refreshArmySelectbox = function(armyIndex) {
-		var selectBox = _gui.getElement("#armySelect" + armyIndex);
-		if(selectBox == null) {
-			return;
-		}
-		selectBox.find("option").each(function(index) {
-			var armyId = selectBox[0].options[index].value;
-			if((armyId != '') && (armyId != -1)) {
-				var army = _systemState.armies[armyId];
-				selectBox[0].options[index].innerHTML = _guiState.text["army." + army.armyPrefix];
-			} else if(armyId == -1) {
-				selectBox[0].options[index].innerHTML = "> " + _guiState.text["army"] + " " + (armyIndex + 1) + " <";
-			}
-		});
-	};
-
 	this.removeDetachmentBox = function(detachmentDataIndex) {
 		_gui.getElement("#detachmentBox" + detachmentDataIndex).remove();
 	};
@@ -471,6 +417,8 @@ function MainmenuGui() {
 
 		if (_systemState.system != null) {
 
+			this.refreshArmySelectBox();
+
 			for(var i in _armyState.getDetachments()) {
 				//this.refreshDetachmentTypeSelectbox(i);
 				//this.refreshArmySelectbox(i);
@@ -493,11 +441,7 @@ function MainmenuGui() {
 				if (!wasClick(event)) {
 					return false;
 				}
-				if ($(this).is(':checked')) {
-					event.data.special.display = true;
-				} else {
-					event.data.special.display = false;
-				}
+				event.data.special.display = $(this).is(':checked');
 				_dispatcher.triggerEvent("mainmenu.postChangeSpecialDisplay");
 			});
 			var myLabel = label().append(myCheckbox).append(_guiState.text[currentSystem.special[i].name]);
