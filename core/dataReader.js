@@ -138,7 +138,7 @@ function DataReader() {
         var detachmentTypes = {};
         for(var i = 0; i < data.detachmentTypes.length; i++) {
             var obj = data.detachmentTypes[i];
-            detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.group, obj.minSlotCounts, obj.maxSlotCounts, isUndefined(obj.canBePrimary) ? true : obj.canBePrimary, null, obj.modifications);
+            detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.group, obj.minSlotCounts, obj.maxSlotCounts, isUndefined(obj.canBePrimary) ? true : obj.canBePrimary, null, obj.modifications, null);
         }
         system.detachmentTypes = detachmentTypes;
 
@@ -181,7 +181,7 @@ function DataReader() {
 			var special = obj.special;
 			var localPools = readPools(detachmentDataIndex, obj.localPools);
 			var modelCountPoolChange = obj.modelCountPoolChange;
-			var entity = new Entity(entityId, entityName, cost, costPerModel, minCount, maxCount, special, localPools, modelCountPoolChange);
+			var entity = new Entity(detachmentDataIndex, armyUnitIndex, entityId, entityName, cost, costPerModel, minCount, maxCount, special, localPools, modelCountPoolChange);
 			var optionLists = obj.optionLists;
 			if(!isUndefined(optionLists)) {
 				//			entity.optionDisplayState = _guiState.OPTION_DISPLAYSTATE_EXPANDED;
@@ -222,13 +222,13 @@ function DataReader() {
 			fillsPool = parsePools(detachmentDataIndex, fillsPool);
 			var needsPool = coalesce(obj.needsPool, null);
 			needsPool = parsePools(detachmentDataIndex, needsPool);
-			var enabled = true;//coalesce(obj.enabled, true);
+			var visible = coalesce(obj.visible, true);
 			
-			var entityslot = new EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, enabled);
+			var entityslot = new EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, visible, armyUnitIndex);
 			armyUnit.addEntityslot(entityslot);
 			armyUnit.setEntityCount(entityslot.entityslotId, 0);
 			registerEntityslotForPools(entityslot);
-			if(enabled) {
+			if(visible) {
 				detachmentData.increaseEntityslotCount(slotId);
 			}
 		}
@@ -239,7 +239,7 @@ function DataReader() {
 		for(var i = 0; i < detachmentTypesObj.length; i++) {
 			var obj = detachmentTypesObj[i];
 			var canBePrimary = isUndefined(obj.canBePrimary) ? true : obj.canBePrimary;
-			detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.group, obj.minSlotCounts, obj.maxSlotCounts, canBePrimary, obj.formationData, obj.modifications);
+			detachmentTypes[obj.id] = new DetachmentType(obj.id, obj.name, obj.group, obj.minSlotCounts, obj.maxSlotCounts, canBePrimary, obj.formationData, obj.modifications, armyUnitIndex);
 		}
 		detachmentData.addDetachmentTypes(detachmentTypes);
 
@@ -253,7 +253,7 @@ function DataReader() {
 		}
 
 		var entityPool = armyUnit.getEntityPool();
-		resolveDeepOptions(entityPool);
+		this.resolveDeepOptions(entityPool);
 		resolveLocalPoolChain(armyUnit);
 		
 //		var allies = data.allies || [];
@@ -307,16 +307,19 @@ function DataReader() {
 		}
 	}
 
-	function resolveDeepOptions(entityPool) {
+	this.resolveDeepOptions = function(entityPool) {
 		for(var i in entityPool) {
-			var entity = entityPool[i];
-			if(entity.hasOptions()) {
-				doResolveDeepOptions(entityPool, entity.optionLists);
-			}
+			this.resolveDeepOptionForEntity(entityPool, entityPool[i]);
 		}
-	}
+	};
 
-	function doResolveDeepOptions(entityPool, optionLists) {
+	this.resolveDeepOptionForEntity = function(entityPool, entity) {
+		if(entity.hasOptions()) {
+			this.resolveDeepOptionsForOptionLists(entityPool, entity.optionLists);
+		}
+	};
+
+	this.resolveDeepOptionsForOptionLists = function(entityPool, optionLists) {
 		for(var i in optionLists) {
 			var optionList = optionLists[i];
 			for(var j in optionList.options) {
@@ -324,11 +327,11 @@ function DataReader() {
 				var entity = entityPool[option.entityId];
 				if(entity.hasOptions() /*&& !option.hasOptions()*/) { // the second condition is to avoid duplicate computations
 					option.optionLists = cloneObject(entity.optionLists);
-					doResolveDeepOptions(entityPool, option.optionLists);
+					this.resolveDeepOptionsForOptionLists(entityPool, option.optionLists);
 				}
 			}
 		}
-	}
+	};
 
 	function resolveLocalPoolChain(armyUnit) {
 		for(var i in armyUnit.getEntityPool()) {

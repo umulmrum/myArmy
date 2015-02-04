@@ -28,17 +28,14 @@ function System(systemId, systemName, systemPrefix) {
 	this.systemName = systemName;
 	this.systemPrefix = systemPrefix;
     this.defaultSlotCost = 1;
-    //this.slots = {};
 	this.special = {};
 	this.detachmentTypes = {};
-    //this.armies = {};
-    //this.extensions = {};
 }
 
 /**
  * DetachmentType holds data for army detachments.
  */
-function DetachmentType(id, name, group, minSlotCounts, maxSlotCounts, canBePrimary, formationData, modifications) {
+function DetachmentType(id, name, group, minSlotCounts, maxSlotCounts, canBePrimary, formationData, modifications, origin) {
 	this.id = id;
 	this.name = name;
 	this.group = group;
@@ -47,6 +44,7 @@ function DetachmentType(id, name, group, minSlotCounts, maxSlotCounts, canBePrim
 	this.canBePrimary = canBePrimary;
 	this.formationData = formationData;
 	this.modifications = modifications;
+	this.origin = origin;
 
 	this.isFormation = function() {
 		return !isUndefined(this.formationData);
@@ -88,7 +86,7 @@ function Army(armyId, armyName, armyPrefix, armyGroup) {
 }
 
 function EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken,
-		slotCost, fillsPool, needsPool, enabled) {
+		slotCost, fillsPool, needsPool, visible) {
 	this.detachmentDataIndex = detachmentDataIndex;
 	this.armyUnitIndex = armyUnitIndex;
 	this.entityslotId = entityslotId;
@@ -101,8 +99,7 @@ function EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, 
 	this.currentSlotCost = 0;
 	this.fillsPool = fillsPool;
 	this.needsPool = needsPool;
-	this.enabled = enabled;
-	this.visible = true;
+	this.visible = visible;
 	this.deletable = true;
 	this.clonable = true;
 
@@ -115,7 +112,7 @@ function EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, 
 	this.init();
 
 	this.clone = function() {
-		var cloned = new EntitySlot(this.detachmentDataIndex, this.armyUnitIndex, this.entityslotId, this.entityId, this.slotId, this.minTaken, this.maxTaken, this.slotCost, this.fillsPool, this.needsPool, this.enabled);
+		var cloned = new EntitySlot(this.detachmentDataIndex, this.armyUnitIndex, this.entityslotId, this.entityId, this.slotId, this.minTaken, this.maxTaken, this.slotCost, this.fillsPool, this.needsPool, this.visible);
 		if(this.entity != null) {
 			cloned.entity = this.entity.clone();
 		}
@@ -123,7 +120,9 @@ function EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, 
 	};
 }
 
-function Entity(entityId, entityName, cost, costPerModel, minCount, maxCount, special, localPools, modelCountPoolChange) {
+function Entity(detachmentDataIndex, armyUnitIndex, entityId, entityName, cost, costPerModel, minCount, maxCount, special, localPools, modelCountPoolChange) {
+	this.detachmentDataIndex = detachmentDataIndex;
+	this.armyUnitIndex = armyUnitIndex;
 	this.entityId = entityId;
 	this.entityName = entityName;
 	this.cost = cost;
@@ -156,7 +155,7 @@ function Entity(entityId, entityName, cost, costPerModel, minCount, maxCount, sp
 	};
 
 	this.clone = function() {
-		var cloned = new Entity(this.entityId, this.entityName, this.cost,
+		var cloned = new Entity(this.detachmentDataIndex, this.armyUnitIndex, this.entityId, this.entityName, this.cost,
 				this.costPerModel, this.minCount, this.maxCount, this.special, cloneObject(this.localPools), this.modelCountPoolChange);
 		cloned.currentCount = this.currentCount;
 		cloned.disabled = this.disabled;

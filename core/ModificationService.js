@@ -1,8 +1,8 @@
 "use strict";
 
-function ModificationService() {
+function ModificationService(dataReader) {
 
-    this.applyModifications = function(detachmentData, modifications) {
+    this.applyModifications = function(detachmentData, modifications, origin) {
         for (var modificationType in modifications) {
             var modificationData = detachmentData.detachmentType.modifications[modificationType];
             //for (var j in _armyState.getDetachments()) {
@@ -13,7 +13,7 @@ function ModificationService() {
                     if (modification == null) {
                         continue;
                     }
-                    applyModificationToArmyUnit(modificationType, modification, detachmentData, affectedArmyUnit);
+                    applyModificationToArmyUnit(modificationType, modification, detachmentData, affectedArmyUnit, origin);
                 }
             //}
         }
@@ -30,7 +30,7 @@ function ModificationService() {
         }
     }
 
-    function applyModificationToArmyUnit(modificationType, modification, detachmentData, armyUnit) {
+    function applyModificationToArmyUnit(modificationType, modification, detachmentData, armyUnit, origin) {
         switch(modificationType) {
             case "entityslot_whitelist":
                 applyEntityslotWhitelist(modification, armyUnit);
@@ -39,7 +39,7 @@ function ModificationService() {
                 applyExtensionWhitelist(modification, detachmentData, armyUnit);
                 break;
             case "entity_changes":
-                applyEntityChanges(modification, armyUnit);
+                applyEntityChanges(modification, detachmentData, armyUnit, origin);
                 break;
             default:
                 alert("Unknown modification: " + modificationType);
@@ -72,7 +72,7 @@ function ModificationService() {
 
     }
 
-    function applyEntityChanges(modification, armyUnit) {
+    function applyEntityChanges(modification, detachmentData, armyUnit, origin) {
 
         var changedEntityIds = [];
         for(var i in modification) {
@@ -85,6 +85,9 @@ function ModificationService() {
                         break;
                     case "optionLists":
                         applyOptionListChanges(change, changedEntity.optionLists);
+                        break;
+                    case "addOptionLists":
+                        applyAddOptionLists(change, changedEntity, detachmentData, origin);
                         break;
                     default:
                         changedEntity[j] = change;
@@ -130,5 +133,61 @@ function ModificationService() {
 
             }
         }
+    }
+
+    function applyAddOptionLists(addedOptionLists, entity, detachmentData, origin) {
+        var optionLists = {};
+        for(var i = 0; i < addedOptionLists.length; i++) {
+            var obj = addedOptionLists[i];
+            var optionListId = "" + (getMaxKey(entity.optionLists) + 1);
+            var minTaken = coalesce(obj.minTaken, 0);
+            var maxTaken = coalesce(obj.maxTaken, Number.MAX_VALUE);
+            var optionList = new OptionList(optionListId, minTaken, maxTaken);
+            optionList.origin = origin;
+            optionList.originOptionListId = obj.olId;
+            optionLists[optionListId] = optionList;
+            var optionsJson = obj.options;
+            optionList.options = {};
+            if(!optionsJson) {
+                continue;
+            }
+            for(var j = 0; j < optionsJson.length; j++) {
+                var obj2 = optionsJson[j];
+                var optionId = obj2.oId;
+                var entityId = obj2.eId;
+                var cost = coalesce(obj2.cost, 0);
+                var costPerModel = coalesce(obj2.costPerModel, 0);
+                var minTaken = coalesce(obj2.minTaken, 0);
+                var maxTaken = coalesce(obj2.maxTaken, 1);
+                var fillsPool = obj2.fillsPool || null;
+                fillsPool = parsePools(origin, fillsPool);
+                var needsPool = obj2.needsPool || null;
+                needsPool = parsePools(origin, needsPool);
+                var fillsLocalPool = obj2.fillsLocalPool || null;
+                fillsLocalPool = parsePools(origin, fillsLocalPool);
+                var needsLocalPool = obj2.needsLocalPool || null;
+                needsLocalPool = parsePools(origin, needsLocalPool);
+                var option = new Option(optionId, entityId, cost, costPerModel, minTaken, maxTaken, fillsPool, needsPool, fillsLocalPool, needsLocalPool);
+                option.origin = origin;
+                optionList.options[optionId] = option;
+            }
+            dataReader.resolveDeepOptionsForOptionLists(detachmentData.getArmyUnit(entity.armyUnitIndex).getEntityPool(), optionLists);
+            if(isUndefined(entity.optionLists)) {
+                entity.optionLists = optionLists;
+            } else {
+                $.extend(entity.optionLists, optionLists);
+            }
+        }
+    }
+
+    function getMaxKey(item) {
+        var max = 0;
+        for(var i in item) {
+            var key = parseInt(i);
+            if(key > max) {
+                max = key;
+            }
+        }
+        return max;
     }
 }

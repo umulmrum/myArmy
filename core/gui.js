@@ -134,7 +134,7 @@ function Gui() {
 		var string = "";
 		var isFirst = true;
 		var armyNames = traverseDetachmentData(this, this.getArmyName);
-		for ( var i = 0; i < armyNames.length; i++) {
+		for ( var i in armyNames) {
 			var armyName = armyNames[i];
 			if (armyName == null) {
 				continue;
@@ -149,10 +149,7 @@ function Gui() {
 	};
 
 	this.getArmyName = function(detachmentData) {
-        var armyUnit = detachmentData.getArmyUnit(0);
-		if (armyUnit == null || armyUnit.getArmy() == null) {
-			return null;
-		}
+        var armyUnit = detachmentData.getArmyUnit("a0");
 		return _guiState.text["army." + armyUnit.getArmy().armyPrefix];
 	};
 

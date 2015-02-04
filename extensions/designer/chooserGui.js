@@ -252,9 +252,6 @@ function ChooserGui() {
 		var hasSeparator = {};
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
-			if(!entityslot.enabled) {
-				continue;
-			}
 			var entityslotId = entityslot.entityslotId;
 			var slotentryList = _gui.getElement("#slotentryChooserList" + entityslot.slotId);
 			var entity = armyUnit.getFromEntityPool(entityslot.entityId);

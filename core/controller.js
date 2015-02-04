@@ -87,7 +87,7 @@ function Controller(modificationService) {
 			}
 		}
 		if(detachmentType.hasModifications()) {
-			modificationService.applyModifications(detachmentData, detachmentData.detachmentType.modifications);
+			modificationService.applyModifications(detachmentData, detachmentType.modifications, detachmentType.origin);
 		}
 		
 		_dispatcher.triggerEvent("postChangeDetachmentType", { detachmentDataIndex: detachmentDataIndex, newDetachmentType: detachmentType, changedEntityslots: changedEntityslots, changedSelections: changedSelections, });
