@@ -76,6 +76,9 @@ function Controller(modificationService) {
 		}
 		detachmentData.detachmentType = detachmentType;
 
+		if(detachmentType.hasModifications()) {
+			modificationService.applyModifications(detachmentData, detachmentType.modifications, detachmentType.origin);
+		}
 		var changedEntityslots = false;
 		var changedSelections = false;
 		if(detachmentType.isFormation()) {
@@ -86,10 +89,7 @@ function Controller(modificationService) {
 				_persistence.restoreFragment(detachmentType.formationData, detachmentData, { deletable: false, clonable: false });
 			}
 		}
-		if(detachmentType.hasModifications()) {
-			modificationService.applyModifications(detachmentData, detachmentType.modifications, detachmentType.origin);
-		}
-		
+
 		_dispatcher.triggerEvent("postChangeDetachmentType", { detachmentDataIndex: detachmentDataIndex, newDetachmentType: detachmentType, changedEntityslots: changedEntityslots, changedSelections: changedSelections, });
 	};
 

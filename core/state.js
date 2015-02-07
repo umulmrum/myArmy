@@ -184,14 +184,21 @@ function State() {
 			/* we always use the optionList from the entity pool to compare against - this way we have a single source of information which is more easy to modify */
 			resolveOptionListMinMax(entity, baseEntity, optionList, entityFromPool.optionLists[i]);
 			var optionListHasActiveOptions = false;
+			var totalMinTaken = 0;
 			for ( var j in optionList.options) {
 				var option = optionList.options[j];
 				resolveOptionMinMax(entity, baseEntity, optionList, option, entityFromPool.optionLists[i].options[j]);
 				resolveOptionPoolAvailable(option);
 				resolveOptionLocalPoolAvailable(baseEntity, option);
+				totalMinTaken += option.currentMinTaken;
+			}
+			var optionListIsFullByMinTaken = (totalMinTaken >= optionList.currentMaxTaken);
+			for ( var j in optionList.options) {
+				var option = optionList.options[j];
 				if (option.currentMaxTaken <= 0
 						|| (option.poolAvailable < 1 && !option.selected)
-						|| (option.localPoolAvailable < 1 && !option.selected)) {
+						|| (option.localPoolAvailable < 1 && !option.selected)
+						|| (optionListIsFullByMinTaken && option.currentMinTaken <= 0)) {
 					option.disabled = true;
 				} else {
 					option.disabled = false;
@@ -236,14 +243,33 @@ function State() {
 						doSelectOption(optionList, option, newOptionCount);
 					} 
 				}
-				
+
 				/*
-				 * Enforce minTaken in options (might be needed to check maxTaken for optionLists afterwards, but currently there is no such thing and so lazyness wins :-)  )
+				 * Enforce minTaken in options
 				 */
 				if((option.currentCount < option.currentMinTaken) && option.currentMaxTaken > 0 && option.poolAvailable == 1 && option.localPoolAvailable == 1) {
 					var diff = option.currentMinTaken - option.currentCount;
 					var newOptionCount = Math.min(option.currentCount + diff, option.currentMaxTaken);
 					doSelectOption(optionList, option, newOptionCount);
+				}
+				/*
+				 * Now maybe there are too many options selected for this optionList. So we unselect/reduce all options whose currentCount is greater than their
+				 * currentMinTaken value until the optionList constraint is fulfilled again
+				 */
+				if(optionList.currentCount > optionList.currentMaxTaken) {
+					var diff = optionList.currentCount - optionList.currentMaxTaken;
+					for(var j in optionList.options) {
+						var option = optionList.options[j];
+						var optionDiff = option.currentCount - option.currentMinTaken;
+						if(optionDiff > 0) {
+							doSelectOption(optionList, option, option.currentCount - Math.min(diff, optionDiff));
+							diff -= optionDiff;
+							calculateOptionState(entityslot, option, baseEntity);
+							if(diff <= 0) {
+								break;
+							}
+						}
+					}
 				}
 
 				if (!option.disabled && option.selected) {
@@ -257,6 +283,19 @@ function State() {
 			 */
 			if (optionList.currentCount < optionList.currentMinTaken) {
 				var diff = optionList.currentMinTaken - optionList.currentCount;
+
+				///*
+				// * start with options that have a minTaken value > 0
+				// */
+				//if(totalMinTaken > 0) {
+				//	for ( var j in optionList.options) {
+				//		var option = optionList.options[j];
+				//		if(option.disabled || option.currentMinTaken == 0) {
+				//			continue;
+				//		}
+				//
+				//	}
+				//}
 				for ( var j in optionList.options) {
 					var option = optionList.options[j];
 					if(option.disabled) {

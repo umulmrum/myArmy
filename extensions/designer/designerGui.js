@@ -187,7 +187,7 @@ function DesignerGui() {
 
 		this.renderEntryHeader(armyUnit, entryContent, entityslot);
 
-		if (entity.minCount < entity.maxCount) {
+		if (entity.minCount > 1 || entity.maxCount > 1) {
 			this.renderModelCountHeader(entryContent, entity, entityslot);
 		}
 
@@ -285,49 +285,25 @@ function DesignerGui() {
 	};
 
 	this.renderModelCountHeader = function(container, entity, entityslot) {
-		var modelCountHeader = null;
-		var minButton = null;
-		var lessButton = null;
-		var moreButton = null;
-		var maxButton = null;
-		var modelCountInput = null;
-		var modelCountInfoText = _guiState.text["pointsPerModel"].replace(
-				/\{0\}/, entity.currentCostPerModel);
+		var modelCountInfoText = _guiState.text["pointsPerModel"].replace(/\{0\}/, entity.currentCostPerModel);
+		var modelCountHeader = div(null, null, "entryHeader commonHighlight modelCountHeader");
 
-			modelCountHeader = div(null, null, "entryHeader commonHighlight modelCountHeader");
-
-			minButton = span(null, null, "incDecButton minButton").on(
-					_guiState.clickEvent, {
-						entityslot : entityslot,
-						count : entity.minCount
-					}, this.clickSetModelCount);
-			lessButton = span(null, null, "incDecButton lessButton").on(
-					_guiState.clickEvent, {
-						entityslot : entityslot,
-						count : -1
-					}, this.clickIncDecModelCount);
-			moreButton = span(null, null, "incDecButton moreButton").on(
-					_guiState.clickEvent, {
-						entityslot : entityslot,
-						count : 1
-					}, this.clickIncDecModelCount);
-			maxButton = span(null, null, "incDecButton maxButton").on(
-					_guiState.clickEvent, {
-						entityslot : entityslot,
-						count : entity.maxCount
-					}, this.clickSetModelCount);
-
-			modelCountInput = span(entity.currentCount, "modelCount_"
-					+ entityslot.localId, "entryCount");
-			var modelCount = span().append(minButton).append(lessButton)
-					.append(modelCountInput).append(moreButton).append(
-							maxButton);
-			modelCountHeader.append(modelCount);
-			if (entity.minCount < entity.maxCount) {
-				modelCountHeader.append(span(modelCountInfoText, null,
-						"pointsPerModel"));
-			}
+		if(entity.minCount == entity.maxCount) {
+			modelCountHeader.append(span(entity.currentCount + " " + _guiState.getText("numberofmodelsPlural")));
 			container.append(modelCountHeader);
+			return;
+		}
+
+		var minButton  = span(null, null, "incDecButton minButton" ).on(_guiState.clickEvent, { entityslot : entityslot, count : entity.minCount }, this.clickSetModelCount);
+		var lessButton = span(null, null, "incDecButton lessButton").on(_guiState.clickEvent, {	entityslot : entityslot, count : -1	}, this.clickIncDecModelCount);
+		var moreButton = span(null, null, "incDecButton moreButton").on(_guiState.clickEvent, {	entityslot : entityslot, count : 1 }, this.clickIncDecModelCount);
+		var maxButton  = span(null, null, "incDecButton maxButton" ).on(_guiState.clickEvent, { entityslot : entityslot, count : entity.maxCount }, this.clickSetModelCount);
+
+		var modelCountInput = span(entity.currentCount, "modelCount_" + entityslot.localId, "entryCount");
+		var modelCount = span().append(minButton).append(lessButton).append(modelCountInput).append(moreButton).append(maxButton);
+		modelCountHeader.append(modelCount);
+		modelCountHeader.append(span(modelCountInfoText, null, "pointsPerModel"));
+		container.append(modelCountHeader);
 
 		if (entity.currentCount <= entity.minCount) {
 			minButton.html("&nbsp;");
