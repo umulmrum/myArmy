@@ -23,6 +23,7 @@
 var _dispatcher = null;
 var _state = null;
 var _dataReader = null;
+var _modificationService = null;
 var _dataStore = null;
 var _systems = []; // all game systems
 var _systemState = null;
@@ -79,7 +80,8 @@ function initVars() {
 	_armyState = new ArmyState();
 	_persistence = new Persistence();
 	_persistence.init();
-	_controller = new Controller(new ModificationService(_dataReader));
+	_modificationService = new ModificationService(_dataReader);
+	_controller = new Controller(_modificationService);
 	_guiState = new GuiState();
 	_gui = new Gui();
 	_gui.init();

@@ -203,6 +203,10 @@ function DetachmentData(detachmentDataIndexParam) {
 		$.extend(true, detachmentTypes, detachmentTypesParam);
 	};
 
+	this.removeDetachmentType = function(detachmentTypeId) {
+		delete detachmentTypes[detachmentTypeId];
+	};
+
 	this.getAllowedExtensions = function() {
 		return allowedExtensions;
 	};

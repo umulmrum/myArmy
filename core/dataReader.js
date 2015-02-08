@@ -169,6 +169,15 @@ function DataReader() {
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
 		var armyUnitIndex = armyUnit.getArmyUnitIndex();
 
+		//var modifications = data.modifications || [];
+		//var detachmentTypeBlacklist = [];
+		//for(var i = 0; i < modifications.length; i++) {
+		//	var modification =
+		//	if() {
+		//
+		//	}
+		//}
+
 		var entities = data.entities || [];
 		for(var i = 0; i < entities.length; i++) {
 			var obj = entities[i];
@@ -262,6 +271,11 @@ function DataReader() {
 //		}
 		
 		traverseDetachmentData(null, checkPoolsAvailable);
+
+		if(armyUnit.isExtension()) {
+			var modifications = data.modifications || [];
+			_modificationService.applyModifications(detachmentData, modifications, armyUnit)
+		}
 	};
 	
 	this.loadArmy = function(armyUnit, detachmentData) {

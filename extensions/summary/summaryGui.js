@@ -271,7 +271,7 @@ function SummaryGui() {
 		s += "\n";
 
 		if (entity.hasOptions()) {
-			var subSummary = renderOptions(detachmentData, entity.optionLists, 0,
+			var subSummary = renderOptions(detachmentData, armyUnit, entity.optionLists, 0,
 					armyRenderer);
 			if (subSummary != '') {
 				s += subSummary;
@@ -282,7 +282,7 @@ function SummaryGui() {
 		return s;
 	}
 
-	function renderOptions(detachmentData, optionLists, depth, armyRenderer) {
+	function renderOptions(detachmentData, armyUnit, optionLists, depth, armyRenderer) {
 		var s = "";
 		var optionsWithoutSuboptions = [];
 		var optionsWithSuboptions = [];
@@ -295,14 +295,10 @@ function SummaryGui() {
 					continue;
 				}
 				if (option.hasOptions()) {
-					var suboption = armyRenderer.joinSingleSuboption(
-							armyRenderer.renderOption(detachmentData, option, depth),
-							renderOptions(detachmentData, option.optionLists,
-									depth + 1, armyRenderer));
+					var suboption = armyRenderer.joinSingleSuboption(armyRenderer.renderOption(detachmentData, armyUnit, option, depth),	renderOptions(detachmentData, armyUnit, option.optionLists, depth + 1, armyRenderer));
 					optionsWithSuboptions.push(suboption);
 				} else {
-					optionsWithoutSuboptions.push(armyRenderer.renderOption(
-						detachmentData, option, depth));
+					optionsWithoutSuboptions.push(armyRenderer.renderOption(detachmentData, armyUnit, option, depth));
 				}
 			}
 		}
@@ -540,7 +536,7 @@ function SummaryGui() {
 					+ ")";
 		};
 
-		this.renderOption = function(detachmentData, option, depth, isFirst, isLast) {
+		this.renderOption = function(detachmentData, armyUnit, option, depth, isFirst, isLast) {
 			var s = "";
 			if (option.currentCount > 1) {
 				s += option.currentCount + "x ";
@@ -580,9 +576,9 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(detachmentData, option, depth, isFirst, isLast) {
+		this.renderOption = function(detachmentData, armyUnit, option, depth, isFirst, isLast) {
 			var s = "";
-			s += this.armyRenderer.renderOption(detachmentData, option, depth,
+			s += this.armyRenderer.renderOption(detachmentData, armyUnit, option, depth,
 					isFirst, isLast);
 			return s;
 		};
@@ -647,8 +643,8 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(detachmentData, option, depth) {
-			return this.armyRenderer.renderOption(detachmentData, option, depth);
+		this.renderOption = function(detachmentData, armyUnit, option, depth) {
+			return this.armyRenderer.renderOption(detachmentData, armyUnit, option, depth);
 		};
 
 		this.joinOptions = function(options, depth) {
@@ -697,8 +693,8 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(armyUnit, option, depth) {
-			return this.armyRenderer.renderOption(armyUnit, option, depth);
+		this.renderOption = function(detachmentData, armyUnit, option, depth) {
+			return this.armyRenderer.renderOption(detachmentData, armyUnit, option, depth);
 		};
 
 		this.joinOptions = function(options, depth) {

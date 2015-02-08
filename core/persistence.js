@@ -54,7 +54,9 @@ function Persistence() {
 	MARKER.OPTION = "O";
 	MARKER.SUBOPTION = "U";
 	MARKER.SUBOPTION_END = "N";
-	
+	//MARKER.MODIFICATION_OPTIONLIST = "";
+	//MARKER.MODIFICATION_OPTION = "";
+
 	this.init = function() {
 		_dispatcher.bindEvent("postStateRefresh", this, this.createStatelink, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.createStatelink, _dispatcher.PHASE_STATE);

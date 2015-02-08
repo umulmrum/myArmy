@@ -4,7 +4,7 @@ function ModificationService(dataReader) {
 
     this.applyModifications = function(detachmentData, modifications, origin) {
         for (var modificationType in modifications) {
-            var modificationData = detachmentData.detachmentType.modifications[modificationType];
+            var modificationData = modifications[modificationType];
             //for (var j in _armyState.getDetachments()) {
             //    var detachment = _armyState.getDetachmentData(j);
                 for (var k in detachmentData.getArmyUnits()) {
@@ -40,6 +40,12 @@ function ModificationService(dataReader) {
                 break;
             case "entity_changes":
                 applyEntityChanges(modification, detachmentData, armyUnit, origin);
+                break;
+            case "entityslot_blacklist":
+                applyEntityslotBlacklist(modification, armyUnit);
+                break;
+            case "detachmenttype_blacklist":
+                applyDetachmentTypeBlacklist(modification, detachmentData);
                 break;
             default:
                 alert("Unknown modification: " + modificationType);
@@ -176,6 +182,24 @@ function ModificationService(dataReader) {
                 entity.optionLists = optionLists;
             } else {
                 $.extend(entity.optionLists, optionLists);
+            }
+        }
+    }
+
+    function applyEntityslotBlacklist(modification, armyUnit) {
+        for(var i in armyUnit.getEntityslots()) {
+            if($.inArray(parseInt(i), modification) != -1) {
+                var entityslot = armyUnit.getEntityslot(i);
+                entityslot.visible = false;
+            }
+        }
+    }
+
+    function applyDetachmentTypeBlacklist(modification, detachmentData) {
+        for(var i in detachmentData.getDetachmentTypes()) {
+            if($.inArray(parseInt(i), modification) != -1) {
+                //var detachmentType = detachmentData.getDetachmentType(i);
+                detachmentData.removeDetachmentType(i);
             }
         }
     }
