@@ -43,7 +43,6 @@ function DetachmentData(detachmentDataIndexParam) {
 	var armyUnitCount = 0;
 
 	var pools = {};
-
 	var texts = {};
 
 	this.getDetachmentDataIndex = function() {

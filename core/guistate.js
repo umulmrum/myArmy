@@ -47,23 +47,23 @@ function GuiState() {
 	
 	this.languages = ["en", "de"]; // all available languages
 	this.lang = "en"; // the currently active language
-	this.text = {}; // all common messages and labels (multi-lingual)
+	var text = {}; // all common messages and labels (multi-lingual)
 	
 	this.resetTexts = function() {
-		this.text = {};
+		text = {};
 	};
 
 	this.getTexts = function() {
-		return this.text;
+		return text;
 	};
 
 	this.getText = function(key) {
-		return this.text[key];
+		return text[key];
 	};
 	
 	this.addTexts = function(textsParam) {
 		for(var key in textsParam) {
-			this.text[key] = textsParam[key];
+			text[key] = textsParam[key];
 		}
 	};
 }

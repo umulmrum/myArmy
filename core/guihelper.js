@@ -172,7 +172,7 @@ function getSlotHeadingText(slot) {
 		isFirst = false;
 	}
 	if(text == "") {
-		text = _guiState.text[slot.slotName];
+		text = _guiState.getText(slot.slotName);
 	}
 	return text;
 }

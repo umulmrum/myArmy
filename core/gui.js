@@ -126,7 +126,7 @@ function Gui() {
 
 	this.refreshTotalPoints = function() {
 		this.getElement("#totalPoints").html(
-				_armyState.getTotalPoints() + " " + _guiState.text["points"]);
+				_armyState.getTotalPoints() + " " + _guiState.getText("points"));
 	};
 
 	this.refreshArmyLabel = function() {
@@ -150,7 +150,7 @@ function Gui() {
 
 	this.getArmyName = function(detachmentData) {
         var armyUnit = detachmentData.getFirstArmyUnit();
-		return _guiState.text["army." + armyUnit.getArmy().armyPrefix];
+		return _guiState.getText("army." + armyUnit.getArmy().armyPrefix);
 	};
 
 	this.renderLanguageSelect = function() {

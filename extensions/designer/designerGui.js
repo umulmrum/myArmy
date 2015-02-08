@@ -101,7 +101,7 @@ function DesignerGui() {
 	 * Refreshes UI elements.
 	 */
 	this.refreshElements = function() {
-		_gui.getElement("#optionCountOkButton").html(_guiState.text["ok"]);
+		_gui.getElement("#optionCountOkButton").html(_guiState.getText("ok"));
 	};
 	
 	/**
@@ -262,7 +262,7 @@ function DesignerGui() {
 		var entityName = detachmentData.getText(entity.entityName);
 		var entityCost = "";
 		if (entity.totalCost > 0) {
-			entityCost = entity.totalCost + " " + _guiState.text["points"];
+			entityCost = entity.totalCost + " " + _guiState.getText("points");
 		}
 		entryHeader = div(null, null, "entryHeader commonHighlight");
 			var armyIndexCss = "entryArmyIndex";
@@ -282,7 +282,7 @@ function DesignerGui() {
 	};
 
 	this.renderModelCountHeader = function(container, entity, entityslot) {
-		var modelCountInfoText = _guiState.text["pointsPerModel"].replace(/\{0\}/, entity.currentCostPerModel);
+		var modelCountInfoText = _guiState.getText("pointsPerModel").replace(/\{0\}/, entity.currentCostPerModel);
 		var modelCountHeader = div(null, null, "entryHeader commonHighlight modelCountHeader");
 
 		if(entity.minCount == entity.maxCount) {
@@ -462,15 +462,15 @@ function DesignerGui() {
 
 			container.append(entryButtons);
 
-		deleteButton.attr("title", _guiState.text["delete"]);
-		deleteButton.attr("alt", _guiState.text["delete"]);
-		cloneButton.attr("title", _guiState.text["clone"]);
-		cloneButton.attr("alt", _guiState.text["clone"]);
+		deleteButton.attr("title", _guiState.getText("delete"));
+		deleteButton.attr("alt", _guiState.getText("delete"));
+		cloneButton.attr("title", _guiState.getText("clone"));
+		cloneButton.attr("alt", _guiState.getText("clone"));
 		if (hasOptions) {
-			collapseButton.attr("title", _guiState.text["collapse"]);
-			collapseButton.attr("alt", _guiState.text["collapse"]);
-			expandButton.attr("title", _guiState.text["expand"]);
-			expandButton.attr("alt", _guiState.text["expand"]);
+			collapseButton.attr("title", _guiState.getText("collapse"));
+			collapseButton.attr("alt", _guiState.getText("collapse"));
+			expandButton.attr("title", _guiState.getText("expand"));
+			expandButton.attr("alt", _guiState.getText("expand"));
 
 			if (entityslot.optionDisplayState == _guiState.OPTION_DISPLAYSTATE.EXPANDED) {
 				expandButton.css("display", "none");
@@ -537,7 +537,7 @@ function DesignerGui() {
 		var entityName = detachmentData.getText(entity.entityName);
 		var entityCost = "";
 		if (entity.totalCost > 0) {
-			entityCost = entity.totalCost + " " + _guiState.text["points"];
+			entityCost = entity.totalCost + " " + _guiState.getText("points");
 		}
 		entryHeader = container.find(".entryHeader");
 		var armyIndexElement = entryHeader.find(".entryArmyIndex");
@@ -556,7 +556,7 @@ function DesignerGui() {
 		var lessButton = null;
 		var moreButton = null;
 		var maxButton = null;
-		var modelCountInfoText = _guiState.text["pointsPerModel"].replace(
+		var modelCountInfoText = _guiState.getText("pointsPerModel").replace(
 				/\{0\}/, entity.currentCostPerModel);
 
 		var modelCountHeader = container.find(".modelCountHeader");
@@ -678,15 +678,15 @@ function DesignerGui() {
 		var expandButton = entryButtons.find(".expandButton");
 		var expandButtonImg = entryButtons.find(".expandButtonImg");
 
-		deleteButtonImg.attr("title", _guiState.text["delete"]);
-		deleteButtonImg.attr("alt", _guiState.text["delete"]);
-		cloneButtonImg.attr("title", _guiState.text["clone"]);
-		cloneButtonImg.attr("alt", _guiState.text["clone"]);
+		deleteButtonImg.attr("title", _guiState.getText("delete"));
+		deleteButtonImg.attr("alt", _guiState.getText("delete"));
+		cloneButtonImg.attr("title", _guiState.getText("clone"));
+		cloneButtonImg.attr("alt", _guiState.getText("clone"));
 		if (entityslot.entity.hasOptions()) {
-			collapseButtonImg.attr("title", _guiState.text["collapse"]);
-			collapseButtonImg.attr("alt", _guiState.text["collapse"]);
-			expandButtonImg.attr("title", _guiState.text["expand"]);
-			expandButtonImg.attr("alt", _guiState.text["expand"]);
+			collapseButtonImg.attr("title", _guiState.getText("collapse"));
+			collapseButtonImg.attr("alt", _guiState.getText("collapse"));
+			expandButtonImg.attr("title", _guiState.getText("expand"));
+			expandButtonImg.attr("alt", _guiState.getText("expand"));
 
 			if (entityslot.optionDisplayState == _guiState.OPTION_DISPLAYSTATE.EXPANDED) {
 				expandButton.css("display", "none");

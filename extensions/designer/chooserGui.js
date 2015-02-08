@@ -131,7 +131,7 @@ function ChooserGui() {
 			return;
 		}
 		
-		var slotMenuItem = span(_guiState.text["all"], "slotMenuItem-1", "menuButton");
+		var slotMenuItem = span(_guiState.getText("all"), "slotMenuItem-1", "menuButton");
 		slotMenuItem.on(_guiState.clickEvent, function(event) {
 			showSlot(-1);
 		});
@@ -152,7 +152,7 @@ function ChooserGui() {
 		for ( var i in sortedSlots) {
 			var slot = sortedSlots[i];
 			var slotId = slot.slotId;
-			var slotName = _guiState.text[slot.slotName];
+			var slotName = _guiState.getText(slot.slotName);
 
 			slotCount++;
 
@@ -276,7 +276,7 @@ function ChooserGui() {
 				_controller.addEntry(event.data.armyUnit, event.data.entityslotId, true);
 			});
 //			if (entityslot.availableState == 0) {
-//				xli.append(span(" (" + _guiState.text["max"] + ")", null,
+//				xli.append(span(" (" + _guiState.getText("max") + ")", null,
 //				"maxAppendix ok"));
 //			}
 			this.setSlotVisibility(_systemState.slots[entityslot.slotId], true);
@@ -356,7 +356,7 @@ function ChooserGui() {
 			isFirst = false;
 		}
 
-		slotHeading.append(span(") : " + _armyState.pointsPerSlot[slotId] + " " + _guiState.text["points"]));
+		slotHeading.append(span(") : " + _armyState.pointsPerSlot[slotId] + " " + _guiState.getText("points")));
 		slotHeading.removeClass("good bad");
 		if(isOk) {
 			slotHeading.addClass("good");

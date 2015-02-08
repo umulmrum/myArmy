@@ -63,13 +63,13 @@ function SummaryGui() {
 	 * Refreshes UI elements.
 	 */
 	this.refreshElements = function() {
-		_gui.getElement("#chooseShortText").html(_guiState.text["shortview"]);
-		_gui.getElement("#chooseBBcodeText").html(_guiState.text["bbcode"]);
-		_gui.getElement("#chooseSeparateDetachmentsText").html(_guiState.text["chooseSeparateDetachmentsText"]);
-		_gui.getElement("#selectAllButton").html(_guiState.text["selectall"]);
-		_gui.getElement("#copytext").html(_guiState.text["copymessage"]);
-		_gui.getElement("#printButton").html(_guiState.text["print"]);
-		_gui.getElement("#saveFileButton").html(_guiState.text["savefile"]);
+		_gui.getElement("#chooseShortText").html(_guiState.getText("shortview"));
+		_gui.getElement("#chooseBBcodeText").html(_guiState.getText("bbcode"));
+		_gui.getElement("#chooseSeparateDetachmentsText").html(_guiState.getText("chooseSeparateDetachmentsText"));
+		_gui.getElement("#selectAllButton").html(_guiState.getText("selectall"));
+		_gui.getElement("#copytext").html(_guiState.getText("copymessage"));
+		_gui.getElement("#printButton").html(_guiState.getText("print"));
+		_gui.getElement("#saveFileButton").html(_guiState.getText("savefile"));
 	};
 	
 	this.selectAllIfSmall = function(event) {
@@ -339,10 +339,10 @@ function SummaryGui() {
 				if (hasMultipleDetachments) {
 					string += " [" + detachmentData.getPosition() + "] ";
 				}
-				string += _guiState.text["army." + army.armyPrefix];
+				string += _guiState.getText("army." + army.armyPrefix);
 				string += " (" + detachmentData.getText(detachmentData.detachmentType.name);
 				if(isFirst) {
-					string += ", " + _guiState.text["primaryDetachment"];
+					string += ", " + _guiState.getText("primaryDetachment");
 				}
 				string += ")";
 
@@ -419,7 +419,7 @@ function SummaryGui() {
 
 		this.renderTotalPoints = function() {
 			var s = "______________________________________________\n";
-			s += _armyState.getTotalPoints() + " " + _guiState.text["points"] + "\n\n";
+			s += _armyState.getTotalPoints() + " " + _guiState.getText("points") + "\n\n";
 
 			return s;
 		};
@@ -440,10 +440,8 @@ function SummaryGui() {
 				}
 				statistics += getSlotHeadingText(slot) + ": ";
 
-				statistics += pointCount + " " + _guiState.text["points"];
-				var percentText = (pointCount / myTotalPoints * 100).toFixed(1)
-						.replace(/[.]/, _guiState.text["decimalpoint"])
-						+ "%";
+				statistics += pointCount + " " + _guiState.getText("points");
+				var percentText = (pointCount / myTotalPoints * 100).toFixed(1).replace(/[.]/, _guiState.getText("decimalpoint")) + "%";
 				statistics += " (" + percentText + ")\n";
 			}
 			return statistics;
@@ -513,7 +511,7 @@ function SummaryGui() {
 
 		this.renderStateLink = function() {
 			return "[url=" + _armyState.getStateLink() + "]"
-					+ _guiState.text["statelink"] + "[/url]";
+					+ _guiState.getText("statelink") + "[/url]";
 		};
 
 		this.renderStatistics = function() {
@@ -538,7 +536,7 @@ function SummaryGui() {
 		};
 
 		this.renderEntityCost = function(entity) {
-			return " (" + entity.totalCost + " " + _guiState.text["points"]
+			return " (" + entity.totalCost + " " + _guiState.getText("points")
 					+ ")";
 		};
 

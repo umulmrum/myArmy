@@ -118,13 +118,13 @@ function MainmenuGui() {
 			} else if (a.armyGroup > b.armyGroup) {
 				return 1;
 			}
-			return _guiState.text["army." + a.armyPrefix] > _guiState.text["army." + b.armyPrefix] ? 1 : -1;
+			return _guiState.getText("army." + a.armyPrefix) > _guiState.getText("army." + b.armyPrefix) ? 1 : -1;
 		});
 		
 		var options = [];
 
 		//armySelectElement.children().remove();
-		options.push(option("> " +_guiState.text["chooseFaction"] + " <", "-1"));
+		options.push(option("> " +_guiState.getText("chooseFaction") + " <", "-1"));
 		
 		var previousArmyGroup = -1;
 
@@ -139,7 +139,7 @@ function MainmenuGui() {
 					options.push('<option disabled="true"></option>');
 				}
 			}
-			var armyName = _guiState.text["army." + _systemState.armies[army.armyId].armyPrefix];
+			var armyName = _guiState.getText("army." + _systemState.armies[army.armyId].armyPrefix);
 			options.push(option(armyName, army.armyId));
 		}
 
@@ -326,7 +326,7 @@ function MainmenuGui() {
 			_controller.addExtension(event.data.detachmentData, this.value);
 		});
 
-		selectBox.append(option("> " +_guiState.text["chooseExtension"] + " <", "-1", true));
+		selectBox.append(option("> " +_guiState.getText("chooseExtension") + " <", "-1", true));
 		var hasSelectableExtensions = false;
 		for(var i in _systemState.extensions) {
 			var extension = _systemState.extensions[i];
@@ -404,17 +404,17 @@ function MainmenuGui() {
 	 */
 	this.refreshAll = function() {
 		this.refreshSpecialContainer();
-		_gui.getElement("#creditsButton").find("a").html(_guiState.text["credits"]);
-		_gui.getElement("#downloadButton").find("a").html(_guiState.text["download"]);
-		_gui.getElement("#forumButton").find("a").html(_guiState.text["forum"]);
-		_gui.getElement("#armyHeading").html(_guiState.text["detachments"]);
-		_gui.getElement("#optionsHeading").html(_guiState.text["viewOptions"]);
-		_gui.getElement("#linksHeading").html(_guiState.text["links"]);
-		_gui.getElement("#resetButton").html(_guiState.text["reset"]);
-		_gui.getElement("#detachmentCreatorHeading").html(_guiState.text["newDetachment"]);
-		_gui.getElement("#deleteAllDetachmentsButton").html(_guiState.text["deleteAllDetachments"]);
-		_gui.getElement("#fileLoaderLabel").html(_guiState.text["loadArmy"]);
-		_gui.getElement("#maxDetachmentsReachedMessage").html(_guiState.text["message.maxDetachmentsReached"]);
+		_gui.getElement("#creditsButton").find("a").html(_guiState.getText("credits"));
+		_gui.getElement("#downloadButton").find("a").html(_guiState.getText("download"));
+		_gui.getElement("#forumButton").find("a").html(_guiState.getText("forum"));
+		_gui.getElement("#armyHeading").html(_guiState.getText("detachments"));
+		_gui.getElement("#optionsHeading").html(_guiState.getText("viewOptions"));
+		_gui.getElement("#linksHeading").html(_guiState.getText("links"));
+		_gui.getElement("#resetButton").html(_guiState.getText("reset"));
+		_gui.getElement("#detachmentCreatorHeading").html(_guiState.getText("newDetachment"));
+		_gui.getElement("#deleteAllDetachmentsButton").html(_guiState.getText("deleteAllDetachments"));
+		_gui.getElement("#fileLoaderLabel").html(_guiState.getText("loadArmy"));
+		_gui.getElement("#maxDetachmentsReachedMessage").html(_guiState.getText("message.maxDetachmentsReached"));
 
 		if (_systemState.system != null) {
 
@@ -445,7 +445,7 @@ function MainmenuGui() {
 				event.data.special.display = $(this).is(':checked');
 				_dispatcher.triggerEvent("mainmenu.postChangeSpecialDisplay");
 			});
-			var myLabel = label().append(myCheckbox).append(_guiState.text[currentSystem.special[i].name]);
+			var myLabel = label().append(myCheckbox).append(_guiState.getText(currentSystem.special[i].name));
 			specialContainer.append(myLabel);
 			specialContainer.append("<br />");
 		}
