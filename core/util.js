@@ -76,15 +76,15 @@ function getObjectSize(obj) {
     return size;
 }
 
-function traverseOptions(armyUnit, entityOrOption, callback) {
+function traverseOptions(detachmentData, armyUnit, entityOrOption, callback) {
 	for(var i in entityOrOption.optionLists) {
 		var optionList = entityOrOption.optionLists[i];
 		for(var j in optionList.options) {
 			var option = optionList.options[j];
-			callback(armyUnit, optionList, option);
+			callback(detachmentData, armyUnit, optionList, option);
 			
 			if(!option.hasOptions()) {
-				traverseOptions(armyUnit, option, callback);
+				traverseOptions(detachmentData, armyUnit, option, callback);
 			}
 		}
 	}

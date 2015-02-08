@@ -94,7 +94,7 @@ function State() {
 	};
 	
 	this.refreshDirtyThings = function(force) {
-		traverseArmyUnit(this, checkDirtyPools); // mark additional entityslots as dirty if affected by pool
+		traverseDetachmentData(this, checkDirtyPools); // mark additional entityslots as dirty if affected by pool
 		traverseArmyUnit(this, this.calculateDirtyEntityStatesInChooser, { force: force});
 		traverseArmyUnit(this, this.calculateDirtyEntityStatesInSelections, { force: force});
 		
@@ -105,18 +105,18 @@ function State() {
 		for(var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if(additionalParams.force || entityslot.dirty) {
-				_state.checkEntityslotAvailable(armyUnit, entityslot);
+				_state.checkEntityslotAvailable(detachmentData, armyUnit, entityslot);
 			}
 		}
 	};
 
-	this.checkAllEntityslotsAvailable = function(armyUnit) {
+	this.checkAllEntityslotsAvailable = function(armyUnit, armyUnitIndex, detachmentData) {
 		for(var i in armyUnit.getEntityslots()) {
-			_state.checkEntityslotAvailable(armyUnit, armyUnit.getEntityslot(i));
+			_state.checkEntityslotAvailable(detachmentData, armyUnit, armyUnit.getEntityslot(i));
 		}
 	};
 
-	this.checkEntityslotAvailable = function(armyUnit, entityslot) {
+	this.checkEntityslotAvailable = function(detachmentData, armyUnit, entityslot) {
 		
 		var availableState = 1;
 		var count = armyUnit.getEntityCount(entityslot.entityslotId);
@@ -128,7 +128,7 @@ function State() {
 				
 		if(availableState > -1) { // the worst case won't be changed
 			for(var i in entityslot.needsPool) {
-				var pool = armyUnit.getPool(i);
+				var pool = detachmentData.getPool(i);
 				if (pool.currentCount - entityslot.needsPool[pool.name] < 0) {
 					// do not display the entityslot's state worse than necessary
 					if (pool.currentCount >= 0 || (armyUnit.getEntityCount(entityslot.entityslotId) == 0) /*&& pool.currentCount >= -50000*/) {
@@ -189,7 +189,7 @@ function State() {
 				var option = optionList.options[j];
 				resolveOptionMinMax(entity, baseEntity, optionList, option, entityFromPool.optionLists[i].options[j]);
 				resolveOptionPoolAvailable(option);
-				resolveOptionLocalPoolAvailable(baseEntity, option);
+				resolveOptionLocalPoolAvailable(option);
 				totalMinTaken += option.currentMinTaken;
 			}
 			var optionListIsFullByMinTaken = (totalMinTaken >= optionList.currentMaxTaken);
@@ -346,19 +346,19 @@ function State() {
 
 	/**
 	 * 
-	 * @param all of these params need to be provided for the eval statement!
+	 * all of these params need to be provided for the eval statement!
 	 */
-	function resolveMinMax(entity, parentEntity, baseEntity, optionList, option, value,
-			defaultValue) {
+	function resolveMinMax(entity, parentEntity, baseEntity, optionList, option, value, defaultValue) {
 		if (isNumber(value)) {
 			return value;
 		} else if (isUndefined(value)) {
 			return defaultValue;
 		} else {
 			var entitySlot = _armyState.lookupId(entity.parentEntityslot);
-			var armyUnit = _armyState.getArmyUnit(entitySlot.detachmentDataIndex, entitySlot.armyUnitIndex);
+			var detachmentData = _armyState.getDetachmentData(entitySlot.detachmentDataIndex);
+			var armyUnit = detachmentData.getArmyUnit(entitySlot.armyUnitIndex);
 			var entityCount = armyUnit.getEntityCounts();
-			var pool = armyUnit.getPools();
+			var pool = detachmentData.getPools();
 			return parseInt(eval(value));
 		}
 	}

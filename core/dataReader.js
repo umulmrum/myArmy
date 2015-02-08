@@ -197,7 +197,7 @@ function DataReader() {
 		for(var i = 0; i < pools.length; i++) {
 			var obj = pools[i];
 			var pool = new Pool(detachmentDataIndex, obj.name, obj.start);
-			armyUnit.addPool(pool);
+			detachmentData.addPool(pool);
 		}
 		
 		var entityslots = data.entityslots || [];
@@ -254,14 +254,14 @@ function DataReader() {
 
 		var entityPool = armyUnit.getEntityPool();
 		this.resolveDeepOptions(entityPool);
-		resolveLocalPoolChain(armyUnit);
+		resolveLocalPoolChain(detachmentData, armyUnit);
 		
 //		var allies = data.allies || [];
 //		if(allies.length > 0) {
 //			detachmentData.allowedAllies.push.apply(detachmentData.allowedAllies, allies);
 //		}
 		
-		traverseArmyUnit(null, checkPoolsAvailable);
+		traverseDetachmentData(null, checkPoolsAvailable);
 	};
 	
 	this.loadArmy = function(armyUnit, detachmentDataIndex) {
@@ -333,16 +333,16 @@ function DataReader() {
 		}
 	};
 
-	function resolveLocalPoolChain(armyUnit) {
+	function resolveLocalPoolChain(detachmentData, armyUnit) {
 		for(var i in armyUnit.getEntityPool()) {
 			var entity = armyUnit.getFromEntityPool(i);
 			if(entity.hasOptions()) {
-				traverseOptions(armyUnit, entity, copyLocalPools);
+				traverseOptions(detachmentData, armyUnit, entity, copyLocalPools);
 			}
 		}
 	}
 	
-	function copyLocalPools(armyUnit, optionList, option) {
+	function copyLocalPools(detachmentData, armyUnit, optionList, option) {
 		var optionEntity = armyUnit.getFromEntityPool(option.entityId);
 		var hasLocalPools = false;
 		var localPools = {};

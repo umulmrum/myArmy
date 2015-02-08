@@ -168,14 +168,15 @@ function Controller(modificationService) {
 	};
 	
 	this.cloneEntry = function(entityslot) {
-		var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
+		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+		var armyUnit = detachmentData.getArmyUnit(entityslot.armyUnitIndex);
 		var newEntityslot = entityslot.clone();
 		var newEntity = newEntityslot.entity;
 		armyUnit.addEntry(newEntityslot, false);
 		newEntity.totalCost = 0; // will be recalculated later on
 		registerEntityslotOptionsForPools(newEntityslot);
 		changePoolByEntityslot(newEntityslot, true);
-		fixOptionPool(armyUnit, newEntityslot.entity);
+		fixOptionPool(detachmentData, armyUnit, newEntityslot.entity);
 		
 		_dispatcher.triggerEvent("postAddSelection", { entityslot: newEntityslot });
 	};

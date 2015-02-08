@@ -40,8 +40,6 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	
 	var stateLinkPart = null;
 	
-	var pools = {};
-	
 	var texts = {};
 
 	var extension = isExtensionParam;
@@ -63,17 +61,9 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 			selectionCount[i] = 0;
 		}
 		stateLinkPart = null;
-		this.resetPools();
 	};
 	
-	this.resetPools = function() {
-		for ( var i in pools) {
-			var pool = pools[i];
-			pool.currentCount = pool.start;
-			pool.dependingOptions = {};
-		}
-	};
-	
+
 	this.addEntry = function(entityslot, doEntityCalculations) {
 		selections.push(entityslot);
 		selectionCountPerSlot[entityslot.slotId] = selectionCountPerSlot[entityslot.slotId] + 1;
@@ -183,22 +173,6 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 		selectionCount[entityslotId] = count;
 	};
 	
-	this.addPool = function(pool) {
-		pools[pool.name] = pool;
-	};
-	
-	this.getPools = function() {
-		return pools;
-	};
-	
-	this.getPool = function(name) {
-		return pools[name];
-	};
-	
-	this.setPools = function(poolsParam) {
-		pools = poolsParam;
-	};
-
     this.getTexts = function() {
         return texts;
     };

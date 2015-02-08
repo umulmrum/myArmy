@@ -43,13 +43,17 @@ function parsePools(armyIndex, poolString) {
  * @param entityslot
  */
 function registerEntityslotForPools(entityslot) {
-	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
+	var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+	var armyUnit = detachmentData.getArmyUnit(entityslot.armyUnitIndex);
 	for ( var i in entityslot.needsPool) {
-		var pool = armyUnit.getPool(i);
+		var pool = detachmentData.getPool(i);
 		if(isUndefined(pool)) {
 			alert("Pool " + i + " is undefined.");
 		}
-		pool.dependingEntityslots[entityslot.entityslotId] = entityslot;
+		if(isUndefined(pool.dependingEntityslots[armyUnit.armyUnitIndex])) {
+			pool.dependingEntityslots[armyUnit.armyUnitIndex] = {};
+		}
+		pool.dependingEntityslots[armyUnit.armyUnitIndex][entityslot.entityslotId] = entityslot;
 	}
 	checkPoolAvailable(entityslot.needsPool);
 }
@@ -70,9 +74,9 @@ function registerEntityslotOptionsForPools(entityslot) {
 }
 
 function registerOptionForPools(option, entityslot) {
-	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
+	var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
 	for ( var i in option.needsPool) {
-		var pool = armyUnit.getPool(i);
+		var pool = detachmentData.getPool(i);
 		pool.dependingOptions[option.localId] = option;
 		if (pool.currentCount - option.needsPool[i] < 0 && !option.selected) {
 			option.poolAvailable = false;
@@ -103,9 +107,9 @@ function unregisterOptionForPools(option) {
 		doSelectOption(_armyState.lookupId(option.parentOptionList), option, 0);
 	}
 	var entityslot = _armyState.lookupId(option.parentEntityslot);
-	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
+	var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
 	for ( var i in option.needsPool) {
-		delete armyUnit.getPool(i).dependingOptions[option.localId];
+		delete detachmentData.getPool(i).dependingOptions[option.localId];
 	}
 	if (!isUndefined(option.optionLists)) {
 		for ( var i in option.optionLists) {
@@ -117,13 +121,16 @@ function unregisterOptionForPools(option) {
 	}
 }
 
-function checkDirtyPools(armyUnit) {
-	for ( var i in armyUnit.getPools()) {
-		var pool = armyUnit.getPool(i);
+function checkDirtyPools(detachmentData) {
+	for ( var i in detachmentData.getPools()) {
+		var pool = detachmentData.getPool(i);
 		if (pool.dirty) {
 			for ( var j in pool.dependingEntityslots) {
-				var entityslot = pool.dependingEntityslots[j];
-				entityslot.dirty = true;
+				var dependingEntityslotsForArmyUnit = pool.dependingEntityslots[j];
+				for(var k in dependingEntityslotsForArmyUnit) {
+					var entityslot = dependingEntityslotsForArmyUnit[k];
+					entityslot.dirty = true;
+				}
 			}
 			for ( var j in pool.dependingOptions) {
 				var option = pool.dependingOptions[j];
@@ -152,19 +159,19 @@ function checkDirtyPools(armyUnit) {
 // }
 // }
 
-function checkPoolsAvailable(armyUnit) {
-	for ( var i in armyUnit.getPools()) {
-		checkPoolAvailable(armyUnit.getPool(i));
+function checkPoolsAvailable(detachmentData) {
+	for ( var i in detachmentData.getPools()) {
+		checkPoolAvailable(detachmentData.getPool(i));
 	}
 }
 
 function resolveOptionPoolAvailable(option) {
 	var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
-	var armyUnit = _armyState.getArmyUnit(parentEntityslot.detachmentDataIndex, parentEntityslot.armyUnitIndex);
+	var detachmentData = _armyState.getDetachmentData(parentEntityslot.detachmentDataIndex);
 	var poolAvailable = 1;
 
 	for ( var i in option.needsPool) {
-		var pool = armyUnit.getPool(i);
+		var pool = detachmentData.getPool(i);
 		if(isUndefined(pool)) {
 			alert("Pool " + i + " is undefined.");
 		}
@@ -198,12 +205,15 @@ function resolveOptionPoolAvailable(option) {
  * selected. Call this method after every pool change.
  */
 function checkPoolAvailable(pool) {
-	for ( var j in pool.dependingEntityslots) {
-		var entityslot = pool.dependingEntityslots[j];
-		var previousPoolAvailable = entityslot.poolAvailable;
-		/*if (pool.currentCount < -50000) {
-			entityslot.poolAvailable = -2;
-		} else*/ if (pool.currentCount - entityslot.needsPool[pool.name] < 0) {
+	for ( var i in pool.dependingEntityslots) {
+		var dependingEntityslotsForArmyUnit = pool.dependingEntityslots[i];
+		for(var j in dependingEntityslotsForArmyUnit) {
+			var entityslot = dependingEntityslotsForArmyUnit[j];
+			var previousPoolAvailable = entityslot.poolAvailable;
+			/*if (pool.currentCount < -50000) {
+			 entityslot.poolAvailable = -2;
+			 } else*/
+			if (pool.currentCount - entityslot.needsPool[pool.name] < 0) {
 //			if (entityslot.poolAvailable != -2) {
 				if (pool.currentCount >= 0) {
 					entityslot.poolAvailable = 0;
@@ -211,15 +221,16 @@ function checkPoolAvailable(pool) {
 					entityslot.poolAvailable = -1;
 				}
 //			}
-		} else {
-			entityslot.poolAvailable = 1;
-		}
-		if (entityslot.poolAvailable != previousPoolAvailable) {
-			entityslot.dirty = true;
+			} else {
+				entityslot.poolAvailable = 1;
+			}
+			if (entityslot.poolAvailable != previousPoolAvailable) {
+				entityslot.dirty = true;
+			}
 		}
 	}
-	for ( var j in pool.dependingOptions) {
-		var myOption = pool.dependingOptions[j];
+	for ( var i in pool.dependingOptions) {
+		var myOption = pool.dependingOptions[i];
 		var previousPoolAvailable = myOption.poolAvailable;
 
 		myOption.poolAvailable = 1;
@@ -253,10 +264,10 @@ function checkPoolAvailable(pool) {
 
 function changePoolByEntityslot(entityslot, isAdd) {
 	var multiplier = isAdd ? 1 : -1;
-	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
+	var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
 	
-	changePool(armyUnit, entityslot.fillsPool, multiplier);
-	changePool(armyUnit, entityslot.needsPool, (-1) * multiplier);
+	changePool(detachmentData, entityslot.fillsPool, multiplier);
+	changePool(detachmentData, entityslot.needsPool, (-1) * multiplier);
 }
 
 function changePoolByOption(option, newCount, oldCount) {
@@ -265,20 +276,20 @@ function changePoolByOption(option, newCount, oldCount) {
 		return;
 	}
 	var entityslot = _armyState.lookupId(option.parentEntityslot);
-	var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
-	changePool(armyUnit, option.fillsPool, diff);
-	changePool(armyUnit, option.needsPool, (-1) * diff);
+	var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+	changePool(detachmentData, option.fillsPool, diff);
+	changePool(detachmentData, option.needsPool, (-1) * diff);
 }
 
-function changePool(armyUnit, pool, multiplier) {
+function changePool(detachmentData, pool, multiplier) {
 	for ( var i in pool) {
-		armyUnit.getPool(i).currentCount += multiplier * pool[i];
-		armyUnit.getPool(i).dirty = true;
+		detachmentData.getPool(i).currentCount += multiplier * pool[i];
+		detachmentData.getPool(i).dirty = true;
 	}
 }
 
-function fixOptionPool(armyUnit, entityOrOption) {
-	traverseOptions(armyUnit, entityOrOption, fixOptionPoolVisitor);
+function fixOptionPool(detachmentData, armyUnit, entityOrOption) {
+	traverseOptions(detachmentData, armyUnit, entityOrOption, fixOptionPoolVisitor);
 }
 
 /**
@@ -286,14 +297,16 @@ function fixOptionPool(armyUnit, entityOrOption) {
  * cloning. We do not use the doSelect function as we need to circumvent all the
  * checks and modifications it performs.
  * 
+ * @param detachmentData
+ * @param armyUnit
  * @param optionList
  * @param option
  */
-function fixOptionPoolVisitor(armyUnit, optionList, option) {
+function fixOptionPoolVisitor(detachmentData, armyUnit, optionList, option) {
 	var entityslot = _armyState.lookupId(option.parentEntityslot);
 	//var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 	for ( var i in option.needsPool) {
-		if ((armyUnit.getPool(i).currentCount - option.needsPool[i]) < 0) {
+		if ((detachmentData.getPool(i).currentCount - option.needsPool[i]) < 0) {
 			// doSelectOption(optionList, option, 0); // do not use this (see
 			// comment above)
 			optionList.currentCount -= option.currentCount;
@@ -303,7 +316,7 @@ function fixOptionPoolVisitor(armyUnit, optionList, option) {
 	}
 }
 
-function resolveOptionLocalPoolAvailable(baseEntity, option) {
+function resolveOptionLocalPoolAvailable(option) {
 	var poolAvailable = 1;
 
 	for ( var i in option.needsLocalPool) {
@@ -385,9 +398,9 @@ function changeModelCountPool(entityslot, oldCount, count) {
 			realPoolChange = (-1) *  poolChange;
 		}
 		if(realPoolChange != 0) {
-			var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
-			armyUnit.getPool(poolName).currentCount += realPoolChange;
-			armyUnit.getPool(poolName).dirty = true;
+			var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+			detachmentData.getPool(poolName).currentCount += realPoolChange;
+			detachmentData.getPool(poolName).dirty = true;
 		}
 	}
 }
