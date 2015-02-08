@@ -258,20 +258,20 @@ function SummaryGui() {
                     continue;
                 }
                 var entity = slotEntry.entity;
-                data.push(renderEntity(detachmentData.getPosition(), armyUnit, entity, armyRenderer));
+                data.push(renderEntity(detachmentData.getPosition(), detachmentData, armyUnit, entity, armyRenderer));
             }
         }
 		return data;
 	}
 
-	function renderEntity(position, armyUnit, entity, armyRenderer) {
+	function renderEntity(position, detachmentData, armyUnit, entity, armyRenderer) {
 		var s = "";
-		s += armyRenderer.renderEntityHeading(position, armyUnit, entity);
+		s += armyRenderer.renderEntityHeading(position, detachmentData, entity);
 		s += armyRenderer.renderEntityCost(entity);
 		s += "\n";
 
 		if (entity.hasOptions()) {
-			var subSummary = renderOptions(armyUnit, entity.optionLists, 0,
+			var subSummary = renderOptions(detachmentData, entity.optionLists, 0,
 					armyRenderer);
 			if (subSummary != '') {
 				s += subSummary;
@@ -282,7 +282,7 @@ function SummaryGui() {
 		return s;
 	}
 
-	function renderOptions(armyUnit, optionLists, depth, armyRenderer) {
+	function renderOptions(detachmentData, optionLists, depth, armyRenderer) {
 		var s = "";
 		var optionsWithoutSuboptions = [];
 		var optionsWithSuboptions = [];
@@ -296,13 +296,13 @@ function SummaryGui() {
 				}
 				if (option.hasOptions()) {
 					var suboption = armyRenderer.joinSingleSuboption(
-							armyRenderer.renderOption(armyUnit, option, depth),
-							renderOptions(armyUnit, option.optionLists,
+							armyRenderer.renderOption(detachmentData, option, depth),
+							renderOptions(detachmentData, option.optionLists,
 									depth + 1, armyRenderer));
 					optionsWithSuboptions.push(suboption);
 				} else {
 					optionsWithoutSuboptions.push(armyRenderer.renderOption(
-							armyUnit, option, depth));
+						detachmentData, option, depth));
 				}
 			}
 		}
@@ -523,7 +523,7 @@ function SummaryGui() {
 
 	function DefaultArmyRenderer() {
 
-		this.renderEntityHeading = function(position, armyUnit, entity) {
+		this.renderEntityHeading = function(position, detachmentData, entity) {
 			var s = "";
 
 			if (_armyState.getDetachmentCount() > 1) {
@@ -533,7 +533,7 @@ function SummaryGui() {
 			if (entity.currentCount > 1) {
 				s += entity.currentCount + "x ";
 			}
-			s += armyUnit.getText(entity.entityName);
+			s += detachmentData.getText(entity.entityName);
 			return s;
 		};
 
@@ -542,12 +542,12 @@ function SummaryGui() {
 					+ ")";
 		};
 
-		this.renderOption = function(armyUnit, option, depth, isFirst, isLast) {
+		this.renderOption = function(detachmentData, option, depth, isFirst, isLast) {
 			var s = "";
 			if (option.currentCount > 1) {
 				s += option.currentCount + "x ";
 			}
-			s += armyUnit.getText(armyUnit.getFromEntityPool(option.entityId).entityName);
+			s += detachmentData.getText(armyUnit.getFromEntityPool(option.entityId).entityName);
 			return s;
 		};
 
@@ -573,8 +573,8 @@ function SummaryGui() {
 
 		this.armyRenderer = armyRenderer;
 
-		this.renderEntityHeading = function(position, armyUnit, entity) {
-			return this.armyRenderer.renderEntityHeading(position, armyUnit,
+		this.renderEntityHeading = function(position, detachmentData, entity) {
+			return this.armyRenderer.renderEntityHeading(position, detachmentData,
 					entity);
 		};
 
@@ -582,9 +582,9 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(armyUnit, option, depth, isFirst, isLast) {
+		this.renderOption = function(detachmentData, option, depth, isFirst, isLast) {
 			var s = "";
-			s += this.armyRenderer.renderOption(armyUnit, option, depth,
+			s += this.armyRenderer.renderOption(detachmentData, option, depth,
 					isFirst, isLast);
 			return s;
 		};
@@ -640,8 +640,8 @@ function SummaryGui() {
 //		this.lineStarter = '............................................................................................';
 		this.lineStarter = '______________________________________________';
 
-		this.renderEntityHeading = function(position, armyUnit, entity) {
-			return this.armyRenderer.renderEntityHeading(position, armyUnit,
+		this.renderEntityHeading = function(position, detachmentData, entity) {
+			return this.armyRenderer.renderEntityHeading(position, detachmentData,
 					entity);
 		};
 
@@ -649,8 +649,8 @@ function SummaryGui() {
 			return this.armyRenderer.renderEntityCost(entity);
 		};
 
-		this.renderOption = function(armyUnit, option, depth) {
-			return this.armyRenderer.renderOption(armyUnit, option, depth);
+		this.renderOption = function(detachmentData, option, depth) {
+			return this.armyRenderer.renderOption(detachmentData, option, depth);
 		};
 
 		this.joinOptions = function(options, depth) {

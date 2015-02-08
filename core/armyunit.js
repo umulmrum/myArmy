@@ -40,8 +40,6 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 	
 	var stateLinkPart = null;
 	
-	var texts = {};
-
 	var extension = isExtensionParam;
 	
 	this.resetArmy = function() {
@@ -173,22 +171,6 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 		selectionCount[entityslotId] = count;
 	};
 	
-    this.getTexts = function() {
-        return texts;
-    };
-
-	this.getText = function(key) {
-		return texts[key];
-	};
-	
-	this.setTexts = function(textsParam) {
-		texts = textsParam;
-	};
-
-	this.addTexts = function(textsParam) {
-		$.extend(texts, textsParam);
-	};
-
 	this.hasSelections = function() {
 		return this.getSelectionCount() > 0;
 	};

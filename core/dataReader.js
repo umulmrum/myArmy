@@ -82,10 +82,10 @@ function DataReader() {
 		}
 	};
 	
-	this.readTextsArmy = function(armyUnit) {
+	this.readTextsArmy = function(armyUnit, detachmentData) {
 		var army = armyUnit.getArmy();
 		if(army != null) {
-			this.readTexts(getArmyPath(army) + "textarmy", $.proxy(armyUnit.setTexts, armyUnit));
+			this.readTexts(getArmyPath(army) + "textarmy", $.proxy(detachmentData.addTexts, detachmentData));
 		}
 	};
 	
@@ -161,14 +161,14 @@ function DataReader() {
 	}
 	
 	this.readArmy = function(data, additionalParams) {
-		this.readArmydata(additionalParams.detachmentDataIndex, additionalParams.armyUnitIndex, data);
+		this.readArmydata(additionalParams.detachmentData, additionalParams.armyUnit, data);
 	};
 	
-	this.readArmydata = function(detachmentDataIndex, armyUnitIndex, data) {
-		
-		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
-		var armyUnit = detachmentData.getArmyUnit(armyUnitIndex);
-		
+	this.readArmydata = function(detachmentData, armyUnit, data) {
+
+		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
+		var armyUnitIndex = armyUnit.getArmyUnitIndex();
+
 		var entities = data.entities || [];
 		for(var i = 0; i < entities.length; i++) {
 			var obj = entities[i];
@@ -264,10 +264,10 @@ function DataReader() {
 		traverseDetachmentData(null, checkPoolsAvailable);
 	};
 	
-	this.loadArmy = function(armyUnit, detachmentDataIndex) {
-		this.readTextsArmy(armyUnit);
+	this.loadArmy = function(armyUnit, detachmentData) {
+		this.readTextsArmy(armyUnit, detachmentData);
 		var armyPath = getArmyPath(armyUnit.getArmy()) + "army.json";
-		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentDataIndex: detachmentDataIndex, armyUnitIndex: armyUnit.getArmyUnitIndex() });
+		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentData: detachmentData, armyUnit: armyUnit });
 	};
 	
 	function readOptions(detachmentDataIndex, entity, optionListsJson) {

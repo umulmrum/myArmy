@@ -177,16 +177,15 @@ function getSlotHeadingText(slot) {
 	return text;
 }
 
-function getSlotHeadingForArmy(detachmentData, detachmentDataIndex, additionalParams) {
-    var armyUnit = detachmentData.getArmyUnit("a0");
-	if(!isUndefined(armyUnit.getText(additionalParams.slotName))) {
-		return armyUnit.getText(additionalParams.slotName);
+function getSlotHeadingForArmy(detachmentData, additionalParams) {
+	if(!isUndefined(detachmentData.getText(additionalParams.slotName))) {
+		return detachmentData.getText(additionalParams.slotName);
 	} else {
 		return null;
 	}
 }
 
-function getChooserCountForArmy (armyUnit, armyUnitIndex, detachmentData, armyIndex, additionalParams) {
+function getChooserCountForArmy (armyUnit, detachmentData, additionalParams) {
 	// support multiple entities per slot by using fractions and round them up here
 	return Math.ceil(armyUnit.getSelectionSlotCost(additionalParams.slotId));
 }

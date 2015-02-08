@@ -94,7 +94,7 @@ function traverseDetachmentData(caller, callback, additionalParams) {
 	var retValue = {};
 	for(var detachmentDataIndex in _armyState.getDetachments()) {
 		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
-		retValue[detachmentDataIndex] = callback.call(caller, detachmentData, detachmentDataIndex, additionalParams);
+		retValue[detachmentDataIndex] = callback.call(caller, detachmentData, additionalParams);
 	}
 	return retValue;
 }
@@ -106,14 +106,14 @@ function traverseArmyUnit(caller, callback, additionalParams) {
 	return traverseDetachmentData(null, doTraverseArmyUnit, params);
 }
 
-function doTraverseArmyUnit(detachmentData, detachmentDataIndex, additionalParams) {
+function doTraverseArmyUnit(detachmentData, additionalParams) {
 	var caller = additionalParams["_caller"];
 	var callback = additionalParams["_callback"];
 	var armyUnits = detachmentData.getArmyUnits();
 	var retValue = {};
 	for(var armyUnitIndex in armyUnits) {
 		var armyUnit = armyUnits[armyUnitIndex];
-		retValue[armyUnitIndex] = callback.call(caller, armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams);
+		retValue[armyUnitIndex] = callback.call(caller, armyUnit, detachmentData, additionalParams);
 	}
 	return retValue;
 }

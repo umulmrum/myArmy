@@ -72,13 +72,12 @@ function ArmyState() {
 		return detachment;
 	};
 
-	this.removeDetachment = function(detachmentDataIndex) {
-		var detachment = detachmentData[detachmentDataIndex];
-        for(var i in detachment.getArmyUnits()) {
-            var armyUnit = detachment.getArmyUnit(i);
-			detachment.removeArmyUnit(i);
+	this.removeDetachment = function(detachmentDataParam) {
+        for(var i in detachmentDataParam.getArmyUnits()) {
+            var armyUnit = detachmentDataParam.getArmyUnit(i);
+			detachmentDataParam.removeArmyUnit(i);
         }
-		delete detachmentData[detachmentDataIndex];
+		delete detachmentData[detachmentDataParam.getDetachmentDataIndex()];
 		detachmentCount--;
 		setDetachmentPositions();
 
@@ -139,10 +138,6 @@ function ArmyState() {
 		return detachmentData[detachmentDataIndex].getArmy(armyUnitIndex);
 	};
 	
-	this.addExtension = function(detachmentDataIndex, extension) {
-		return detachmentData[detachmentDataIndex].addArmyUnit(extension);
-	};
-
 	this.removeExtension = function(detachmentDataIndex, armyUnitIndex) {
 		return detachmentData[detachmentDataIndex].removeExtension(armyUnitIndex);
 	};

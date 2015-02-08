@@ -149,7 +149,7 @@ function Gui() {
 	};
 
 	this.getArmyName = function(detachmentData) {
-        var armyUnit = detachmentData.getArmyUnit("a0");
+        var armyUnit = detachmentData.getFirstArmyUnit();
 		return _guiState.text["army." + armyUnit.getArmy().armyPrefix];
 	};
 
@@ -188,7 +188,7 @@ function Gui() {
 		return true;
 	};
 	
-	this.checkSlotVisible = function(detachmentData, armyIndex, additionalParams) {
+	this.checkSlotVisible = function(detachmentData, additionalParams) {
 		return !isUndefined(detachmentData.entityslotCount[additionalParams.slotId])
 				&& (detachmentData.entityslotCount[additionalParams.slotId] > 0);
 	};

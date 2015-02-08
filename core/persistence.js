@@ -163,10 +163,11 @@ function Persistence() {
 		// first load all armies in the detachment, so the they can interact (e.g. extensions add detachment types)
 		var armyUnitIdList = findArmyUnits(fileVersion, q, i);
 		_controller.addDetachment(armyUnitIdList[0], "1");
+		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
 		for(var j = 1; j < armyUnitIdList.length; j++) {
-			_controller.addExtension(detachmentDataIndex, armyUnitIdList[j]);
+			_controller.addExtension(detachmentData, armyUnitIdList[j]);
 		}
-		_controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
+		_controller.changeDetachmentType(detachmentData, detachmentTypeId);
 
         while(i < q.length) {
             switch(q[i]) {
@@ -211,15 +212,15 @@ function Persistence() {
 				isExtension = true;
 			}
 			if(isExtension) {
-				_controller.addExtension(detachmentDataIndex, armyId);
+				_controller.addExtension(_armyState.getDetachmentData(detachmentDataIndex), armyId);
 			} else {
 				_controller.addDetachment(armyId, detachmentTypeId);
 			}
 		}
-		var armyUnitId = "a" + armyUnitIndex;
-		var detachmentType = _armyState.getDetachmentData(detachmentDataIndex).detachmentType;
+		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		var armyUnit = detachmentData.getArmyUnit("a" + armyUnitIndex);
 		var options = {};
-		if(detachmentType.isFormation()) {
+		if(detachmentData.detachmentType.isFormation()) {
 			options = { deletable: false, clonable: false };
 		}
         i = i + value.length;
@@ -228,7 +229,7 @@ function Persistence() {
 			switch(q[i]) {
 			case MARKER.DETACHMENT:
                 if(fileVersion < 2) {
-				    i = restoreDetachmentType(fileVersion, q, i + 1, detachmentDataIndex);
+				    i = restoreDetachmentType(fileVersion, q, i + 1, detachmentData);
                 } else {
                     return i;
                 }
@@ -244,7 +245,7 @@ function Persistence() {
 				i = restoreFoc(fileVersion, q, i + 1);
 				break;
 			case MARKER.ENTITY:
-				i = restoreEntity(fileVersion, q, i + 1, detachmentDataIndex, armyUnitId, options);
+				i = restoreEntity(fileVersion, q, i + 1, armyUnit, options);
 				break;
 			case MARKER.ALLYENTITY:
 				// legacy
@@ -258,10 +259,10 @@ function Persistence() {
 		return i+1;
 	}
 	
-	function restoreDetachmentType(fileVersion, q, i, detachmentDataIndex) {
+	function restoreDetachmentType(fileVersion, q, i, detachmentData) {
 		var value = val(q, i);
 		var detachmentTypeId = parseInt(value, BASE);
-		_controller.changeDetachmentType(detachmentDataIndex, detachmentTypeId);
+		_controller.changeDetachmentType(detachmentData, detachmentTypeId);
 		i = i + value.length;
 		return i;
 	}
@@ -281,7 +282,7 @@ function Persistence() {
 		return i + value.length;
 	}
 	
-	function restoreEntity(fileVersion, q, i, detachmentDataIndex, armyUnitIndex, options) {
+	function restoreEntity(fileVersion, q, i, armyUnit, options) {
 		var value = val(q, i);
 		var entityslotId = parseInt(value, BASE);
 		i = i + value.length;
@@ -291,7 +292,7 @@ function Persistence() {
 				i++;
 			}
 		} else {
-			var entity = _controller.addEntry(detachmentDataIndex, armyUnitIndex, entityslotId, false, options);
+			var entity = _controller.addEntry(armyUnit, entityslotId, false, options);
 		}
 		while(i < q.length) {
 			switch(q[i]) {
@@ -311,7 +312,7 @@ function Persistence() {
                 return i;
                 break;
 			case MARKER.ALLYENTITY:
-				i = restoreEntity(fileVersion, q, i + 1, 1);
+				i = restoreEntity(fileVersion, q, i + 1, armyUnit);
 				break;
 			default:
 				alert("Unexpected token '" + q[i] + "' in restoreEntity ");
@@ -451,7 +452,7 @@ function Persistence() {
 					i += value.length;
 					break;
 				case MARKER.ENTITY:
-					i = restoreEntity(currentFileVersion, q, i + 1, detachmentData.getDetachmentDataIndex(), armyUnit.getArmyUnitIndex(), options);
+					i = restoreEntity(currentFileVersion, q, i + 1, armyUnit, options);
 					break;
 				default:
 					alert("Unexpected token '" + q[i] + "' in restoreFragment");

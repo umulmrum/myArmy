@@ -41,7 +41,7 @@ function State() {
 	this.onPostAddSelection = function(event, additionalData) {
 		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
 		this.sortSelections(armyUnit);
-		this.calculateAllSelectionSlotCosts(_armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex))
+		this.calculateAllSelectionSlotCosts(armyUnit);
 	};
 
 	this.onPostRemoveSelection = function(event, additionalData) {
@@ -74,7 +74,7 @@ function State() {
 		this.refreshDirtyThings(force);
 	};
 	
-	this.onPostChangeDetachmentType = function(event, additionalData) {
+	this.onPostChangeDetachmentType = function(event) {
 		for(var i in _armyState.getDetachments()) {
 			for(var j in _armyState.getDetachmentData(i).getArmyUnits()) {
 				this.sortSelections(_armyState.getArmyUnit(i, j));
@@ -101,7 +101,7 @@ function State() {
 		_dispatcher.triggerEvent("postStateRefresh");
 	};
 
-	this.calculateDirtyEntityStatesInChooser = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {
+	this.calculateDirtyEntityStatesInChooser = function(armyUnit, detachmentData, additionalParams) {
 		for(var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if(additionalParams.force || entityslot.dirty) {
@@ -110,7 +110,7 @@ function State() {
 		}
 	};
 
-	this.checkAllEntityslotsAvailable = function(armyUnit, armyUnitIndex, detachmentData) {
+	this.checkAllEntityslotsAvailable = function(armyUnit, detachmentData) {
 		for(var i in armyUnit.getEntityslots()) {
 			_state.checkEntityslotAvailable(detachmentData, armyUnit, armyUnit.getEntityslot(i));
 		}
@@ -153,7 +153,7 @@ function State() {
 		}
 	};
 
-	this.calculateDirtyEntityStatesInSelections = function(armyUnit, additionalParams) {
+	this.calculateDirtyEntityStatesInSelections = function(armyUnit, detachmentData, additionalParams) {
 		for ( var i = 0; i < armyUnit.getSelectionCount(); i++) {
 			var slotEntry = armyUnit.getSelection(i);
 			if (additionalParams.force || slotEntry.dirty) {

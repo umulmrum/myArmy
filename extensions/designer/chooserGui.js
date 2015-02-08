@@ -99,9 +99,7 @@ function ChooserGui() {
 	};
 
 	this.onPostAddExtension = function(event, additionalData) {
-		var detachmentData = _armyState.getDetachmentData(additionalData.detachmentDataIndex);
-		var armyUnit = detachmentData.getArmyUnit(additionalData.armyUnitIndex);
-		this.renderSlotEntries(armyUnit, additionalData.armyUnitIndex, detachmentData, additionalData.detachmentDataIndex);
+		this.renderSlotEntries(additionalData.armyUnit, additionalData.detachmentData);
 	};
 
 	this.onPostDeleteExtension = function(event) {
@@ -248,14 +246,16 @@ function ChooserGui() {
 		traverseArmyUnit(this, this.renderSlotEntries);
 	};
 	
-	this.renderSlotEntries = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex) {
+	this.renderSlotEntries = function(armyUnit, detachmentData) {
+		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
+		var armyUnitIndex = armyUnit.getArmyUnitIndex();
 		var hasSeparator = {};
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			var entityslotId = entityslot.entityslotId;
 			var slotentryList = _gui.getElement("#slotentryChooserList" + entityslot.slotId);
 			var entity = armyUnit.getFromEntityPool(entityslot.entityId);
-			var entityName = armyUnit.getText(entity.entityName);
+			var entityName = detachmentData.getText(entity.entityName);
 
 			var cssClasses = this.getCssForEntry(armyUnit, entityslot);
 
@@ -267,14 +267,13 @@ function ChooserGui() {
 			var xli = li(/*"&raquo; " +*/ entityName,
 					"chooserEntry" + detachmentDataIndex + "_" + armyUnitIndex + "_" + entityslotId, cssClasses);
 			xli.on(_guiState.clickEvent, {
-				detachmentDataIndex : detachmentDataIndex,
-                armyUnitIndex: armyUnitIndex,
+                armyUnit: armyUnit,
 				entityslotId : entityslotId
 			}, function(event) {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.addEntry(event.data.detachmentDataIndex, event.data.armyUnitIndex, event.data.entityslotId, true);
+				_controller.addEntry(event.data.armyUnit, event.data.entityslotId, true);
 			});
 //			if (entityslot.availableState == 0) {
 //				xli.append(span(" (" + _guiState.text["max"] + ")", null,
@@ -381,11 +380,11 @@ function ChooserGui() {
 		return (count >= minCount) && (count <= maxCount);
 	}
 	
-	this.refreshDirtySlots = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex) {
+	this.refreshDirtySlots = function(armyUnit, detachmentData) {
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if (entityslot.dirty) {
-				this.refreshSlotentry(detachmentDataIndex, armyUnit, armyUnitIndex, entityslot);
+				this.refreshSlotentry(detachmentData.getDetachmentDataIndex(), armyUnit, entityslot);
 //				dirtySlotIds[entityslot.slotId] = 1;
 				entityslot.dirty = false;
 			}
@@ -404,8 +403,8 @@ function ChooserGui() {
 		}
 	};
 	
-	this.refreshSlotentry = function(detachmentDataIndex, armyUnit, armyUnitIndex, entityslot) {
-		var entry = $("#chooserEntry" + detachmentDataIndex + "_" + armyUnitIndex + "_" + entityslot.entityslotId);
+	this.refreshSlotentry = function(detachmentDataIndex, armyUnit, entityslot) {
+		var entry = $("#chooserEntry" + detachmentDataIndex + "_" + armyUnit.getArmyUnitIndex() + "_" + entityslot.entityslotId);
 		entry.removeClass();
 		entry.addClass(this.getCssForEntry(armyUnit, entityslot));
 	};
@@ -432,18 +431,18 @@ function ChooserGui() {
 		tabs.filter("#unitSelectionTab" + unitsToShow).addClass("selectedTab");
 	};
 	
-	this.refreshForArmyUnit = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {
+	this.refreshForArmyUnit = function(armyUnit, detachmentData, additionalParams) {
 		for ( var j in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(j);
 			if (entityslot.slotId != additionalParams.slotId) {
 				continue;
 			}
 			
-			var entry = $("#chooserEntry" + detachmentDataIndex + "_" + armyUnitIndex + "_" + entityslot.entityslotId);
+			var entry = $("#chooserEntry" + detachmentData.getDetachmentDataIndex() + "_" + armyUnit.getArmyUnitIndex() + "_" + entityslot.entityslotId);
 			entry.removeClass();
 			entry.addClass(this.getCssForEntry(armyUnit, entityslot));
 			var entity = armyUnit.getFromEntityPool(entityslot.entityId);
-			var entityName = armyUnit.getText(entity.entityName);
+			var entityName = detachmentData.getText(entity.entityName);
 			entry.html(entityName);
 		}
 		return detachmentData.entityslotCount[additionalParams.slotId] > 0;

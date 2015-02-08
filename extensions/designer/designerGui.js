@@ -81,7 +81,7 @@ function DesignerGui() {
 	this.onPostChangeDetachmentType = function(event, additionalData) {
 		if(additionalData.changedSelections) {
 			this.removeInvalidEntries();
-			this.renderSelectionsForDetachment(_armyState.getDetachmentData(additionalData.detachmentDataIndex));
+			this.renderSelectionsForDetachment(additionalData.detachmentData);
 		}
 	};
 
@@ -142,7 +142,7 @@ function DesignerGui() {
 		}
 	};
 	
-	this.renderSelectionsForSlot = function(armyUnit, armyUnitIndex, detachmentData, detachmentDataIndex, additionalParams) {
+	this.renderSelectionsForSlot = function(armyUnit, detachmentData, additionalParams) {
 		var selections = armyUnit.getSelections();
 		for (var j = 0; j < selections.length; j++) {
 			if(selections[j].slotId == additionalParams.slotId) {
@@ -160,14 +160,10 @@ function DesignerGui() {
 		var container = _gui.getElement("#slotentryDesignerList" + entityslot.slotId);
 		var isCollapsed = entityslot.optionDisplayState == _guiState.OPTION_DISPLAYSTATE.COLLAPSED;
 
-		var entry = null;
-		var entryContent = null;
-		var optionContainer = null;
-
-		entry = li(null, "entry_" + entityslot.localId , "entry", { "data-localid": entityslot.localId });
-		entryContent = div(null, "entryContent_" + entityslot.localId , "entryContent", null);
+		var entry = li(null, "entry_" + entityslot.localId , "entry", { "data-localid": entityslot.localId });
+		var entryContent = div(null, "entryContent_" + entityslot.localId , "entryContent", null);
 		entry.append(entryContent);
-		optionContainer = table();
+		var optionContainer = table();
 		
 		var position = getEntryPosition(armyUnit.getSelections(), entityslot);
 		if(position == 0) {
@@ -185,7 +181,7 @@ function DesignerGui() {
 			event.data.target.clickOption($(this).attr('data-localId'));
 		});
 
-		this.renderEntryHeader(armyUnit, entryContent, entityslot);
+		this.renderEntryHeader(entryContent, entityslot);
 
 		if (entity.minCount > 1 || entity.maxCount > 1) {
 			this.renderModelCountHeader(entryContent, entity, entityslot);
@@ -259,10 +255,11 @@ function DesignerGui() {
 		return position;
 	}
 
-	this.renderEntryHeader = function(armyUnit, container, entityslot) {
+	this.renderEntryHeader = function(container, entityslot) {
+		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
 		var entity = entityslot.entity;
 		var entryHeader = null;
-		var entityName = armyUnit.getText(entity.entityName);
+		var entityName = detachmentData.getText(entity.entityName);
 		var entityCost = "";
 		if (entity.totalCost > 0) {
 			entityCost = entity.totalCost + " " + _guiState.text["points"];
@@ -272,7 +269,7 @@ function DesignerGui() {
 			if(entity.minCount < entity.maxCount) {
 				armyIndexCss += " entryArmyIndexWithModelCount";
 			}
-			var armyIndexElement = span(_armyState.getDetachmentData(entityslot.detachmentDataIndex).getPosition(), null, armyIndexCss);
+			var armyIndexElement = span(detachmentData.getPosition(), null, armyIndexCss);
 			entryHeader.append(armyIndexElement);
 		if(_armyState.getDetachmentCount() < 2) {
 			armyIndexElement.addClass("invisible");
@@ -356,7 +353,8 @@ function DesignerGui() {
 			isFirstOptionList, isFirstOption, depth, invisible) {
 
 		var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
-		var optionEntity = _armyState.getArmyUnit(parentEntityslot.detachmentDataIndex, parentEntityslot.armyUnitIndex).getFromEntityPool(option.entityId);
+		var detachmentData = _armyState.getDetachmentData(parentEntityslot.detachmentDataIndex);
+		var optionEntity = armyUnit.getFromEntityPool(option.entityId);
 
 		var cssClasses = "option";
 		if (isFirstOption && !isFirstOptionList) {
@@ -381,7 +379,7 @@ function DesignerGui() {
 		var optionTextAttr = {};
 		optionTextAttr["style"] = "padding-left: " + padding + "px";
 
-		var optionText = armyUnit.getText(optionEntity.entityName);
+		var optionText = detachmentData.getText(optionEntity.entityName);
 		if (option.currentMaxTaken > 1) {
 			optionText += " " + option.currentCount + "/"
 					+ option.currentMaxTaken;
@@ -536,7 +534,7 @@ function DesignerGui() {
 		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex)
 		var entity = entityslot.entity;
 		var entryHeader = null;
-		var entityName = armyUnit.getText(entity.entityName);
+		var entityName = detachmentData.getText(entity.entityName);
 		var entityCost = "";
 		if (entity.totalCost > 0) {
 			entityCost = entity.totalCost + " " + _guiState.text["points"];
@@ -617,6 +615,8 @@ function DesignerGui() {
 	this.refreshOption = function(armyUnit, optionContainer, optionList, option, isCollapsed,
 			isFirstOptionList, isFirstOption, depth, invisible) {
 
+		var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
+		var detachmentData = _armyState.getDetachmentData(parentEntityslot.detachmentDataIndex);
 		var optionEntity = armyUnit.getFromEntityPool(option.entityId);
 		var cssClasses = "option";
 		if (isFirstOption && !isFirstOptionList) {
@@ -640,7 +640,7 @@ function DesignerGui() {
 		optionElement.removeClass();
 		optionElement.addClass(cssClasses);
 		
-		var optionText = armyUnit.getText(optionEntity.entityName);
+		var optionText = detachmentData.getText(optionEntity.entityName);
 		if (option.currentMaxTaken > 1) {
 			optionText += " " + option.currentCount + "/"
 					+ option.currentMaxTaken;
