@@ -326,10 +326,18 @@ function MainmenuGui() {
 			_controller.addExtension(event.data.detachmentData, this.value);
 		});
 
+		var sortedExtensions = [];
+		for(var i in _systemState.extensions) {
+			sortedExtensions.push(_systemState.extensions[i]);
+		}
+		sortedExtensions = sortedExtensions.sort(function(a, b) {
+			return _guiState.getText("army." + a.armyPrefix) > _guiState.getText("army." + b.armyPrefix) ? 1 : -1;
+		});
+
 		selectBox.append(option("> " +_guiState.getText("chooseExtension") + " <", "-1", true));
 		var hasSelectableExtensions = false;
-		for(var i in _systemState.extensions) {
-			var extension = _systemState.extensions[i];
+		for(var i in sortedExtensions) {
+			var extension = sortedExtensions[i];
 			if(!detachmentData.isExtensionAllowed(extension.armyId)) {
 				continue;
 			}

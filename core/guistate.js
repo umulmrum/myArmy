@@ -44,6 +44,8 @@ function GuiState() {
 	
 	this.contentFragments = {};
 	this.currentContent = null;
+
+	this.unitsToShow = "d0";
 	
 	this.languages = ["en", "de"]; // all available languages
 	this.lang = "en"; // the currently active language

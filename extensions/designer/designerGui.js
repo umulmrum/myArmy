@@ -36,6 +36,7 @@ function DesignerGui() {
 		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
+		_dispatcher.bindEvent("postChangeUnitsToShow", this, this.onPostChangeUnitsToShow, _dispatcher.PHASE_STATE);
 	};
 	
 	this.onPostInit = function(event) {
@@ -95,6 +96,10 @@ function DesignerGui() {
 	
 	this.onPostChangeSpecialDisplay = function(event) {
 		traverseArmyUnit(this, this.refreshSelections);
+	};
+
+	this.onPostChangeUnitsToShow = function(event, additionalData) {
+		this.highlightActiveDetachment(additionalData.unitsToShow);
 	};
 	
 	/**
@@ -160,7 +165,7 @@ function DesignerGui() {
 		var container = _gui.getElement("#slotentryDesignerList" + entityslot.slotId);
 		var isCollapsed = entityslot.optionDisplayState == _guiState.OPTION_DISPLAYSTATE.COLLAPSED;
 
-		var entry = li(null, "entry_" + entityslot.localId , "entry", { "data-localid": entityslot.localId });
+		var entry = li(null, "entry_" + entityslot.localId , "entry", { "data-localid": entityslot.localId, "data-detachmentdataindex": _armyState.getDetachmentData(entityslot.detachmentDataIndex).getDetachmentDataIndex() });
 		var entryContent = div(null, "entryContent_" + entityslot.localId , "entryContent", null);
 		entry.append(entryContent);
 		var optionContainer = table();
@@ -265,12 +270,15 @@ function DesignerGui() {
 			entityCost = entity.totalCost + " " + _guiState.getText("points");
 		}
 		entryHeader = div(null, null, "entryHeader commonHighlight");
-			var armyIndexCss = "entryArmyIndex";
-			if(entity.minCount < entity.maxCount) {
-				armyIndexCss += " entryArmyIndexWithModelCount";
-			}
-			var armyIndexElement = span(detachmentData.getPosition(), null, armyIndexCss);
-			entryHeader.append(armyIndexElement);
+		if(entityslot.detachmentDataIndex != _guiState.unitsToShow) {
+			entryHeader.addClass("commonHighlightInactive");
+		}
+		var armyIndexCss = "entryArmyIndex";
+		if(entity.minCount < entity.maxCount) {
+			armyIndexCss += " entryArmyIndexWithModelCount";
+		}
+		var armyIndexElement = span(detachmentData.getPosition(), null, armyIndexCss);
+		entryHeader.append(armyIndexElement);
 		if(_armyState.getDetachmentCount() < 2) {
 			armyIndexElement.addClass("invisible");
 		}
@@ -284,6 +292,9 @@ function DesignerGui() {
 	this.renderModelCountHeader = function(container, entity, entityslot) {
 		var modelCountInfoText = _guiState.getText("pointsPerModel").replace(/\{0\}/, entity.currentCostPerModel);
 		var modelCountHeader = div(null, null, "entryHeader commonHighlight modelCountHeader");
+		if(entityslot.detachmentDataIndex != _guiState.unitsToShow) {
+			modelCountHeader.addClass("commonHighlightInactive");
+		}
 
 		if(entity.minCount == entity.maxCount) {
 			modelCountHeader.append(span(entity.currentCount + " " + _guiState.getText("numberofmodelsPlural")));
@@ -881,5 +892,11 @@ function DesignerGui() {
 			okButton.unbind(_guiState.clickEvent);
 		});
 	};
+
+	this.highlightActiveDetachment = function(unitsToShow) {
+		var designContainer = _gui.getElement(".designContainer");
+		designContainer.find("li[data-detachmentdataindex!='" + unitsToShow + "']").find(".entryHeader").addClass("commonHighlightInactive");
+		designContainer.find("li[data-detachmentdataindex='" + unitsToShow + "']").find(".entryHeader").removeClass("commonHighlightInactive");
+	}
 	
 }

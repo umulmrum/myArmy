@@ -22,8 +22,6 @@
 
 function ChooserGui() {
 	
-	var unitsToShow = "d0";
-	
 	this.init = function() {
 		_dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, _dispatcher.PHASE_STATE);
 		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
@@ -196,10 +194,10 @@ function ChooserGui() {
 
 	this.renderUnitSelectionTabs = function() {
 
-		if(_armyState.getDetachmentData(unitsToShow) == null) {
+		if(_armyState.getDetachmentData(_guiState.unitsToShow) == null) {
 			var firstDetachment = _armyState.getFirstDetachment();
 			if(firstDetachment != null) {
-				unitsToShow = firstDetachment.getDetachmentDataIndex();
+				_guiState.unitsToShow = firstDetachment.getDetachmentDataIndex();
 			}
 		}
 
@@ -212,7 +210,7 @@ function ChooserGui() {
 		for(var i in  _armyState.getDetachments()) {
 			var detachmentData = _armyState.getDetachmentData(i);
 			var xLi = li(detachmentData.getPosition(), "unitSelectionTab" + i, "tab unitTab", null);
-			if(unitsToShow == i) {
+			if(_guiState.unitsToShow == i) {
 				xLi.addClass("selectedTab");
 			}
 			xLi.on(_guiState.clickEvent, { unitsToShow: i, target: this}, this.showUnitTab);
@@ -428,7 +426,7 @@ function ChooserGui() {
 		var tabRow = rowElement.find(".tabRow");
 		var tabs = tabRow.children();
 		tabs.removeClass("selectedTab");
-		tabs.filter("#unitSelectionTab" + unitsToShow).addClass("selectedTab");
+		tabs.filter("#unitSelectionTab" + _guiState.unitsToShow).addClass("selectedTab");
 	};
 	
 	this.refreshForArmyUnit = function(armyUnit, detachmentData, additionalParams) {
@@ -465,7 +463,7 @@ function ChooserGui() {
             // break;
 		}
 		
-		if(entityslot.detachmentDataIndex != unitsToShow) {
+		if(entityslot.detachmentDataIndex != _guiState.unitsToShow) {
 			cssClass += " invisible";
 		}
 		if(!_gui.checkDisplay(armyUnit.getFromEntityPool(entityslot.entityId))) {
@@ -482,8 +480,9 @@ function ChooserGui() {
 		if (!wasClick(event)) {
 			return false;
 		}
-		unitsToShow = event.data.unitsToShow;
+		_guiState.unitsToShow = event.data.unitsToShow;
 		event.data.target.refreshEntries();
+		_dispatcher.triggerEvent("postChangeUnitsToShow", { unitsToShow: event.data.unitsToShow });
 	};
 
 	this.setSlotVisibility = function(slot, visible) {
@@ -499,7 +498,8 @@ function ChooserGui() {
 	this.resetUnitsToShow = function () {
 		var firstDetachment = _armyState.getFirstDetachment();
 		if(firstDetachment != null) {
-			unitsToShow = firstDetachment.getDetachmentDataIndex();
+			_guiState.unitsToShow = firstDetachment.getDetachmentDataIndex();
+			_dispatcher.triggerEvent("postChangeUnitsToShow", { unitsToShow: firstDetachment.getDetachmentDataIndex() });
 		}
 	};
 }
