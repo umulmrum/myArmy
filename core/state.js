@@ -168,7 +168,7 @@ function State() {
 		_armyState.addTotalPoints(costBefore);
 		_armyState.addPointsPerSlot(entityslot.slotId, costBefore);
 		calculateOptionState(entityslot, entity, entity);
-		calculateEntityCost(entity);
+		calculateEntityCost(entityslot, entity);
 		_persistence.calculateEntityslotSaveState(entityslot);
 		_armyState.addTotalPoints(entity.totalCost);
 		_armyState.addPointsPerSlot(entityslot.slotId, entity.totalCost);
@@ -363,19 +363,21 @@ function State() {
 		}
 	}
 
-	function calculateEntityCost(entity) {
+	function calculateEntityCost(entityslot, entity) {
 		var costObj = [0, 0];
-		costObj[0] = entity.costPerModel;
-		costObj[1] = entity.cost;
+        costObj[0] = entity.costPerModel;
+        costObj[1] = entity.cost;
 
-		for ( var i in entity.optionLists) {
-			var optionList = entity.optionLists[i];
-			if(optionList.currentMaxTaken == 0) {
-				continue;
-			}
-			for ( var j in optionList.options) {
-				calculateOptionCost(entity, optionList.options[j], costObj);
-			}
+        for ( var i in entity.optionLists) {
+            var optionList = entity.optionLists[i];
+            if(optionList.currentMaxTaken == 0) {
+                continue;
+            }
+            for ( var j in optionList.options) {
+                var entityFromPool = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(entity.entityId);
+                var optionFromPool = entityFromPool.optionLists[i].options[j];
+                calculateOptionCost(entityslot, entity, optionList.options[j], optionFromPool, costObj);
+            }
 		}
 
 		entity.currentCostPerModel = costObj[0];
@@ -383,18 +385,19 @@ function State() {
 		entity.totalCost = costObj[0] * entity.currentCount + costObj[1];
 	}
 
-	function calculateOptionCost(entity, option, costObj) {
+	function calculateOptionCost(entityslot, entity, option, compareOption, costObj) {
 		var optionCostObj = [0, 0];
 
 		// calculate option cost
-		resolveOptionCurrentCost(entity, option, optionCostObj);
+		resolveOptionCurrentCost(entity, option, compareOption, optionCostObj);
 		// recursively calculate suboption cost if applicable
 		if (!isUndefined(option.optionLists)) {
 			for ( var i in option.optionLists) {
 				var optionList = option.optionLists[i];
 				for ( var j in optionList.options) {
-					calculateOptionCost(entity, optionList.options[j],
-							optionCostObj);
+                    var entityFromPool = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(option.entityId);
+                    var optionFromPool = entityFromPool.optionLists[i].options[j];
+					calculateOptionCost(entityslot, entity, optionList.options[j], optionFromPool, optionCostObj);
 				}
 			}
 		}
@@ -408,17 +411,17 @@ function State() {
 		}
 	}
 
-	function resolveOptionCurrentCost(entity, option, optionCostObj) {
+	function resolveOptionCurrentCost(entity, option, compareOption, optionCostObj) {
 
-		if (isNumber(option.costPerModel)) {
-			optionCostObj[0] = option.costPerModel;
+		if (isNumber(compareOption.costPerModel)) {
+			optionCostObj[0] = compareOption.costPerModel;
 		} else {
-			optionCostObj[0] = eval(option.costPerModel);
+			optionCostObj[0] = eval(compareOption.costPerModel);
 		}
-		if (isNumber(option.cost)) {
-			optionCostObj[1] = option.cost;
+		if (isNumber(compareOption.cost)) {
+			optionCostObj[1] = compareOption.cost;
 		} else {
-			optionCostObj[1] = eval(option.cost);
+			optionCostObj[1] = eval(compareOption.cost);
 		}
 
 		if (option.currentCount > 0) {
