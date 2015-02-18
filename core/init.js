@@ -22,6 +22,7 @@
 
 var _dispatcher = null;
 var _state = null;
+var _remoteService = null;
 var _dataReader = null;
 var _modificationService = null;
 var _dataStore = null;
@@ -73,9 +74,14 @@ function initVars() {
 	_dispatcher = new Dispatcher();
 	_state = new State();
 	_state.init();
-	_dataReader = new DataReader();
-	_dataReader.init();
 	_dataStore = new DataStore();
+	_remoteService = new RemoteService();
+	if(_options.core.cacheRemoteFiles && _dataStore.isLocalStorageAvailable()) {
+		_remoteService = new CachedRemoteService(_remoteService, _dataStore);
+	}
+	_remoteService.init();
+	_dataReader = new DataReader(_remoteService);
+	_dataReader.init();
 	_systemState = new SystemState();
 	_armyState = new ArmyState();
 	_persistence = new Persistence();

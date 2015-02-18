@@ -24,7 +24,7 @@
  * DataReader reads data from the data repository (i.e. mainly the server or 
  * the file system when used offline).
  */
-function DataReader() {
+function DataReader(remoteService) {
 	
 	this.init = function() {
 		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_BEGIN);
@@ -45,19 +45,6 @@ function DataReader() {
 
 	function getArmyPath(army) {
 		return getSystemPath(_systemState.system) + army.armyPrefix + "/";
-	}
-	
-	function doJson(file, successHandler, errorHandler, isAsync, additionalParams) {
-		$.ajax({
-			url : file,
-			dataType : 'json',
-			success : function(data, textstats, jqXHR) {
-				successHandler(data, additionalParams);
-			},
-			error : errorHandler,
-			async: isAsync,
-			cache: false
-		});
 	}
 	
 	function loadfail(filename, response, errortype, message) {
@@ -91,7 +78,7 @@ function DataReader() {
 	
 	this.readTexts = function(filepath, callback) {
 		var file = filepath + "_" + _guiState.lang + ".json";
-		doJson(file, this.readTextsSuccess, null, false, { callback: callback });
+		remoteService.getRemoteFile(file, this.readTextsSuccess, null, false, { callback: callback });
 	};
 	
 	this.readTextsSuccess = function(data, additionalParams) {
@@ -99,7 +86,7 @@ function DataReader() {
 	};
 	
 	this.readSystems = function() {
-		doJson('data/systems.json', this.readSystemsSuccess, loadfail, false);
+		remoteService.getRemoteFile('data/systems.json', this.readSystemsSuccess, loadfail, false);
 	};
 	
 	this.readSystemsSuccess = function(data) {
@@ -114,7 +101,7 @@ function DataReader() {
 	};
 
     this.readSystem = function(system) {
-        doJson(getSystemPath(system) + '/system.json', this.readSystemSuccess, loadfail, false, { system: system });
+		remoteService.getRemoteFile(getSystemPath(system) + '/system.json', this.readSystemSuccess, loadfail, false, { system: system });
     };
 
     this.readSystemSuccess = function(data, additionalParams) {
@@ -281,7 +268,7 @@ function DataReader() {
 	this.loadArmy = function(armyUnit, detachmentData) {
 		this.readTextsArmy(armyUnit, detachmentData);
 		var armyPath = getArmyPath(armyUnit.getArmy()) + "army.json";
-		doJson(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentData: detachmentData, armyUnit: armyUnit });
+		remoteService.getRemoteFile(armyPath, $.proxy(this.readArmy, this), loadfail, false, { detachmentData: detachmentData, armyUnit: armyUnit });
 	};
 	
 	function readOptions(detachmentDataIndex, entity, optionListsJson) {

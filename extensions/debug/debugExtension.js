@@ -29,7 +29,11 @@ function DebugExtension() {
 		extensionManager.addMenuButton("debugButton", function() {
 			_gui.showFragment("debug");
 		});
-		
+
+		_gui.getElement('#clearCacheButton').on(_guiState.clickEvent, function() {
+			localStorage.clear();
+		});
+
 		_gui.getElement('#debugTestSuccessMessageButton').on(_guiState.clickEvent, function() {
 			_gui.displaySuccessMessage("Test success message");
 		});
@@ -42,13 +46,16 @@ function DebugExtension() {
 		_gui.getElement('#debugTestHideMessagesButton').on(_guiState.clickEvent, function() {
 			_gui.hideMessages();
 		});
-	}
+	};
 	
 	function getContainerContent() {
-		return '<div> \
-				<span id="debugTestSuccessMessageButton" class="mediumButton">Display test success message</span><br /> \
-				<span id="debugTestErrorMessageButton" class="mediumButton">Display test error message</span><br /> \
-				<span id="debugTestInfoMessageButton" class="mediumButton">Display test info message</span><br /> \
+		return '\
+			<span id="clearCacheButton" class="mediumButton">Clear cache</span>\
+			<hr>\
+			<div>\
+				<span id="debugTestSuccessMessageButton" class="mediumButton">Display test success message</span>\
+				<span id="debugTestErrorMessageButton" class="mediumButton">Display test error message</span>\
+				<span id="debugTestInfoMessageButton" class="mediumButton">Display test info message</span>\
 				<span id="debugTestHideMessagesButton" class="mediumButton">Hide messages</span> \
 			</div>';
 	}

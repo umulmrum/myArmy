@@ -28,7 +28,10 @@ function loadScript(url) {
 
 loadScript("core/options.js");
 loadScript("core/jquery.ba-hashchange-sk.js");
+loadScript("core/version.js");
 loadScript("core/datastore.js");
+loadScript("core/RemoteService.js");
+loadScript("core/CachedRemoteService.js");
 loadScript("core/model.js");
 loadScript("core/dispatcher.js");
 loadScript("core/systemstate.js");

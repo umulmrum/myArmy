@@ -55,7 +55,14 @@ function DataStore() {
 		}
 		return null;
 	};
-	
+
+	this.isLocalStorageAvailable = function() {
+		try {
+			return 'localStorage' in window && window['localStorage'] !== null;
+		} catch (e) {
+			return false;
+		}
+	};
 	
 	this.setLocalData = function(name, value, permanent) {
 		try {
