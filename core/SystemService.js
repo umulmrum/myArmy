@@ -20,7 +20,7 @@
 
 "use strict";
 
-function SystemService(systemState) {
+function SystemService(systemState, armyState) {
 
     var dataReader = null;
 
@@ -32,6 +32,7 @@ function SystemService(systemState) {
             }
         }
         dataReader.readSystem(systemState.system);
+        armyState.resetArmy();
     };
 
     this.setDataReader = function(dataReaderParam) {

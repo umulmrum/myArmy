@@ -46,9 +46,9 @@ function Container() {
 
         systemState = new SystemState();
 
-        systemService = new SystemService(systemState);
-
         armyState = new ArmyState(systemState);
+
+        systemService = new SystemService(systemState, armyState);
 
         dispatcher = new Dispatcher();
 

@@ -32,7 +32,6 @@ function Controller(dispatcher, languageService, systemService, detachmentServic
 	this.changeSystem = function(systemId) {
 		if (systemId != -1) {
             systemService.changeSystem(systemId);
-			//this.resetArmylist();
 			dispatcher.triggerEvent("postChangeSystem");
 		}
 	};
