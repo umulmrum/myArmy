@@ -60,7 +60,7 @@ function Controller(dispatcher, languageService, systemService, detachmentServic
 	};
 
 	this.deleteDetachment = function(detachmentData) {
-		detachmentService.removeDetachment(detachmentData);
+		detachmentService.deleteDetachment(detachmentData);
 		dispatcher.triggerEvent("postDeleteDetachment", { detachmentData: detachmentData });
 	};
 

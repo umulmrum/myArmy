@@ -65,7 +65,8 @@ function Persistence(dispatcher, systemService, systemState, armyState, poolServ
 		dispatcher.bindEvent("postResetArmy", this, this.createStatelink, dispatcher.PHASE_STATE);
 		dispatcher.bindEvent("postAddExtension", this, this.createStatelink, dispatcher.PHASE_STATE);
 		dispatcher.bindEvent("postDeleteDetachment", this, this.createStatelink, dispatcher.PHASE_ACTION);
-		
+		dispatcher.bindEvent("postDeleteExtension", this, this.createStatelink, dispatcher.PHASE_ACTION);
+
 		jQuery.event.add(window, "hashchange", function() {
 			if(_guiState.hashEventEnabled) {
 				dispatcher.triggerEvent("postHashChange");

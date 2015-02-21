@@ -84,7 +84,6 @@ function DetachmentData(detachmentDataIndexParam) {
 		}
 		delete armyUnits[armyUnitIndex];
 		armyUnitCount--;
-		_container.getPersistence().createStatelink();
 		return extensionId;
 	};
 	
