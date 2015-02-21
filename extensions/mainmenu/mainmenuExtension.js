@@ -27,6 +27,7 @@ function MainmenuExtension(dispatcher, gui) {
         var systemState = _container.getSystemState();
         var armyState = _container.getArmyState();
         var controller = _container.getController();
+        var languageService = _container.getLanguageService();
 
 		var mainmenuGui = new MainmenuGui(dispatcher, systemState, armyState, controller, gui);
 		mainmenuGui.init();
@@ -34,7 +35,7 @@ function MainmenuExtension(dispatcher, gui) {
 		extensionManager.addContainer("mainmenuContainer", getContainerContent());
 		extensionManager.addContainer("creditsContainer", "");
 		
-		addEvents(controller);
+		addEvents(controller, languageService);
 		
 		extensionManager.addMenuButton("mainmenuButton", function() {
 			gui.showFragment("mainmenu");
@@ -74,7 +75,7 @@ function MainmenuExtension(dispatcher, gui) {
 	</div>';
 	}
 	
-	function addEvents(controller) {
+	function addEvents(controller, languageService) {
 		gui.getElement("#systemSelect").on("change", { controller: controller }, function() {
 			controller.changeSystem(this.value);
 		});
@@ -97,7 +98,7 @@ function MainmenuExtension(dispatcher, gui) {
 			gui.showFragment("credits");
 		});
 		gui.getElement("#downloadButton").on(_guiState.clickEvent, function() {
-			window.open(_options.core.downloadBaseUri + _guiState.lang + _options.core.downloadPath);
+			window.open(_options.core.downloadBaseUri + languageService.getLanguage() + _options.core.downloadPath);
 		});
 		gui.getElement("#forumButton").on(_guiState.clickEvent, function() {
 			window.open("http://www.gw-fanworld.net/forumdisplay.php/398-myArmy");

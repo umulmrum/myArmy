@@ -115,10 +115,6 @@ function DetachmentData(detachmentDataIndexParam) {
 		this.resetPools();
 	};
 	
-	this.addEntry = function(armyUnitIndex, entityslot, doEntityCalculations) {
-		armyUnits[armyUnitIndex].addEntry(entityslot, doEntityCalculations);
-	};
-
 	this.removeEntry = function(armyUnitIndex, entityslot) {
 		armyUnits[armyUnitIndex].removeEntry(entityslot);
 	};

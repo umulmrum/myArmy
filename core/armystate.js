@@ -80,8 +80,6 @@ function ArmyState(systemState) {
 		delete detachmentData[detachmentDataParam.getDetachmentDataIndex()];
 		detachmentCount--;
 		setDetachmentPositions();
-
-		_container.getPersistence().createStatelink();
 	};
 
 	function setDetachmentPositions() {
@@ -165,10 +163,6 @@ function ArmyState(systemState) {
 	
 	this.getFocCount = function() {
 		return this.focCount;
-	};
-	
-	this.setFocCount = function(count) {
-		this.focCount = count;
 	};
 	
 	this.getStateLink = function() {

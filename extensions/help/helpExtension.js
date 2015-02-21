@@ -25,9 +25,10 @@ function HelpExtension(dispatcher, gui) {
 	this.init = function(extensionManager) {
 		
 //		extensionManager.addContainer("helpContainer", "");
+        var languageService = _container.getLanguageService();
 		
 		extensionManager.addMenuButton("helpButton", function() {
-			window.open(_options.help.baseUri + _guiState.lang + _options.help.path);
+			window.open(_options.help.baseUri + languageService.getLanguage() + _options.help.path);
 //			gui.getElement(".helpContainer").load(
 //					"extensions/help/help_" + _guiState.lang + ".html");
 //			gui.showFragment("help");

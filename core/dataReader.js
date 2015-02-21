@@ -24,7 +24,7 @@
  * DataReader reads data from the data repository (i.e. mainly the server or 
  * the file system when used offline).
  */
-function DataReader(dispatcher, remoteService, systemState, modificationService, poolService) {
+function DataReader(dispatcher, remoteService, systemState, modificationService, poolService, languageService) {
 	
 	this.init = function() {
 		dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_BEGIN);
@@ -77,7 +77,7 @@ function DataReader(dispatcher, remoteService, systemState, modificationService,
 	};
 	
 	this.readTexts = function(filepath, callback) {
-		var file = filepath + "_" + _guiState.lang + ".json";
+		var file = filepath + "_" + languageService.getLanguage() + ".json";
 		remoteService.getRemoteFile(file, this.readTextsSuccess, null, false, { callback: callback });
 	};
 	

@@ -23,7 +23,7 @@
 /**
  * State is used to compute the current state of constraints in the system.
  */
-function State(dispatcher, systemState, armyState, persistence, poolService) {
+function State(dispatcher, systemState, armyState, persistence, poolService, optionService) {
 	
 	this.init = function() {
 		dispatcher.bindEvent("postAddSelection", this, this.onPostAddSelection, dispatcher.PHASE_ACTION);
@@ -209,7 +209,7 @@ function State(dispatcher, systemState, armyState, persistence, poolService) {
 				 * currentCount to fit.
 				 */
 				if ((option.currentCount > option.currentMaxTaken)) {
-					doSelectOption(optionList, option, option.currentMaxTaken);
+                    optionService.doSelectOption(optionList, option, option.currentMaxTaken);
 				}
 			}
 			if(!optionListHasActiveOptions) {
@@ -236,11 +236,11 @@ function State(dispatcher, systemState, armyState, persistence, poolService) {
 						var diff = optionList.currentCount - optionList.currentMaxTaken;
 						var newOptionCount = Math.min(Math.max(option.currentCount
 								- diff, 0), option.currentMaxTaken);
-						doSelectOption(optionList, option, newOptionCount);
+                        optionService.doSelectOption(optionList, option, newOptionCount);
 					} else if((optionList.currentCount < optionList.currentMinTaken) && option.currentMaxTaken > 0 && option.poolAvailable == 1 && option.localPoolAvailable == 1) {
 						var diff = optionList.currentMinTaken - optionList.currentCount;
 						var newOptionCount = Math.min(option.currentCount + diff, option.currentMaxTaken);
-						doSelectOption(optionList, option, newOptionCount);
+                        optionService.doSelectOption(optionList, option, newOptionCount);
 					} 
 				}
 
@@ -250,7 +250,7 @@ function State(dispatcher, systemState, armyState, persistence, poolService) {
 				if((option.currentCount < option.currentMinTaken) && option.currentMaxTaken > 0 && option.poolAvailable == 1 && option.localPoolAvailable == 1) {
 					var diff = option.currentMinTaken - option.currentCount;
 					var newOptionCount = Math.min(option.currentCount + diff, option.currentMaxTaken);
-					doSelectOption(optionList, option, newOptionCount);
+                    optionService.doSelectOption(optionList, option, newOptionCount);
 				}
 				/*
 				 * Now maybe there are too many options selected for this optionList. So we unselect/reduce all options whose currentCount is greater than their
@@ -262,7 +262,7 @@ function State(dispatcher, systemState, armyState, persistence, poolService) {
 						var option = optionList.options[j];
 						var optionDiff = option.currentCount - option.currentMinTaken;
 						if(optionDiff > 0) {
-							doSelectOption(optionList, option, option.currentCount - Math.min(diff, optionDiff));
+                            optionService.doSelectOption(optionList, option, option.currentCount - Math.min(diff, optionDiff));
 							diff -= optionDiff;
 							calculateOptionState(entityslot, option, baseEntity);
 							if(diff <= 0) {
@@ -303,7 +303,7 @@ function State(dispatcher, systemState, armyState, persistence, poolService) {
 					}
 					var optionDiff = option.currentMaxTaken - option.currentCount;
 					if (optionDiff > 0) {
-						doSelectOption(optionList, option, option.currentCount
+                        optionService.doSelectOption(optionList, option, option.currentCount
 								+ Math.min(diff, optionDiff));
 						diff -= optionDiff;
 						calculateOptionState(entityslot, option, baseEntity);

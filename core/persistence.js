@@ -25,7 +25,7 @@
  * code to re-create the army. How this code is used is up to the GUI).
  * See the documentation on how the code is being created and parsed.
  */
-function Persistence(dispatcher, systemState, armyState, poolService) {
+function Persistence(dispatcher, systemService, systemState, armyState, poolService, detachmentService, selectionService, optionService) {
 
 	var currentFileVersion = "2";
 
@@ -131,7 +131,7 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 	function restoreSystem(fileVersion, q, i) {
 		var value = val(q, i);
 		var systemid = parseInt(value, BASE);
-		_container.getController().changeSystem(systemid);
+		systemService.changeSystem(systemid);
 		i = i + value.length;
 		var detachmentDataIndex = 0;
 		while(i < q.length) {
@@ -165,12 +165,12 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 
 		// first load all armies in the detachment, so the they can interact (e.g. extensions add detachment types)
 		var armyUnitIdList = findArmyUnits(fileVersion, q, i);
-		_container.getController().addDetachment(armyUnitIdList[0], "1");
+		detachmentService.addDetachment(armyUnitIdList[0], "1");
 		var detachmentData = armyState.getDetachmentData(detachmentDataIndex);
 		for(var j = 1; j < armyUnitIdList.length; j++) {
-			_container.getController().addExtension(detachmentData, armyUnitIdList[j]);
+			detachmentService.addExtension(detachmentData, armyUnitIdList[j]);
 		}
-		_container.getController().changeDetachmentType(detachmentData, detachmentTypeId);
+		detachmentService.changeDetachmentType(detachmentData, detachmentData.getDetachmentType(detachmentTypeId));
 
         while(i < q.length) {
             switch(q[i]) {
@@ -215,9 +215,9 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 				isExtension = true;
 			}
 			if(isExtension) {
-				_container.getController().addExtension(armyState.getDetachmentData(detachmentDataIndex), armyId);
+				detachmentService.addExtension(armyState.getDetachmentData(detachmentDataIndex), armyId);
 			} else {
-				_container.getController().addDetachment(armyId, detachmentTypeId);
+				detachmentService.addDetachment(armyId, detachmentTypeId);
 			}
 		}
 		var detachmentData = armyState.getDetachmentData(detachmentDataIndex);
@@ -265,7 +265,7 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 	function restoreDetachmentType(fileVersion, q, i, detachmentData) {
 		var value = val(q, i);
 		var detachmentTypeId = parseInt(value, BASE);
-		_container.getController().changeDetachmentType(detachmentData, detachmentTypeId);
+		detachmentService.changeDetachmentType(detachmentData, detachmentData.getDetachmentType(detachmentTypeId));
 		i = i + value.length;
 		return i;
 	}
@@ -273,7 +273,7 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 	function restoreCurrentArmyLegacy(fileVersion, q, i) {
 		var value = val(q, i);
 		var armyid = parseInt(value, BASE);
-		_container.getController().addDetachment(armyid);
+		detachmentService.addDetachment(armyid);
 		i = i + value.length;
 		return i;//+1;
 	}
@@ -295,7 +295,8 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 				i++;
 			}
 		} else {
-			var entity = _container.getController().addEntry(armyUnit, entityslotId, false, options);
+			var entityslot = selectionService.addSelection(armyUnit, entityslotId, false, options);
+            var entity = entityslot.entity;
 		}
 		while(i < q.length) {
 			switch(q[i]) {
@@ -379,7 +380,7 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 		var option = optionList.options[optionId];
 //		resolveOptionMinMax(parentEntity, baseEntity, optionList, option);
 		// directly select the option, circumventing all checks (if the user managed to save this state, we assume that it is valid)
-		doSelectOption(optionList, option, 1);
+		optionService.doSelectOption(optionList, option, 1);
 		i = i + value.length;
 		while(i < q.length) {
 			switch(q[i]) {
@@ -417,7 +418,7 @@ function Persistence(dispatcher, systemState, armyState, poolService) {
 	
 	function restoreOptionCount(fileVersion, q, i, entity, optionList, option) {
 		var value = val(q, i);
-		doSelectOption(optionList, option, parseInt(value, BASE));
+        optionService.doSelectOption(optionList, option, parseInt(value, BASE));
 		i = i + value.length;
 		return i;
 	}

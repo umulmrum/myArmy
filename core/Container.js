@@ -26,8 +26,10 @@ function Container() {
     var state = null;
     var dataStore = null;
     var remoteService = null;
+    var languageService = null;
     var dataReader = null;
     var systemState = null;
+    var systemService = null;
     var armyState = null;
     var persistence = null;
     var modificationService = null;
@@ -35,22 +37,34 @@ function Container() {
     var textService = null;
     var extensionManager = null;
     var poolService = null;
+    var detachmentService = null;
+    var selectionService = null;
+    var optionService = null;
     var gui = null;
 
     this.init = function() {
 
         systemState = new SystemState();
 
+        systemService = new SystemService(systemState);
+
         armyState = new ArmyState(systemState);
 
         dispatcher = new Dispatcher();
 
-        poolService = new PoolService(armyState);
+        optionService = new OptionService(armyState);
 
-        persistence = new Persistence(dispatcher, systemState, armyState, poolService);
+        poolService = new PoolService(armyState, optionService);
+        optionService.setPoolService(poolService);
+
+        selectionService = new SelectionService(armyState, poolService);
+
+        detachmentService = new DetachmentService(systemState, armyState);
+
+        persistence = new Persistence(dispatcher, systemService, systemState, armyState, poolService, detachmentService, selectionService, optionService);
         persistence.init();
 
-        state = new State(dispatcher, systemState, armyState, persistence, poolService);
+        state = new State(dispatcher, systemState, armyState, persistence, poolService, optionService);
         state.init();
 
         dataStore = new DataStore();
@@ -61,19 +75,26 @@ function Container() {
         }
         remoteService.init();
 
+        languageService = new LanguageService(dataStore);
+
         modificationService = new ModificationService(poolService);
 
-        dataReader = new DataReader(dispatcher, remoteService, systemState, modificationService, poolService);
+        dataReader = new DataReader(dispatcher, remoteService, systemState, modificationService, poolService, languageService);
         dataReader.init();
 
         modificationService.init();
 
-        controller = new Controller(dispatcher, dataStore, dataReader, systemState, armyState, persistence, poolService, modificationService);
+        detachmentService.setDataReader(dataReader);
+        detachmentService.setModificationService(modificationService);
+        detachmentService.setPersistence(persistence);
+        systemService.setDataReader(dataReader);
+
+        controller = new Controller(dispatcher, languageService, systemService, detachmentService, selectionService, optionService);
 
         textService = new TextService(dispatcher, armyState);
         textService.init();
 
-        gui = new Gui(dispatcher, systemState, armyState, controller);
+        gui = new Gui(dispatcher, systemState, armyState, controller, languageService);
         gui.init();
 
         extensionManager = new ExtensionManager(dispatcher, gui);
@@ -95,6 +116,10 @@ function Container() {
 
     this.getRemoteService = function() {
         return remoteService;
+    };
+
+    this.getLanguageService = function() {
+        return languageService;
     };
 
     this.getDataReader = function() {
@@ -135,5 +160,13 @@ function Container() {
 
     this.getGui = function() {
         return gui;
+    };
+
+    this.getOptionService = function() {
+        return optionService;
+    };
+
+    this.getSystemService = function() {
+        return systemService;
     };
 }

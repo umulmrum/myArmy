@@ -23,7 +23,7 @@
 /**
  * The Gui is the main user interface for the system.
  */
-function Gui(dispatcher, systemState, armyState, controller) {
+function Gui(dispatcher, systemState, armyState, controller, language) {
 
 	this.init = function() {
 		dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_STATE);
@@ -83,7 +83,7 @@ function Gui(dispatcher, systemState, armyState, controller) {
 	this.onPreCallFragment = function(event, additionalData) {
 		if (additionalData.newFragment == "credits") {
 			this.getElement(".creditsContainer").load(
-					"credits_" + _guiState.lang + ".html");
+					"credits_" + languageService.getLanguage() + ".html");
 		}
 	};
 

@@ -20,7 +20,7 @@
 
 "use strict";
 
-function PoolService(armyState) {
+function PoolService(armyState, optionService) {
 
     this.parsePools = function(armyIndex, poolString) {
         if (poolString == null) {
@@ -102,7 +102,7 @@ function PoolService(armyState) {
             myOption.poolAvailable = 1;
             if (myOption.selected) {
                 if (pool.currentCount < 0) {
-                    doSelectOption(armyState.lookupId(myOption.parentOptionList), myOption,
+                    optionService.doSelectOption(armyState.lookupId(myOption.parentOptionList), myOption,
                         0);
                     myOption.poolAvailable = -1;
                 }
@@ -120,7 +120,7 @@ function PoolService(armyState) {
 
             if ((myOption.poolAvailable != previousPoolAvailable)
                 && !isUndefined(armyState.lookupId(myOption.parentEntityslot))) {
-                // might be undefined during the call from deleteEntry, when
+                // might be undefined during the call from selectionService.deleteSelection(), when
                 // the entityslot has already been deleted; in this case we
                 // can (and need to) safely ignore the dirty flag
                 armyState.lookupId(myOption.parentEntityslot).dirty = true;
@@ -174,7 +174,7 @@ function PoolService(armyState) {
 
     this.unregisterOptionForPools = function(option) {
         if (hasProperties(option.fillsPool) || hasProperties(option.needsPool)) {
-            doSelectOption(_container.getArmyState().lookupId(option.parentOptionList), option, 0);
+            optionService.doSelectOption(_container.getArmyState().lookupId(option.parentOptionList), option, 0);
         }
         var entityslot = _container.getArmyState().lookupId(option.parentEntityslot);
         var detachmentData = _container.getArmyState().getDetachmentData(entityslot.detachmentDataIndex);
@@ -224,7 +224,7 @@ function PoolService(armyState) {
 
             if (option.selected) {
                 if (pool.currentCount < 0) {
-                    doSelectOption(armyState.lookupId(option.parentOptionList), option, 0);
+                    optionService.doSelectOption(armyState.lookupId(option.parentOptionList), option, 0);
                     poolAvailable = -1;
                 }
             } else {
@@ -290,7 +290,7 @@ function PoolService(armyState) {
         var entityslot = armyState.lookupId(option.parentEntityslot);
         for ( var i in option.needsPool) {
             if ((detachmentData.getPool(i).currentCount - option.needsPool[i]) < 0) {
-                // doSelectOption(optionList, option, 0); // do not use this (see
+                // optionService.doSelectOption(optionList, option, 0); // do not use this (see
                 // comment above)
                 optionList.currentCount -= option.currentCount;
                 option.selected = false;
@@ -312,7 +312,7 @@ function PoolService(armyState) {
 
             if (option.selected) {
                 if (pool.currentCount < 0) {
-                    doSelectOption(armyState.lookupId(option.parentOptionList), option, 0);
+                    optionService.doSelectOption(armyState.lookupId(option.parentOptionList), option, 0);
                     poolAvailable = -1;
                 }
             } else {

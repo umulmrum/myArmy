@@ -37,13 +37,14 @@ function init() {
     var dispatcher = container.getDispatcher();
     var dataReader = container.getDataReader();
     var systemState = container.getSystemState();
+    var systemService = container.getSystemService();
     var armyState = container.getArmyState();
-    var controller = container.getController();
     var extensionManager = container.getExtensionManager();
     var gui = container.getGui();
+    var languageService = container.getLanguageService();
+    var persistence = container.getPersistence();
 
     dispatcher.triggerEvent("preLongRunningProcess");
-	dispatcher.deactivateEvents();
 	initDevice();
 	// After this point the event system is initialized.
 	// Do not register events (jQuery or myArmy) before this comment.
@@ -51,10 +52,11 @@ function init() {
 	gui.onResizeContainer();
 	extensionManager.initExtensions();
 	dataReader.readSystems();
-	initUserState(container.getDataStore(), container.getPersistence());
+    languageService.restoreLanguage();
+    persistence.restoreState();
     
     if(systemState.system == null) {
-    	controller.changeSystem(1); // set directly as long as only 1 system is supported ...
+    	systemService.changeSystem(1); // set directly as long as only 1 system is supported ...
     }
 	
     // TODO decouple
@@ -64,7 +66,6 @@ function init() {
 		_guiState.currentContent = "mainmenu";
 	}
 
-	dispatcher.activateEvents();
 	dispatcher.triggerEvent("postInit");
     dispatcher.triggerEvent("postLongRunningProcess");
 }
@@ -127,13 +128,4 @@ function initDevice() {
 //	if((userAgent.indexOf("iphone") != -1) || (userAgent.indexOf("ipad") != -1)) {
 //		_guiState.selectEvent = "focus";
 //	}
-}
-
-function initUserState(dataStore, persistence) {
-	var lang = dataStore.readCookieValue("myArmy.language");
-	if (lang != null) {
-		_guiState.lang = lang;
-	}
-	
-    persistence.restoreState();
 }
