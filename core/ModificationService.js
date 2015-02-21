@@ -1,21 +1,24 @@
 "use strict";
 
-function ModificationService(dataReader) {
+function ModificationService(poolService) {
+
+    var dataReader = null;
+
+    this.init = function() {
+        dataReader = _container.getDataReader();
+    };
 
     this.applyModifications = function(detachmentData, modifications, origin) {
         for (var modificationType in modifications) {
             var modificationData = modifications[modificationType];
-            //for (var j in _armyState.getDetachments()) {
-            //    var detachment = _armyState.getDetachmentData(j);
-                for (var k in detachmentData.getArmyUnits()) {
-                    var affectedArmyUnit = detachmentData.getArmyUnit(k);
-                    var modification = getModificationForArmyUnit(modificationData, affectedArmyUnit);
-                    if (modification == null) {
-                        continue;
-                    }
-                    applyModificationToArmyUnit(modificationType, modification, detachmentData, affectedArmyUnit, origin);
+            for (var k in detachmentData.getArmyUnits()) {
+                var affectedArmyUnit = detachmentData.getArmyUnit(k);
+                var modification = getModificationForArmyUnit(modificationData, affectedArmyUnit);
+                if (modification == null) {
+                    continue;
                 }
-            //}
+                applyModificationToArmyUnit(modificationType, modification, detachmentData, affectedArmyUnit, origin);
+            }
         }
     };
 
@@ -166,13 +169,13 @@ function ModificationService(dataReader) {
                 var minTaken = coalesce(obj2.minTaken, 0);
                 var maxTaken = coalesce(obj2.maxTaken, 1);
                 var fillsPool = obj2.fillsPool || null;
-                fillsPool = parsePools(origin, fillsPool);
+                fillsPool = poolService.parsePools(origin, fillsPool);
                 var needsPool = obj2.needsPool || null;
-                needsPool = parsePools(origin, needsPool);
+                needsPool = poolService.parsePools(origin, needsPool);
                 var fillsLocalPool = obj2.fillsLocalPool || null;
-                fillsLocalPool = parsePools(origin, fillsLocalPool);
+                fillsLocalPool = poolService.parsePools(origin, fillsLocalPool);
                 var needsLocalPool = obj2.needsLocalPool || null;
-                needsLocalPool = parsePools(origin, needsLocalPool);
+                needsLocalPool = poolService.parsePools(origin, needsLocalPool);
                 var option = new Option(optionId, entityId, cost, costPerModel, minTaken, maxTaken, fillsPool, needsPool, fillsLocalPool, needsLocalPool);
                 option.origin = origin;
                 optionList.options[optionId] = option;

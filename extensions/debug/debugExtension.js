@@ -20,31 +20,33 @@
 
 "use strict";
 
-function DebugExtension() {
+function DebugExtension(dispatcher, gui) {
 	
 	this.init = function(extensionManager) {
-		
+
+        var dataStore = _container.getDataStore();
+
 		extensionManager.addContainer("debugContainer", getContainerContent());
 		
 		extensionManager.addMenuButton("debugButton", function() {
-			_gui.showFragment("debug");
+			gui.showFragment("debug");
 		});
 
-		_gui.getElement('#clearCacheButton').on(_guiState.clickEvent, function() {
-			localStorage.clear();
+		gui.getElement('#clearCacheButton').on(_guiState.clickEvent, function() {
+			dataStore.clear();
 		});
 
-		_gui.getElement('#debugTestSuccessMessageButton').on(_guiState.clickEvent, function() {
-			_gui.displaySuccessMessage("Test success message");
+		gui.getElement('#debugTestSuccessMessageButton').on(_guiState.clickEvent, function() {
+			gui.displaySuccessMessage("Test success message");
 		});
-		_gui.getElement('#debugTestErrorMessageButton').on(_guiState.clickEvent, function() {
-			_gui.displayErrorMessage("Test error message");
+		gui.getElement('#debugTestErrorMessageButton').on(_guiState.clickEvent, function() {
+			gui.displayErrorMessage("Test error message");
 		});
-		_gui.getElement('#debugTestInfoMessageButton').on(_guiState.clickEvent, function() {
-			_gui.displayInfoMessage("Test info message");
+		gui.getElement('#debugTestInfoMessageButton').on(_guiState.clickEvent, function() {
+			gui.displayInfoMessage("Test info message");
 		});
-		_gui.getElement('#debugTestHideMessagesButton').on(_guiState.clickEvent, function() {
-			_gui.hideMessages();
+		gui.getElement('#debugTestHideMessagesButton').on(_guiState.clickEvent, function() {
+			gui.hideMessages();
 		});
 	};
 	

@@ -25,7 +25,7 @@
  * code to re-create the army. How this code is used is up to the GUI).
  * See the documentation on how the code is being created and parsed.
  */
-function Persistence() {
+function Persistence(dispatcher, systemState, armyState, poolService) {
 
 	var currentFileVersion = "2";
 
@@ -58,16 +58,17 @@ function Persistence() {
 	//MARKER.MODIFICATION_OPTION = "";
 
 	this.init = function() {
-		_dispatcher.bindEvent("postStateRefresh", this, this.createStatelink, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeDetachmentType", this, this.createStatelink, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddDetachment", this, this.createStatelink, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postResetArmy", this, this.createStatelink, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddExtension", this, this.createStatelink, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteDetachment", this, this.createStatelink, _dispatcher.PHASE_ACTION);
+        
+		dispatcher.bindEvent("postStateRefresh", this, this.createStatelink, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeDetachmentType", this, this.createStatelink, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddDetachment", this, this.createStatelink, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postResetArmy", this, this.createStatelink, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddExtension", this, this.createStatelink, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteDetachment", this, this.createStatelink, dispatcher.PHASE_ACTION);
 		
 		jQuery.event.add(window, "hashchange", function() {
 			if(_guiState.hashEventEnabled) {
-				_dispatcher.triggerEvent("postHashChange");
+				dispatcher.triggerEvent("postHashChange");
 				init();
 			}
 		});
@@ -107,8 +108,8 @@ function Persistence() {
 	function doEntityCalculations(armyUnit) {
 		for(var i = 0; i < armyUnit.getSelectionCount(); i++) {
 			var entityslot = armyUnit.getSelection(i);
-			registerEntityslotOptionsForPools(entityslot);
-			changePoolByEntityslot(entityslot, true);
+            poolService.registerEntityslotOptionsForPools(entityslot);
+            poolService.changePoolByEntityslot(entityslot, true);
 		}
 		armyUnit.recalculateSelectionSlotCost();
 	}
@@ -130,7 +131,7 @@ function Persistence() {
 	function restoreSystem(fileVersion, q, i) {
 		var value = val(q, i);
 		var systemid = parseInt(value, BASE);
-		_controller.changeSystem(systemid);
+		_container.getController().changeSystem(systemid);
 		i = i + value.length;
 		var detachmentDataIndex = 0;
 		while(i < q.length) {
@@ -164,12 +165,12 @@ function Persistence() {
 
 		// first load all armies in the detachment, so the they can interact (e.g. extensions add detachment types)
 		var armyUnitIdList = findArmyUnits(fileVersion, q, i);
-		_controller.addDetachment(armyUnitIdList[0], "1");
-		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		_container.getController().addDetachment(armyUnitIdList[0], "1");
+		var detachmentData = armyState.getDetachmentData(detachmentDataIndex);
 		for(var j = 1; j < armyUnitIdList.length; j++) {
-			_controller.addExtension(detachmentData, armyUnitIdList[j]);
+			_container.getController().addExtension(detachmentData, armyUnitIdList[j]);
 		}
-		_controller.changeDetachmentType(detachmentData, detachmentTypeId);
+		_container.getController().changeDetachmentType(detachmentData, detachmentTypeId);
 
         while(i < q.length) {
             switch(q[i]) {
@@ -210,16 +211,16 @@ function Persistence() {
 		var isExtension = false;
 		if(fileVersion < 2) {
 			// in older versions each army was loaded when it "appeared" in the saved string
-			if(isUndefined(_systemState.armies[armyId]) && !isUndefined(_systemState.extensions[armyId])) {
+			if(isUndefined(systemState.armies[armyId]) && !isUndefined(systemState.extensions[armyId])) {
 				isExtension = true;
 			}
 			if(isExtension) {
-				_controller.addExtension(_armyState.getDetachmentData(detachmentDataIndex), armyId);
+				_container.getController().addExtension(armyState.getDetachmentData(detachmentDataIndex), armyId);
 			} else {
-				_controller.addDetachment(armyId, detachmentTypeId);
+				_container.getController().addDetachment(armyId, detachmentTypeId);
 			}
 		}
-		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+		var detachmentData = armyState.getDetachmentData(detachmentDataIndex);
 		var armyUnit = detachmentData.getArmyUnit("a" + armyUnitIndex);
 		var options = {};
 		if(detachmentData.detachmentType.isFormation()) {
@@ -264,7 +265,7 @@ function Persistence() {
 	function restoreDetachmentType(fileVersion, q, i, detachmentData) {
 		var value = val(q, i);
 		var detachmentTypeId = parseInt(value, BASE);
-		_controller.changeDetachmentType(detachmentData, detachmentTypeId);
+		_container.getController().changeDetachmentType(detachmentData, detachmentTypeId);
 		i = i + value.length;
 		return i;
 	}
@@ -272,7 +273,7 @@ function Persistence() {
 	function restoreCurrentArmyLegacy(fileVersion, q, i) {
 		var value = val(q, i);
 		var armyid = parseInt(value, BASE);
-		_controller.addDetachment(armyid);
+		_container.getController().addDetachment(armyid);
 		i = i + value.length;
 		return i;//+1;
 	}
@@ -280,7 +281,7 @@ function Persistence() {
 	function restoreFoc(fileVersion, q, i) {
 		var value = val(q, i);
 		// ignore result as this is a legacy feature (needs to be in though, to provide backwards compatibility)
-//		_armyState.setFocCount(parseInt(value, BASE));
+//		armyState.setFocCount(parseInt(value, BASE));
 		return i + value.length;
 	}
 	
@@ -294,7 +295,7 @@ function Persistence() {
 				i++;
 			}
 		} else {
-			var entity = _controller.addEntry(armyUnit, entityslotId, false, options);
+			var entity = _container.getController().addEntry(armyUnit, entityslotId, false, options);
 		}
 		while(i < q.length) {
 			switch(q[i]) {
@@ -327,8 +328,8 @@ function Persistence() {
 	function restoreModelcount(fileVersion, q, i, entity) {
 		var value = val(q, i);
 		entity.currentCount = parseInt(value, BASE);
-		var entityslot = _armyState.lookupId(entity.parentEntityslot);
-		changeModelCountPool(entityslot, 0, entity.currentCount);
+		var entityslot = armyState.lookupId(entity.parentEntityslot);
+		poolService.changeModelCountPool(entityslot, 0, entity.currentCount);
 		i = i + value.length;
 		return i;
 	}
@@ -471,17 +472,17 @@ function Persistence() {
 			stateLink = stateLink.substring(0, stateLink.indexOf("#"));
 		}
 	
-		if (_systemState.system == null) {
+		if (systemState.system == null) {
 			return;
 		}
 	
 		var state = currentFileVersion; // version of link format (zero-based; if none is given, we assume 0 when loading an army)
-		state += MARKER.SYSTEM + _systemState.system.systemId.toString(BASE);
-		if(_armyState.getFocCount() > 1) {
-			state += MARKER.FOC + _armyState.getFocCount().toString(BASE);
+		state += MARKER.SYSTEM + systemState.system.systemId.toString(BASE);
+		if(armyState.getFocCount() > 1) {
+			state += MARKER.FOC + armyState.getFocCount().toString(BASE);
 		}
 	
-		if (_armyState.getDetachmentCount() != 0) {
+		if (armyState.getDetachmentCount() != 0) {
 			var stateLinksPerArmy = traverseDetachmentData(this, createStateLinkForDetachmentData);
 			for(var i in stateLinksPerArmy) {
 				if(stateLinksPerArmy[i] != null) {
@@ -491,10 +492,10 @@ function Persistence() {
 		}
 	
 		stateLink += "#" + state;
-		_armyState.setStateLink(stateLink);
-		_persistence.setHashEvent(false);
+		armyState.setStateLink(stateLink);
+		this.setHashEvent(false);
 		location.hash = state;
-		window.setTimeout("window.setTimeout(\"_persistence.setHashEvent(true)\", 1)", 1);
+		window.setTimeout("window.setTimeout(\"_container.getPersistence().setHashEvent(true)\", 1)", 1);
 	};
 	
 	function createStateLinkForDetachmentData(detachmentData) {

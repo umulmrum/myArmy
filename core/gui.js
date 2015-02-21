@@ -23,22 +23,23 @@
 /**
  * The Gui is the main user interface for the system.
  */
-function Gui() {
+function Gui(dispatcher, systemState, armyState, controller) {
 
 	this.init = function() {
-		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachmentAction, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachmentAction, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachmentAction, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
-		
+		dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachmentAction, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachmentAction, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachmentAction, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("preLongRunningProcess", this, this.onPreLongRunningProcess, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postLongRunningProcess", this, this.onPostLongRunningProcess, dispatcher.PHASE_STATE);
+
 		this.getElement(".appMenuButton").on(_guiState.clickEvent, { menuId: "appMenu" }, toggleMenu);
 		this.getElement(".slotMenuButton").on(_guiState.clickEvent, { menuId: "slotMenu" }, toggleMenu);
 		this.getElement(".messageCloseButton").on(_guiState.clickEvent, this.hideMessages);
@@ -52,12 +53,6 @@ function Gui() {
 	
 	this.onPostAddDetachment = function(event, additionalData) {
 		this.refreshAll();
-		this.stopLongRunningProcess();
-	};
-
-	this.onPostAddExtension = function(event, additionalData) {
-		//this.refreshAll();
-		this.stopLongRunningProcess();
 	};
 
 	this.onPostDeleteDetachmentAction = function(event, additionalData) {
@@ -66,7 +61,6 @@ function Gui() {
 
 	this.onPostDeleteDetachment = function(event, additionalData) {
 		this.refreshAll();
-		this.stopLongRunningProcess();
 	};
 
 	this.onPostResetArmy = function(event) {
@@ -75,7 +69,6 @@ function Gui() {
 
 	this.onPostChangeLanguage = function(event) {
 		this.refreshAll();
-		this.stopLongRunningProcess();
 	};
 
 	this.onPostStateRefresh = function(event) {
@@ -85,7 +78,6 @@ function Gui() {
 	this.onPostInit = function(event) {
 		this.prepare();
 		this.refreshAll();
-		this.stopLongRunningProcess();
 	};
 	
 	this.onPreCallFragment = function(event, additionalData) {
@@ -95,11 +87,19 @@ function Gui() {
 		}
 	};
 
+    this.onPreLongRunningProcess = function() {
+      this.startLongRunningProcess();
+    };
+
+    this.onPostLongRunningProcess = function() {
+        this.stopLongRunningProcess();
+    };
+
 	this.prepare = function() {
 		this.renderLanguageSelect();
 		this.checkSlotVisibility();
 
-		_dispatcher.triggerEvent("postPrepareGui");
+		dispatcher.triggerEvent("postPrepareGui");
 	};
 
 	this.refreshAll = function() {
@@ -118,15 +118,15 @@ function Gui() {
 	};
 	
 	this.checkSlotVisibility = function() {
-		for ( var i in _systemState.slots) {
-			var slot = _systemState.slots[i];
+		for ( var i in systemState.slots) {
+			var slot = systemState.slots[i];
 			slot.visible = $.inArray(true, traverseDetachmentData(this, this.checkSlotVisible, { slotId : slot.slotId })) > -1;
 		}
 	};
 
 	this.refreshTotalPoints = function() {
 		this.getElement("#totalPoints").html(
-				_armyState.getTotalPoints() + " " + _guiState.getText("points"));
+				armyState.getTotalPoints() + " " + _guiState.getText("points"));
 	};
 
 	this.refreshArmyLabel = function() {
@@ -165,7 +165,7 @@ function Gui() {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.changeLanguage(_guiState.languages[event.data.language]);
+				controller.changeLanguage(_guiState.languages[event.data.language]);
 			});
 			languageSelectElement.append(languageElement);
 		}
@@ -175,7 +175,7 @@ function Gui() {
 		if (isUndefined(entity.special)) {
 			return true;
 		}
-		var currentSystem = _systemState.system;
+		var currentSystem = systemState.system;
 		if (isNumber(entity.special)) {
 			return currentSystem.special[entity.special].display;
 		}
@@ -248,27 +248,27 @@ function Gui() {
 	 *****************************/
 	
 	this.displayErrorMessage = function(message) {
-		displayMessage(message, "Error");
+		this.displayMessage(message, "Error");
 	};
 	
 	this.displaySuccessMessage = function(message) {
-		displayMessage(message, "Success");
+		this.displayMessage(message, "Success");
 	};
 	
 	this.displayInfoMessage = function(message) {
-		displayMessage(message, "Info");
+		this.displayMessage(message, "Info");
 	};
 	
-	function displayMessage(message, type) {
-		var messageBar = _gui.getElement('.messageBar');
-		var messageElement = _gui.getElement('.message');
+	this.displayMessage = function(message, type) {
+		var messageBar = this.getElement('.messageBar');
+		var messageElement = this.getElement('.message');
 		messageElement.html(message);
 		messageBar.removeClass();
 		messageBar.addClass("messageBar message" + type);
-	}
+	};
 
 	this.hideMessages = function() {
-		var messageBar = _gui.getElement('.messageBar');
+		var messageBar = this.getElement('.messageBar');
 		messageBar.addClass("invisible");
 	};
 	
@@ -288,7 +288,7 @@ function Gui() {
 			if(button != null) {
 				button.removeClass("selectedMenuButton");
 			}
-			_dispatcher.triggerEvent("preCallFragment", { oldFragment: _guiState.currentContent, newFragment: fragmentName });
+			dispatcher.triggerEvent("preCallFragment", { oldFragment: _guiState.currentContent, newFragment: fragmentName });
 			container.removeClass("invisible");
 			_guiState.currentContent = fragmentName;
 			button = this.getElement("." + _guiState.currentContent + "Button");
@@ -336,7 +336,7 @@ function Gui() {
 	 *****************************/
 
 	this.loadFile = function(event) {
-		_gui    .startLongRunningProcess();
+        dispatcher.triggerEvent("preLongRunningProcess");
 	    var f = event.target.files[0]; 
 
 	    if (f) {
@@ -358,6 +358,7 @@ function Gui() {
 	    }
 	    event.stopPropagation();
 	    event.preventDefault();
+        dispatcher.triggerEvent("postLongRunningProcess");
 	    return true;
 	};
 

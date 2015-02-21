@@ -20,7 +20,7 @@
 
 "use strict";
 
-function Controller(modificationService) {
+function Controller(dispatcher, dataStore, dataReader, systemState, armyState, persistence, poolService, modificationService) {
 	
 	/**
 	 * 
@@ -29,11 +29,12 @@ function Controller(modificationService) {
 	 *
 	 */
 	this.changeLanguage = function(language) {
-		_gui.startLongRunningProcess();
+        dispatcher.triggerEvent("preLongRunningProcess");
 		_guiState.lang = language;
-		_dataStore.setCookie("myArmy.language", _guiState.lang);
+		dataStore.setCookie("myArmy.language", _guiState.lang);
 		
-		_dispatcher.triggerEvent("postChangeLanguage");
+		dispatcher.triggerEvent("postChangeLanguage");
+        dispatcher.triggerEvent("postLongRunningProcess");
 	};
 	
 	/**
@@ -42,9 +43,9 @@ function Controller(modificationService) {
 	 *
 	 */
 	this.resetArmylist = function() {
-		_armyState.resetArmy();
+		armyState.resetArmy();
 		
-		_dispatcher.triggerEvent("postResetArmy");
+		dispatcher.triggerEvent("postResetArmy");
 	};
 
 	this.deleteAllDetachments = function() {
@@ -53,18 +54,18 @@ function Controller(modificationService) {
 	
 	this.changeSystem = function(systemId) {
 		if (systemId != -1
-				&& (_systemState.system == null || systemId != _systemState.system)) {
+				&& (systemState.system == null || systemId != systemState.system)) {
 			
 			for ( var i = 0; i < _systems.length; i++) {
 				if (_systems[i].systemId == systemId) {
-					_systemState.system = _systems[i];
+					systemState.system = _systems[i];
 					break;
 				}
 			}
-			_dataReader.readSystem(_systemState.system);
+			dataReader.readSystem(systemState.system);
 			this.resetArmylist();
 			
-			_dispatcher.triggerEvent("postChangeSystem");
+			dispatcher.triggerEvent("postChangeSystem");
 		}
 	};
 	
@@ -85,24 +86,24 @@ function Controller(modificationService) {
 			if(addFormationSelections) {
 				changedSelections = true;
 				detachmentData.resetArmy();
-				_persistence.restoreFragment(detachmentType.formationData, detachmentData, { deletable: false, clonable: false });
+				persistence.restoreFragment(detachmentType.formationData, detachmentData, { deletable: false, clonable: false });
 			}
 		}
 
-		_dispatcher.triggerEvent("postChangeDetachmentType", { detachmentData: detachmentData, newDetachmentType: detachmentType, changedEntityslots: changedEntityslots, changedSelections: changedSelections });
+		dispatcher.triggerEvent("postChangeDetachmentType", { detachmentData: detachmentData, newDetachmentType: detachmentType, changedEntityslots: changedEntityslots, changedSelections: changedSelections });
 	};
 
 	this.addDetachment = function(armyId, detachmentTypeId) {
 		if(armyId == -1) {
 			return;
 		}
-		_gui.startLongRunningProcess();
+        dispatcher.triggerEvent("preLongRunningProcess");
 
-		var detachmentData = _armyState.addDetachment(_systemState.armies[armyId]);
+		var detachmentData = armyState.addDetachment(systemState.armies[armyId]);
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
 		var armyUnit = detachmentData.getArmyUnit("a0");
 
-		_dataReader.loadArmy(armyUnit, detachmentData);
+		dataReader.loadArmy(armyUnit, detachmentData);
 		detachmentData.resetArmy();
 		if(!isUndefined(detachmentTypeId)) {
 			this.changeDetachmentType(detachmentData, detachmentTypeId);
@@ -113,36 +114,38 @@ function Controller(modificationService) {
 				this.changeDetachmentType(detachmentData, "2");
 			}
 		}
-		_dispatcher.triggerEvent("postAddDetachment", { detachmentData: detachmentData, newArmyId: armyId });
+		dispatcher.triggerEvent("postAddDetachment", { detachmentData: detachmentData, newArmyId: armyId });
+        dispatcher.triggerEvent("postLongRunningProcess");
 	};
 
 	this.deleteDetachment = function(detachmentData) {
-		_armyState.removeDetachment(detachmentData);
-		_dispatcher.triggerEvent("postDeleteDetachment", { detachmentData: detachmentData });
+		armyState.removeDetachment(detachmentData);
+		dispatcher.triggerEvent("postDeleteDetachment", { detachmentData: detachmentData });
 	};
 
 	this.cloneDetachment = function(detachmentData) {
 		window.location.hash += detachmentData.stateLinkPart;
-		//_dispatcher.triggerEvent("postAddDetachment", { detachmentDataIndex: detachmentDataIndex });
+		//dispatcher.triggerEvent("postAddDetachment", { detachmentDataIndex: detachmentDataIndex });
 	};
 
 	this.addExtension = function(detachmentData, extensionId) {
 		if(extensionId == -1) {
 			return;
 		}
-		_gui.startLongRunningProcess();
+        dispatcher.triggerEvent("preLongRunningProcess");
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
-		var armyUnit = detachmentData.addArmyUnit(_systemState.extensions[extensionId]);
+		var armyUnit = detachmentData.addArmyUnit(systemState.extensions[extensionId]);
 		var armyUnitIndex = armyUnit.getArmyUnitIndex();
 
-		_dataReader.loadArmy(armyUnit, detachmentData);
+		dataReader.loadArmy(armyUnit, detachmentData);
 		armyUnit.resetArmy();
-		_dispatcher.triggerEvent("postAddExtension", { detachmentData: detachmentData, armyUnit: armyUnit, extensionId: armyUnit.getArmy().armyId });
+		dispatcher.triggerEvent("postAddExtension", { detachmentData: detachmentData, armyUnit: armyUnit, extensionId: armyUnit.getArmy().armyId });
+        dispatcher.triggerEvent("postLongRunningProcess");
 	};
 
 	this.deleteExtension = function(detachmentData, armyUnit) {
 		var extensionId = detachmentData.removeExtension(armyUnit.getArmyUnitIndex());
-		_dispatcher.triggerEvent("postDeleteExtension", { detachmentData: detachmentData, armyUnit: armyUnit, extensionId: extensionId });
+		dispatcher.triggerEvent("postDeleteExtension", { detachmentData: detachmentData, armyUnit: armyUnit, extensionId: extensionId });
 	};
 	
 	this.addEntry = function(armyUnit, entityslotId, doEntityCalculations, options) {
@@ -158,36 +161,36 @@ function Controller(modificationService) {
 		armyUnit.addEntry(entityslot, doEntityCalculations);
 		
 		if (doEntityCalculations) {
-			registerEntityslotOptionsForPools(entityslot);
-			changePoolByEntityslot(entityslot, true);
-			_dispatcher.triggerEvent("postAddSelection", { entityslot: entityslot });
+			poolService.registerEntityslotOptionsForPools(entityslot);
+			poolService.changePoolByEntityslot(entityslot, true);
+			dispatcher.triggerEvent("postAddSelection", { entityslot: entityslot });
 		}
 		
 		return entity;
 	};
 	
 	this.cloneEntry = function(entityslot) {
-		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+		var detachmentData = armyState.getDetachmentData(entityslot.detachmentDataIndex);
 		var armyUnit = detachmentData.getArmyUnit(entityslot.armyUnitIndex);
 		var newEntityslot = entityslot.clone();
 		var newEntity = newEntityslot.entity;
 		armyUnit.addEntry(newEntityslot, false);
 		newEntity.totalCost = 0; // will be recalculated later on
-		registerEntityslotOptionsForPools(newEntityslot);
-		changePoolByEntityslot(newEntityslot, true);
-		fixOptionPool(detachmentData, armyUnit, newEntityslot.entity);
+        poolService.registerEntityslotOptionsForPools(newEntityslot);
+        poolService.changePoolByEntityslot(newEntityslot, true);
+		poolService.fixOptionPool(detachmentData, armyUnit, newEntityslot.entity);
 		
-		_dispatcher.triggerEvent("postAddSelection", { entityslot: newEntityslot });
+		dispatcher.triggerEvent("postAddSelection", { entityslot: newEntityslot });
 	};
 	
 	this.deleteEntry = function(entityslot) {
-        var armyUnit = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
+        var armyUnit = armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex);
 		var entity = entityslot.entity;
-		_armyState.addTotalPoints((-1) * entity.totalCost);
-		unregisterEntityslotOptionsForPools(entityslot);
+		armyState.addTotalPoints((-1) * entity.totalCost);
+        poolService.unregisterEntityslotOptionsForPools(entityslot);
 		armyUnit.removeEntry(entityslot);
 		
-		_dispatcher.triggerEvent("postRemoveSelection", { entityslot: entityslot });
+		dispatcher.triggerEvent("postRemoveSelection", { entityslot: entityslot });
 	};
 	
 	this.setModelCount = function(entityslot, count) {
@@ -196,15 +199,15 @@ function Controller(modificationService) {
 		}
 		var oldCount = entityslot.entity.currentCount;
 		entityslot.entity.currentCount = count;
-		changeModelCountPool(entityslot, oldCount, count);
+		poolService.changeModelCountPool(entityslot, oldCount, count);
 		entityslot.dirty = true;
-		_dispatcher.triggerEvent("postChangeModelCount", { entityslot: entityslot });
+		dispatcher.triggerEvent("postChangeModelCount", { entityslot: entityslot });
 	};
 	
 	this.selectOption = function(optionLocalId, optionCount) {
 		_guiState.lastClickedOptionId = optionLocalId;
-		var option = _armyState.lookupId(optionLocalId);
-		var entityslot = _armyState.lookupId(option.parentEntityslot);
+		var option = armyState.lookupId(optionLocalId);
+		var entityslot = armyState.lookupId(option.parentEntityslot);
 		selectOptionCommon(option, optionCount);
 		
 		/*
@@ -213,7 +216,7 @@ function Controller(modificationService) {
 		 * the restrictions.
 		 * We need to do this here to avoid order-dependency when combining multiple option lists
 		 */
-		var optionList = _armyState.lookupId(option.parentOptionList);
+		var optionList = armyState.lookupId(option.parentOptionList);
 		if (optionList.currentCount > optionList.currentMaxTaken) {
 			var diff = optionList.currentCount - optionList.currentMaxTaken;
 			for(var i in optionList.options) {
@@ -232,13 +235,13 @@ function Controller(modificationService) {
 		}
 		
 		entityslot.dirty = true;
-		_dispatcher.triggerEvent("postSelectOption", { optionLocalId: optionLocalId });
+		dispatcher.triggerEvent("postSelectOption", { optionLocalId: optionLocalId });
 	};
 	
 	this.setFocCount = function(focCount) {
 		if (focCount > 0) {
-			_armyState.setFocCount(focCount);
-			_dispatcher.triggerEvent("postChangeFocCount");
+			armyState.setFocCount(focCount);
+			dispatcher.triggerEvent("postChangeFocCount");
 		}
 	};
 	

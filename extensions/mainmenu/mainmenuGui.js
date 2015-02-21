@@ -20,18 +20,18 @@
 
 "use strict";
 
-function MainmenuGui() {
+function MainmenuGui(dispatcher, systemState, armyState, controller, gui) {
 
 	this.init = function() {
-		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeSystem", this, this.onPostChangeSystem, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteExtension, _dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeSystem", this, this.onPostChangeSystem, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteExtension, dispatcher.PHASE_STATE);
 	};
 
 	this.onPostInit = function(event) {
@@ -84,10 +84,10 @@ function MainmenuGui() {
 	// there is only one system available at the moment
 	//this.refreshSystemChooser = function() {
     //
-	//	var systemSelectElement = _gui.getElement("#systemSelect");
+	//	var systemSelectElement = gui.getElement("#systemSelect");
 	//	systemSelectElement.children().remove();
 	//	systemSelectElement.append(option("", "-1"));
-	//	var currentSystem = _systemState.system;
+	//	var currentSystem = systemState.system;
      //
 	//	for (var i = 0; i < _systems.length; i++) {
 	//		var systemId = _systems[i].systemId;
@@ -99,7 +99,7 @@ function MainmenuGui() {
 	//};
 
 	this.refreshArmySelectBox = function() {
-		var selectBox = _gui.getElement("#armySelect");
+		var selectBox = gui.getElement("#armySelect");
 		if(selectBox != null) {
 			selectBox.children().remove();
 			selectBox.append(getArmySelectBoxOptions());
@@ -109,8 +109,8 @@ function MainmenuGui() {
 	function getArmySelectBoxOptions() {
 		
 		var sortedArmies = [];
-		for(var i in _systemState.armies) {
-			sortedArmies.push(_systemState.armies[i]);
+		for(var i in systemState.armies) {
+			sortedArmies.push(systemState.armies[i]);
 		}
 		sortedArmies = sortedArmies.sort(function(a, b) {
 			if (a.armyGroup < b.armyGroup) {
@@ -139,7 +139,7 @@ function MainmenuGui() {
 					options.push('<option disabled="true"></option>');
 				}
 			}
-			var armyName = _guiState.getText("army." + _systemState.armies[army.armyId].armyPrefix);
+			var armyName = _guiState.getText("army." + systemState.armies[army.armyId].armyPrefix);
 			options.push(option(armyName, army.armyId));
 		}
 
@@ -147,14 +147,14 @@ function MainmenuGui() {
 	}
 
 	this.resetArmySelect = function() {
-		var armySelect = _gui.getElement("#armySelect");
+		var armySelect = gui.getElement("#armySelect");
 		armySelect.val("-1").change();
 	};
 
 	this.renderDetachmentBoxes = function() {
 		$("#detachmentBoxContainer").children().remove();
-		for(var i in _armyState.getDetachments()) {
-			this.renderDetachmentBox(_armyState.getDetachmentData(i));
+		for(var i in armyState.getDetachments()) {
+			this.renderDetachmentBox(armyState.getDetachmentData(i));
 		}
 	};
 
@@ -192,18 +192,18 @@ function MainmenuGui() {
 			if(event.data.detachmentData.hasSelections() && !confirm(_guiState.getText("message.confirmDetachmentDelete"))) {
 				return;
 			}
-			_controller.deleteDetachment(detachmentData);
+			controller.deleteDetachment(detachmentData);
 		});
 		buttons.append(deleteButton);
 		var cloneButton = div(null, null, "entryButton cloneButton cloneDetachmentButton", { title: _guiState.getText("clone"), alt: _guiState.getText("clone") });
 		cloneButton.on(_guiState.clickEvent, { detachmentData: detachmentData }, function(event) {
-			_controller.cloneDetachment(event.data.detachmentData);
+			controller.cloneDetachment(event.data.detachmentData);
 		});
 		buttons.append(cloneButton);
 
 		detachmentBox.append(buttons);
 
-		_gui.getElement("#detachmentBoxContainer").append(detachmentBox);
+		gui.getElement("#detachmentBoxContainer").append(detachmentBox);
 	};
 
 	function getDetachmentBoxHeadingText(detachmentData) {
@@ -215,15 +215,15 @@ function MainmenuGui() {
 	}
 
 	this.refreshDetachmentBoxIndexes = function() {
-		for(var detachmentDataIndex in _armyState.getDetachments()) {
-			var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
-			_gui.getElement("#detachmentBox" + detachmentDataIndex).find(".entryArmyIndex").html(detachmentData.getPosition());
+		for(var detachmentDataIndex in armyState.getDetachments()) {
+			var detachmentData = armyState.getDetachmentData(detachmentDataIndex);
+			gui.getElement("#detachmentBox" + detachmentDataIndex).find(".entryArmyIndex").html(detachmentData.getPosition());
 		}
 	};
 
 	this.refreshDetachmentBox = function(detachmentData) {
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
-		var detachmentBox = _gui.getElement("#detachmentBox" + detachmentDataIndex);
+		var detachmentBox = gui.getElement("#detachmentBox" + detachmentDataIndex);
 		if(detachmentBox == null) {
 			return;
 		}
@@ -249,7 +249,7 @@ function MainmenuGui() {
 			if(detachmentData.detachmentType.hasModifications()) {
 				this.prop("disabled", true);
 			}
-			_controller.changeDetachmentType(detachmentData, this.value, true);
+			controller.changeDetachmentType(detachmentData, this.value, true);
 		});
 		selectBox.append(getDetachmentTypeOptions(detachmentData.getDetachmentTypes(), detachmentData.detachmentType.id, isPrimary, detachmentData));
 		if(detachmentData.detachmentType.hasModifications()) {
@@ -261,26 +261,26 @@ function MainmenuGui() {
 
 	this.refreshDetachmentTypeSelectbox = function(detachmentData) {
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
-		var selectBox = _gui.getElement("#detachmentTypeSelect" + detachmentDataIndex);
+		var selectBox = gui.getElement("#detachmentTypeSelect" + detachmentDataIndex);
 		if(selectBox != null) {
-			_gui.removeElement("#detachmentTypeSelect" + detachmentDataIndex);
+			gui.removeElement("#detachmentTypeSelect" + detachmentDataIndex);
 			selectBox.replaceWith(getDetachmentTypeSelectbox(detachmentData));
 		}
 	};
 
 	this.refreshExtensionSelectbox = function(detachmentData) {
-		var selectBox = _gui.getElement("#extensionSelect" + detachmentData.getDetachmentDataIndex());
+		var selectBox = gui.getElement("#extensionSelect" + detachmentData.getDetachmentDataIndex());
 		//var selectBox = $("#extensionSelect" + detachmentDataIndex);
 		if(selectBox != null) {
-			_gui.removeElement("#extensionSelect" + detachmentData.getDetachmentDataIndex());
+			gui.removeElement("#extensionSelect" + detachmentData.getDetachmentDataIndex());
 			selectBox.replaceWith(getExtensionSelectbox(detachmentData));
 		}
 	};
 
 	this.refreshExtensionList = function(detachmentData) {
-		var list = _gui.getElement("#extensionList" + detachmentData.getDetachmentDataIndex());
+		var list = gui.getElement("#extensionList" + detachmentData.getDetachmentDataIndex());
 		if(list != null) {
-			_gui.removeElement("#extensionList" + detachmentData.getDetachmentDataIndex());
+			gui.removeElement("#extensionList" + detachmentData.getDetachmentDataIndex());
 			list.replaceWith(getExtensionListElement(detachmentData));
 		}
 	};
@@ -323,12 +323,12 @@ function MainmenuGui() {
 		var detachmentDataIndex = detachmentData.getDetachmentDataIndex();
 		var selectBox = select("extensionSelect" + detachmentDataIndex);
 		selectBox.on("change", { detachmentData: detachmentData}, function(event) {
-			_controller.addExtension(event.data.detachmentData, this.value);
+			controller.addExtension(event.data.detachmentData, this.value);
 		});
 
 		var sortedExtensions = [];
-		for(var i in _systemState.extensions) {
-			sortedExtensions.push(_systemState.extensions[i]);
+		for(var i in systemState.extensions) {
+			sortedExtensions.push(systemState.extensions[i]);
 		}
 		sortedExtensions = sortedExtensions.sort(function(a, b) {
 			return _guiState.getText("army." + a.armyPrefix) > _guiState.getText("army." + b.armyPrefix) ? 1 : -1;
@@ -386,24 +386,24 @@ function MainmenuGui() {
 			if(armyUnit.hasSelections() && !confirm(_guiState.getText("message.confirmExtensionDelete"))) {
 				return;
 			}
-			_controller.deleteExtension(detachmentData, armyUnit);
+			controller.deleteExtension(detachmentData, armyUnit);
 		});
 		element.append(deleteButton);
 		return element;
 	}
 
 	this.removeExtension = function(detachmentDataIndex, armyUnitIndex, extensionId) {
-		_gui.getElement("#extension" + detachmentDataIndex + "_" + armyUnitIndex).remove();
-		var extensionSelect = _gui.getElement("#extensionSelect" + detachmentDataIndex);
+		gui.getElement("#extension" + detachmentDataIndex + "_" + armyUnitIndex).remove();
+		var extensionSelect = gui.getElement("#extensionSelect" + detachmentDataIndex);
 		extensionSelect.find("option[value=" + extensionId + "]").removeAttr("disabled");
 	};
 	
 	this.removeDetachmentBox = function(detachmentDataIndex) {
-		_gui.getElement("#detachmentBox" + detachmentDataIndex).remove();
+		gui.getElement("#detachmentBox" + detachmentDataIndex).remove();
 	};
 
 	this.addExtension = function(detachmentData, armyUnit) {
-		var extensionListElement = _gui.getElement("#extensionList" + detachmentData.getDetachmentDataIndex());
+		var extensionListElement = gui.getElement("#extensionList" + detachmentData.getDetachmentDataIndex());
 		extensionListElement.append(getExtensionElement(_guiState.getText("army." + armyUnit.getArmy().armyPrefix), detachmentData, armyUnit));
 	};
 	
@@ -412,34 +412,34 @@ function MainmenuGui() {
 	 */
 	this.refreshAll = function() {
 		this.refreshSpecialContainer();
-		_gui.getElement("#creditsButton").find("a").html(_guiState.getText("credits"));
-		_gui.getElement("#downloadButton").find("a").html(_guiState.getText("download"));
-		_gui.getElement("#forumButton").find("a").html(_guiState.getText("forum"));
-		_gui.getElement("#armyHeading").html(_guiState.getText("detachments"));
-		_gui.getElement("#optionsHeading").html(_guiState.getText("viewOptions"));
-		_gui.getElement("#linksHeading").html(_guiState.getText("links"));
-		_gui.getElement("#resetButton").html(_guiState.getText("reset"));
-		_gui.getElement("#detachmentCreatorHeading").html(_guiState.getText("newDetachment"));
-		_gui.getElement("#deleteAllDetachmentsButton").html(_guiState.getText("deleteAllDetachments"));
-		_gui.getElement("#fileLoaderLabel").html(_guiState.getText("loadArmy"));
-		_gui.getElement("#maxDetachmentsReachedMessage").html(_guiState.getText("message.maxDetachmentsReached"));
+		gui.getElement("#creditsButton").find("a").html(_guiState.getText("credits"));
+		gui.getElement("#downloadButton").find("a").html(_guiState.getText("download"));
+		gui.getElement("#forumButton").find("a").html(_guiState.getText("forum"));
+		gui.getElement("#armyHeading").html(_guiState.getText("detachments"));
+		gui.getElement("#optionsHeading").html(_guiState.getText("viewOptions"));
+		gui.getElement("#linksHeading").html(_guiState.getText("links"));
+		gui.getElement("#resetButton").html(_guiState.getText("reset"));
+		gui.getElement("#detachmentCreatorHeading").html(_guiState.getText("newDetachment"));
+		gui.getElement("#deleteAllDetachmentsButton").html(_guiState.getText("deleteAllDetachments"));
+		gui.getElement("#fileLoaderLabel").html(_guiState.getText("loadArmy"));
+		gui.getElement("#maxDetachmentsReachedMessage").html(_guiState.getText("message.maxDetachmentsReached"));
 
-		if (_systemState.system != null) {
+		if (systemState.system != null) {
 
 			this.refreshArmySelectBox();
 
-			for(var i in _armyState.getDetachments()) {
+			for(var i in armyState.getDetachments()) {
 				//this.refreshDetachmentTypeSelectbox(i);
 				//this.refreshArmySelectbox(i);
-				this.refreshDetachmentBox(_armyState.getDetachmentData(i));
+				this.refreshDetachmentBox(armyState.getDetachmentData(i));
 			}
 		}
 	};
 	
 	this.refreshSpecialContainer = function() {
-		var specialContainer = _gui.getElement("#specialContainer");
+		var specialContainer = gui.getElement("#specialContainer");
 		specialContainer.children().remove();
-		var currentSystem = _systemState.system;
+		var currentSystem = systemState.system;
 		
 		for ( var i in currentSystem.special) {
 			var myCheckbox = checkbox("special",
@@ -451,7 +451,7 @@ function MainmenuGui() {
 					return false;
 				}
 				event.data.special.display = $(this).is(':checked');
-				_dispatcher.triggerEvent("mainmenu.postChangeSpecialDisplay");
+				dispatcher.triggerEvent("mainmenu.postChangeSpecialDisplay");
 			});
 			var myLabel = label().append(myCheckbox).append(_guiState.getText(currentSystem.special[i].name));
 			specialContainer.append(myLabel);
@@ -460,15 +460,15 @@ function MainmenuGui() {
 	};
 
 	this.checkMaxDetachments = function() {
-		if(_armyState.getDetachmentCount() >= 10) {
-			_gui.getElement("#armySelect").addClass("invisible");
-			_gui.getElement("#detachmentCreatorHeading").addClass("invisible");
-			_gui.getElement("#maxDetachmentsReachedMessage").removeClass("invisible");
+		if(armyState.getDetachmentCount() >= 10) {
+			gui.getElement("#armySelect").addClass("invisible");
+			gui.getElement("#detachmentCreatorHeading").addClass("invisible");
+			gui.getElement("#maxDetachmentsReachedMessage").removeClass("invisible");
 			$(".cloneDetachmentButton").addClass("invisible");
 		} else {
-			_gui.getElement("#armySelect").removeClass("invisible");
-			_gui.getElement("#detachmentCreatorHeading").removeClass("invisible");
-			_gui.getElement("#maxDetachmentsReachedMessage").addClass("invisible");
+			gui.getElement("#armySelect").removeClass("invisible");
+			gui.getElement("#detachmentCreatorHeading").removeClass("invisible");
+			gui.getElement("#maxDetachmentsReachedMessage").addClass("invisible");
 			$(".cloneDetachmentButton").removeClass("invisible");
 		}
 	};

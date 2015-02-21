@@ -20,21 +20,21 @@
 
 "use strict";
 
-function ChooserGui() {
+function ChooserGui(dispatcher, systemState, armyState, controller, gui) {
 	
 	this.init = function() {
-		_dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postPrepareGui", this, this.onPostPrepareGui, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteExtension, _dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeFocCount", this, this.onPostChangeFocCount, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postPrepareGui", this, this.onPostPrepareGui, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddExtension", this, this.onPostAddExtension, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteExtension, dispatcher.PHASE_STATE);
 	};
 	
 	this.onPostChangeFocCount = function(event) {
@@ -119,13 +119,13 @@ function ChooserGui() {
 	 */
 	this.renderSlots = function() {
 
-		var designContainer = _gui.getElement(".designContainer");
+		var designContainer = gui.getElement(".designContainer");
 		designContainer.children().remove();
 
-		var slotMenu = _gui.getElement("#slotMenu");
+		var slotMenu = gui.getElement("#slotMenu");
 		slotMenu.children().remove();
 
-		if (_systemState.system == null) {
+		if (systemState.system == null) {
 			return;
 		}
 		
@@ -139,8 +139,8 @@ function ChooserGui() {
 		var selectedPage = -1;
 
 		var sortedSlots = [];
-		for ( var i in _systemState.slots) {
-			sortedSlots.push(_systemState.slots[i]);
+		for ( var i in systemState.slots) {
+			sortedSlots.push(systemState.slots[i]);
 		}
 
 		sortedSlots.sort(function(a, b) {
@@ -194,8 +194,8 @@ function ChooserGui() {
 
 	this.renderUnitSelectionTabs = function() {
 
-		if(_armyState.getDetachmentData(_guiState.unitsToShow) == null) {
-			var firstDetachment = _armyState.getFirstDetachment();
+		if(armyState.getDetachmentData(_guiState.unitsToShow) == null) {
+			var firstDetachment = armyState.getFirstDetachment();
 			if(firstDetachment != null) {
 				_guiState.unitsToShow = firstDetachment.getDetachmentDataIndex();
 			}
@@ -203,12 +203,12 @@ function ChooserGui() {
 
 		$(".tabRow").remove();
 		var tabRow = ol(null, null, "tabRow unitTabRow", null);
-		if(_armyState.getDetachmentCount() < 2) {
+		if(armyState.getDetachmentCount() < 2) {
 			tabRow.addClass("invisible");
 		}
 		
-		for(var i in  _armyState.getDetachments()) {
-			var detachmentData = _armyState.getDetachmentData(i);
+		for(var i in  armyState.getDetachments()) {
+			var detachmentData = armyState.getDetachmentData(i);
 			var xLi = li(detachmentData.getPosition(), "unitSelectionTab" + i, "tab unitTab", null);
 			if(_guiState.unitsToShow == i) {
 				xLi.addClass("selectedTab");
@@ -216,29 +216,29 @@ function ChooserGui() {
 			xLi.on(_guiState.clickEvent, { unitsToShow: i, target: this}, this.showUnitTab);
 			tabRow.append(xLi);
 		}
-		_gui.getElement(".slotHeadingChooser").after(tabRow);
+		gui.getElement(".slotHeadingChooser").after(tabRow);
 	};
 	
 	this.renderEntries = function() {
-		if(_armyState.getDetachmentCount() == 0) {
+		if(armyState.getDetachmentCount() == 0) {
 			return;
 		}
 
-		var tabRows = _gui.getElement(".designContainer").find(".tabRow");
-		if(_armyState.getDetachmentCount() < 2) {
+		var tabRows = gui.getElement(".designContainer").find(".tabRow");
+		if(armyState.getDetachmentCount() < 2) {
 			tabRows.addClass("invisible");
 		} else {
 			tabRows.removeClass("invisible");
 		}
 		
-		for ( var i in _systemState.slots) {
-			var slot = _systemState.slots[i];
+		for ( var i in systemState.slots) {
+			var slot = systemState.slots[i];
 			if(slot.visible) {
-				_gui.getElement("#slotMenuItem" + slot.slotId).removeClass("invisible empty");
+				gui.getElement("#slotMenuItem" + slot.slotId).removeClass("invisible empty");
 			} else {
-				_gui.getElement("#slotMenuItem" + slot.slotId).addClass("invisible empty");
+				gui.getElement("#slotMenuItem" + slot.slotId).addClass("invisible empty");
 			}
-			var slotentryList = _gui.getElement("#slotentryChooserList" + slot.slotId);
+			var slotentryList = gui.getElement("#slotentryChooserList" + slot.slotId);
 			slotentryList.children().remove();
 		}
 		traverseArmyUnit(this, this.renderSlotEntries);
@@ -251,7 +251,7 @@ function ChooserGui() {
 		for ( var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			var entityslotId = entityslot.entityslotId;
-			var slotentryList = _gui.getElement("#slotentryChooserList" + entityslot.slotId);
+			var slotentryList = gui.getElement("#slotentryChooserList" + entityslot.slotId);
 			var entity = armyUnit.getFromEntityPool(entityslot.entityId);
 			var entityName = detachmentData.getText(entity.entityName);
 
@@ -271,13 +271,13 @@ function ChooserGui() {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.addEntry(event.data.armyUnit, event.data.entityslotId, true);
+				controller.addEntry(event.data.armyUnit, event.data.entityslotId, true);
 			});
 //			if (entityslot.availableState == 0) {
 //				xli.append(span(" (" + _guiState.getText("max") + ")", null,
 //				"maxAppendix ok"));
 //			}
-			this.setSlotVisibility(_systemState.slots[entityslot.slotId], true);
+			this.setSlotVisibility(systemState.slots[entityslot.slotId], true);
 			slotentryList.append(xli);
 		}
 	};
@@ -300,19 +300,19 @@ function ChooserGui() {
 //	};
 	
 	this.refreshSlotHeadings = function() {
-		for ( var i in _systemState.slots) {
+		for ( var i in systemState.slots) {
 			// TODO possibly add dirty-check
 			this.refreshSlotHeading(i);
 		}
 	};
 
 	this.refreshSlotHeading = function(slotId) {
-		var slotHeading = _gui.getElement("#slotHeading" + slotId);
+		var slotHeading = gui.getElement("#slotHeading" + slotId);
 		if(slotHeading == null) {
 			return;
 		}
 		slotHeading.children().remove();
-		var slot = _systemState.slots[slotId];
+		var slot = systemState.slots[slotId];
 		
 		var slotHeadingText = getSlotHeadingText(slot);
 		slotHeading.append(span(slotHeadingText + " ("));
@@ -346,7 +346,7 @@ function ChooserGui() {
 			}
 			thisText += slotCount;
 			
-			var detachmentType = _armyState.getDetachmentData(i).detachmentType;
+			var detachmentType = armyState.getDetachmentData(i).detachmentType;
 				
 			var isThisOk = checkSlotMinMax(detachmentType, slotId, slotCount);
 			isOk = isOk && isThisOk;
@@ -354,7 +354,7 @@ function ChooserGui() {
 			isFirst = false;
 		}
 
-		slotHeading.append(span(") : " + _armyState.pointsPerSlot[slotId] + " " + _guiState.getText("points")));
+		slotHeading.append(span(") : " + armyState.pointsPerSlot[slotId] + " " + _guiState.getText("points")));
 		slotHeading.removeClass("good bad");
 		if(isOk) {
 			slotHeading.addClass("good");
@@ -362,7 +362,7 @@ function ChooserGui() {
 			slotHeading.addClass("bad");
 		}
 		
-		_gui.getElement("#slotMenuItem" + slotId).html(slotHeadingText);
+		gui.getElement("#slotMenuItem" + slotId).html(slotHeadingText);
 	};
 	
 	function checkSlotMinMax(detachmentType, slotId, count) {
@@ -388,16 +388,16 @@ function ChooserGui() {
 			}
 		}
 //		for ( var i in dirtySlotIds) {
-//			this.refreshChooserSlot(_systemState.slots[i]);
+//			this.refreshChooserSlot(systemState.slots[i]);
 //		}
 	};
 	
 	this.refreshEntries = function() {
-		//if(_armyState.getArmy(unitsToShow, "a0") == null) {
-		//	unitsToShow = _armyState.getFirstArmyIndex();
+		//if(armyState.getArmy(unitsToShow, "a0") == null) {
+		//	unitsToShow = armyState.getFirstArmyIndex();
 		//}
-		for ( var i in _systemState.slots) {
-			this.refreshEntriesForSlot(_systemState.slots[i]);
+		for ( var i in systemState.slots) {
+			this.refreshEntriesForSlot(systemState.slots[i]);
 		}
 	};
 	
@@ -408,8 +408,8 @@ function ChooserGui() {
 	};
 	
 	this.refreshEntriesForSlot = function(slot) {
-		var rowElement = _gui.getElement("#slotRow" + slot.slotId);
-		var menuElement = _gui.getElement("#slotMenuItem" + slot.slotId);
+		var rowElement = gui.getElement("#slotRow" + slot.slotId);
+		var menuElement = gui.getElement("#slotMenuItem" + slot.slotId);
 		var hasElements = ($.inArray(true, traverseArmyUnit(this, this.refreshForArmyUnit, {slotId: slot.slotId}))) > -1;
 		if(slot.visible) {
 			menuElement.removeClass("invisible");
@@ -466,7 +466,7 @@ function ChooserGui() {
 		if(entityslot.detachmentDataIndex != _guiState.unitsToShow) {
 			cssClass += " invisible";
 		}
-		if(!_gui.checkDisplay(armyUnit.getFromEntityPool(entityslot.entityId))) {
+		if(!gui.checkDisplay(armyUnit.getFromEntityPool(entityslot.entityId))) {
 			cssClass += " invisible";
 		}
 		if(!entityslot.visible) {
@@ -482,12 +482,12 @@ function ChooserGui() {
 		}
 		_guiState.unitsToShow = event.data.unitsToShow;
 		event.data.target.refreshEntries();
-		_dispatcher.triggerEvent("postChangeUnitsToShow", { unitsToShow: event.data.unitsToShow });
+		dispatcher.triggerEvent("postChangeUnitsToShow", { unitsToShow: event.data.unitsToShow });
 	};
 
 	this.setSlotVisibility = function(slot, visible) {
 		slot.visible = visible;
-		var slotElement = _gui.getElement("#slotRow" + slot.slotId);
+		var slotElement = gui.getElement("#slotRow" + slot.slotId);
 		if(visible) {
 			slotElement.removeClass("invisible");
 		} else {
@@ -496,10 +496,10 @@ function ChooserGui() {
 	};
 
 	this.resetUnitsToShow = function () {
-		var firstDetachment = _armyState.getFirstDetachment();
+		var firstDetachment = armyState.getFirstDetachment();
 		if(firstDetachment != null) {
 			_guiState.unitsToShow = firstDetachment.getDetachmentDataIndex();
-			_dispatcher.triggerEvent("postChangeUnitsToShow", { unitsToShow: firstDetachment.getDetachmentDataIndex() });
+			dispatcher.triggerEvent("postChangeUnitsToShow", { unitsToShow: firstDetachment.getDetachmentDataIndex() });
 		}
 	};
 }

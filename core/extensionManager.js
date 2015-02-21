@@ -24,7 +24,7 @@
  * ExtensionManager is responsible for the initialization of extensions.
  * It provides functions for extending the core system.
  */
-function ExtensionManager() {
+function ExtensionManager(dispatcher, gui) {
 	
 	var extensions = [];
 	var extensionPoints = {};
@@ -32,7 +32,7 @@ function ExtensionManager() {
 	this.initExtensions = function() {
 
 		for(var i = 0; i < _options.extensions.length; i++) {
-			extensions.push(new window[_options.extensions[i]]());
+			extensions.push(new window[_options.extensions[i]](dispatcher, gui));
 		}
 		
 		for(var i in extensions) {
@@ -42,18 +42,18 @@ function ExtensionManager() {
 	
 	this.reset = function() {
 		
-		var mainContainer = _gui.getElement("#container");
+		var mainContainer = gui.getElement("#container");
 		mainContainer.children().remove();
 		
-		var extraContainer = _gui.getElement("#extraContainer");
+		var extraContainer = gui.getElement("#extraContainer");
 		extraContainer.children().remove();
 		
-		var menuButtonContainer = _gui.getElement("#menuButtonContainer");
+		var menuButtonContainer = gui.getElement("#menuButtonContainer");
 		menuButtonContainer.children().remove();
 		
-		var appMenu = _gui.getElement("#appMenu");
+		var appMenu = gui.getElement("#appMenu");
 		appMenu.children().remove();
-	}
+	};
 	
 //	this.addExtensionPoint = function(name, extensionPoint) {
 //		extensionPoints[name] = extensionPoint;
@@ -67,7 +67,7 @@ function ExtensionManager() {
 //	};
 	
 	this.addContainer = function(className, content) {
-		var mainContainer = _gui.getElement("#container");
+		var mainContainer = gui.getElement("#container");
 		
 		var newContainer = div(null, null, className + " container invisible", null);
 		newContainer.append(content);
@@ -75,18 +75,18 @@ function ExtensionManager() {
 	};
 
 	this.addExtraContainer = function(id) {
-		var extraContainer = _gui.getElement("#extraContainer");
+		var extraContainer = gui.getElement("#extraContainer");
 		
 		var newContainer = div(null, id);
 		extraContainer.append(newContainer);
 	};
 
 	this.addMenuButton = function(name, callback) {
-		_gui.getElement("#menuButtonContainer").append(span(null, null, "menuButton " + name));
-		_gui.getElement("#appMenu").append(span(null, null, "menuButton " + name));
+		gui.getElement("#menuButtonContainer").append(span(null, null, "menuButton " + name));
+		gui.getElement("#appMenu").append(span(null, null, "menuButton " + name));
 		
 		_guiState.contentFragments[name] = name;
-		_gui.getElement("." + name).on(_guiState.clickEvent, callback);
+		gui.getElement("." + name).on(_guiState.clickEvent, callback);
 	};
 	
 }

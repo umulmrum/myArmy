@@ -20,25 +20,25 @@
 
 "use strict";
 
-function SummaryGui() {
+function SummaryGui(dispatcher, systemState, armyState, gui) {
 
 	this.init = function() {
-		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
-		//_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("summary.postChangeOptions", this, this.onPostChangeOptions, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("summary.postSelectAll", this, this.onPostSelectAll, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("summary.postClickPrint", this, this.onPostClickPrint, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("summary.postClickSave", this, this.onPostClickSave, _dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, dispatcher.PHASE_STATE);
+		//dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("preCallFragment", this, this.onPreCallFragment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("summary.postChangeOptions", this, this.onPostChangeOptions, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("summary.postSelectAll", this, this.onPostSelectAll, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("summary.postClickPrint", this, this.onPostClickPrint, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("summary.postClickSave", this, this.onPostClickSave, dispatcher.PHASE_STATE);
 		
-		_gui.getElement("#chooseShort").on("change", $.proxy(function() { this.refreshSummary(); }, this));
-		_gui.getElement("#chooseBBcode").on("change", $.proxy(function() { this.refreshSummary(); }, this));
-		_gui.getElement("#chooseSeparateDetachments").on("change", $.proxy(function() { this.refreshSummary(); }, this));
-		_gui.getElement("#selectAllButton").on(_guiState.clickEvent, $.proxy(function() { this.selectAllText();	}, this));
-		_gui.getElement("#printButton").on(_guiState.clickEvent, $.proxy(function() {this.printSummary(); }, this));
-		_gui.getElement("#saveFileButton").on(_guiState.clickEvent, $.proxy(function() { this.saveSummary(); }, this));
-		_gui.getElement(".summaryText").on(_guiState.selectEvent, $.proxy(function() { this.selectAllIfSmall();	}, this));
+		gui.getElement("#chooseShort").on("change", $.proxy(function() { this.refreshSummary(); }, this));
+		gui.getElement("#chooseBBcode").on("change", $.proxy(function() { this.refreshSummary(); }, this));
+		gui.getElement("#chooseSeparateDetachments").on("change", $.proxy(function() { this.refreshSummary(); }, this));
+		gui.getElement("#selectAllButton").on(_guiState.clickEvent, $.proxy(function() { this.selectAllText();	}, this));
+		gui.getElement("#printButton").on(_guiState.clickEvent, $.proxy(function() {this.printSummary(); }, this));
+		gui.getElement("#saveFileButton").on(_guiState.clickEvent, $.proxy(function() { this.saveSummary(); }, this));
+		gui.getElement(".summaryText").on(_guiState.selectEvent, $.proxy(function() { this.selectAllIfSmall();	}, this));
 	};
 
 	this.onPostInit = function(event) {
@@ -63,13 +63,13 @@ function SummaryGui() {
 	 * Refreshes UI elements.
 	 */
 	this.refreshElements = function() {
-		_gui.getElement("#chooseShortText").html(_guiState.getText("shortview"));
-		_gui.getElement("#chooseBBcodeText").html(_guiState.getText("bbcode"));
-		_gui.getElement("#chooseSeparateDetachmentsText").html(_guiState.getText("chooseSeparateDetachmentsText"));
-		_gui.getElement("#selectAllButton").html(_guiState.getText("selectall"));
-		_gui.getElement("#copytext").html(_guiState.getText("copymessage"));
-		_gui.getElement("#printButton").html(_guiState.getText("print"));
-		_gui.getElement("#saveFileButton").html(_guiState.getText("savefile"));
+		gui.getElement("#chooseShortText").html(_guiState.getText("shortview"));
+		gui.getElement("#chooseBBcodeText").html(_guiState.getText("bbcode"));
+		gui.getElement("#chooseSeparateDetachmentsText").html(_guiState.getText("chooseSeparateDetachmentsText"));
+		gui.getElement("#selectAllButton").html(_guiState.getText("selectall"));
+		gui.getElement("#copytext").html(_guiState.getText("copymessage"));
+		gui.getElement("#printButton").html(_guiState.getText("print"));
+		gui.getElement("#saveFileButton").html(_guiState.getText("savefile"));
 	};
 	
 	this.selectAllIfSmall = function(event) {
@@ -160,7 +160,7 @@ function SummaryGui() {
 	
 	this.refreshSummary = function() {
 
-		if (_armyState.getDetachmentCount() == 0) {
+		if (armyState.getDetachmentCount() == 0) {
 			return;
 		}
 
@@ -187,8 +187,8 @@ function SummaryGui() {
 
 		// prepare slots
 		var sortedSlots = [];
-		for ( var i in _systemState.slots) {
-			sortedSlots.push(_systemState.slots[i]);
+		for ( var i in systemState.slots) {
+			sortedSlots.push(systemState.slots[i]);
 		}
 
 		sortedSlots.sort(function(a, b) {
@@ -206,8 +206,8 @@ function SummaryGui() {
 		var selectionData = {};
 		for ( var i in sortedSlots) {
 			var slot = sortedSlots[i];
-			for ( var j in _armyState.getDetachments()) {
-				var detachmentData = _armyState.getDetachmentData(j);
+			for ( var j in armyState.getDetachments()) {
+				var detachmentData = armyState.getDetachmentData(j);
 				if (isUndefined(selectionData[j])) {
 					selectionData[j] = {};
 				}
@@ -320,10 +320,10 @@ function SummaryGui() {
 		this.renderArmyLabel = function() {
 
 			var string = "";
-			var hasMultipleDetachments = _armyState.getDetachmentCount() > 1;
+			var hasMultipleDetachments = armyState.getDetachmentCount() > 1;
 			var isFirst = true;
-			for ( var i in _armyState.getDetachments()) {
-				var detachmentData = _armyState.getDetachmentData(i);
+			for ( var i in armyState.getDetachments()) {
+				var detachmentData = armyState.getDetachmentData(i);
 				if (detachmentData == null) {
 					continue;
 				}
@@ -406,7 +406,7 @@ function SummaryGui() {
 			s += getSlotHeadingText(slot);
 			s += " (";
 
-			s += getChooserCountForDetachment(_armyState.getDetachmentData(detachmentDataIndex), slot.slotId);
+			s += getChooserCountForDetachment(armyState.getDetachmentData(detachmentDataIndex), slot.slotId);
 
 			s += ")";
 			s += " ----------";
@@ -415,22 +415,22 @@ function SummaryGui() {
 
 		this.renderTotalPoints = function() {
 			var s = "______________________________________________\n";
-			s += _armyState.getTotalPoints() + " " + _guiState.getText("points") + "\n\n";
+			s += armyState.getTotalPoints() + " " + _guiState.getText("points") + "\n\n";
 
 			return s;
 		};
 
 		this.renderStateLink = function() {
-			return _armyState.getStateLink();
+			return armyState.getStateLink();
 		};
 
 		this.renderStatistics = function() {
 			var statistics = "";
-			var myTotalPoints = (_armyState.getTotalPoints() > 0) ? _armyState
+			var myTotalPoints = (armyState.getTotalPoints() > 0) ? armyState
 					.getTotalPoints() : 1;
-			for ( var i in _systemState.slots) {
-				var slot = _systemState.slots[i];
-				var pointCount = _armyState.pointsPerSlot[slot.slotId];
+			for ( var i in systemState.slots) {
+				var slot = systemState.slots[i];
+				var pointCount = armyState.pointsPerSlot[slot.slotId];
 				if (pointCount == 0) {
 					continue;
 				}
@@ -506,7 +506,7 @@ function SummaryGui() {
 		};
 
 		this.renderStateLink = function() {
-			return "[url=" + _armyState.getStateLink() + "]"
+			return "[url=" + armyState.getStateLink() + "]"
 					+ _guiState.getText("statelink") + "[/url]";
 		};
 
@@ -520,7 +520,7 @@ function SummaryGui() {
 		this.renderEntityHeading = function(position, detachmentData, entity) {
 			var s = "";
 
-			if (_armyState.getDetachmentCount() > 1) {
+			if (armyState.getDetachmentCount() > 1) {
 				s += "[" + position + "] ";
 			}
 

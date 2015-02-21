@@ -20,7 +20,7 @@
 
 "use strict";
 
-function HelpExtension() {
+function HelpExtension(dispatcher, gui) {
 	
 	this.init = function(extensionManager) {
 		
@@ -28,9 +28,9 @@ function HelpExtension() {
 		
 		extensionManager.addMenuButton("helpButton", function() {
 			window.open(_options.help.baseUri + _guiState.lang + _options.help.path);
-//			_gui.getElement(".helpContainer").load(
+//			gui.getElement(".helpContainer").load(
 //					"extensions/help/help_" + _guiState.lang + ".html");
-//			_gui.showFragment("help");
+//			gui.showFragment("help");
 		});
 	}
 	

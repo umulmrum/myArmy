@@ -51,7 +51,7 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 		selections = [];
 		selectionCountPerSlot = {};
 		selectionSlotCost = {};
-		for(var i in _systemState.slots) {
+		for(var i in _container.getSystemState().slots) {
 			selectionCountPerSlot[i] = 0;
 			selectionSlotCost[i] = 0;
 		}
@@ -68,10 +68,10 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 		selectionCount[entityslot.entityslotId] = selectionCount[entityslot.entityslotId] + 1;
 		assignEntitySlotLocalId(entityslot);
 		if(doEntityCalculations) {
-			_state.calculateEntityState(entityslot);
+			_container.getState().calculateEntityState(entityslot);
 			//selectionSlotCost[entityslot.slotId] = selectionSlotCost[entityslot.slotId] + entityslot.currentSlotCost;
 		}
-		changeModelCountPool(entityslot, 0, entityslot.entity.currentCount);
+		_container.getPoolService().changeModelCountPool(entityslot, 0, entityslot.entity.currentCount);
 		entityslot.dirty = true;
 		entityslots[entityslot.entityslotId].dirty = true;
 	};
@@ -82,8 +82,8 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 		selectionSlotCost[entityslot.slotId] = selectionSlotCost[entityslot.slotId] - entityslot.currentSlotCost;
 		selectionCount[entityslot.entityslotId] = selectionCount[entityslot.entityslotId] - 1;
 		removeEntitySlotLocalIds(entityslot);
-		changeModelCountPool(entityslot, entityslot.entity.currentCount, 0);
-		_armyState.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
+        _container.getPoolService().changeModelCountPool(entityslot, entityslot.entity.currentCount, 0);
+		_container.getArmyState().pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
 		entityslots[entityslot.entityslotId].dirty = true;
 	};
 
@@ -93,13 +93,13 @@ function ArmyUnit(armyUnitIndexParam, armyParam, isExtensionParam) {
 
 	this.recalculateSelectionSlotCost = function() {
 		selectionSlotCost = {};
-		for(var i in _systemState.slots) {
+		for(var i in _container.getSystemState().slots) {
 			selectionSlotCost[i] = 0;
 		}
 		for(var i in selections) {
 			var selection = selections[i];
-			_state.calculateSelectionSlotCost(selection);
-			selectionSlotCost[_systemState.slots[selection.slotId]] = selection.currentSlotCost;
+			_container.getState().calculateSelectionSlotCost(selection);
+			selectionSlotCost[_container.getSystemState().slots[selection.slotId]] = selection.currentSlotCost;
 		}
 	};
 

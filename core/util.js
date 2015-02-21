@@ -92,8 +92,8 @@ function traverseOptions(detachmentData, armyUnit, entityOrOption, callback) {
 
 function traverseDetachmentData(caller, callback, additionalParams) {
 	var retValue = {};
-	for(var detachmentDataIndex in _armyState.getDetachments()) {
-		var detachmentData = _armyState.getDetachmentData(detachmentDataIndex);
+	for(var detachmentDataIndex in _container.getArmyState().getDetachments()) {
+		var detachmentData = _container.getArmyState().getDetachmentData(detachmentDataIndex);
 		retValue[detachmentDataIndex] = callback.call(caller, detachmentData, additionalParams);
 	}
 	return retValue;
@@ -140,19 +140,19 @@ function cloneObject(obj) {
 //START localId
 
 function assignEntitySlotLocalId(entityslot) {
-	_armyState.addToIdLookup(entityslot);
+	_container.getArmyState().addToIdLookup(entityslot);
 	entityslot.entity.parentEntityslot = entityslot.localId;
 	assignEntityOrOptionLocalId(entityslot.entity, entityslot);
 }
 
 function assignEntityOrOptionLocalId(entityOrOption, entityslot) {
-	_armyState.addToIdLookup(entityOrOption);
+	_container.getArmyState().addToIdLookup(entityOrOption);
 	entityOrOption.parentEntityslot = entityslot.localId;
 	
 	if (entityOrOption.hasOptions()) {
 		for ( var i in entityOrOption.optionLists) {
 			var optionList = entityOrOption.optionLists[i];
-			_armyState.addToIdLookup(optionList);
+			_container.getArmyState().addToIdLookup(optionList);
 			optionList.parentEntity = entityOrOption.localId;
 			if (!isUndefined(optionList.options)) {
 				for ( var j in optionList.options) {
@@ -167,16 +167,16 @@ function assignEntityOrOptionLocalId(entityOrOption, entityslot) {
 }
 
 function removeEntitySlotLocalIds(entityslot) {
-	_armyState.removeFromIdLookup(entityslot);
+	_container.getArmyState().removeFromIdLookup(entityslot);
 	removeEntityOrOptionLocalIds(entityslot.entity);
 }
 
 function removeEntityOrOptionLocalIds(entityOrOption) {
-	_armyState.removeFromIdLookup(entityOrOption);
+	_container.getArmyState().removeFromIdLookup(entityOrOption);
 	if (!isUndefined(entityOrOption.optionLists)) {
 		for ( var i in entityOrOption.optionLists) {
 			var optionList = entityOrOption.optionLists[i];
-			_armyState.removeFromIdLookup(optionList);
+			_container.getArmyState().removeFromIdLookup(optionList);
 			if (!isUndefined(optionList.options)) {
 				for ( var j in optionList.options) {
 					var option = optionList.options[j];
@@ -192,7 +192,7 @@ function removeEntityOrOptionLocalIds(entityOrOption) {
 // START options
 
 function selectOptionCommon(option, optionCount) {
-	var optionList = _armyState.lookupId(option.parentOptionList);
+	var optionList = _container.getArmyState().lookupId(option.parentOptionList);
 
 	if (option.selected) {
 		if (option.currentMaxTaken > 1) {
@@ -267,8 +267,8 @@ function doSelectOption(optionList, option, optionCount) {
 	option.currentCount = optionCount;
 	optionList.currentCount += option.currentCount - previousOptionCount;
 	
-	changePoolByOption(option, optionCount, previousOptionCount);
-	changeLocalPoolByOption(option, optionCount, previousOptionCount);
+	_container.getPoolService().changePoolByOption(option, optionCount, previousOptionCount);
+	_container.getPoolService().changeLocalPoolByOption(option, optionCount, previousOptionCount);
 }
 
 // END options

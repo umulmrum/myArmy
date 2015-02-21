@@ -24,11 +24,11 @@
  * DataReader reads data from the data repository (i.e. mainly the server or 
  * the file system when used offline).
  */
-function DataReader(remoteService) {
+function DataReader(dispatcher, remoteService, systemState, modificationService, poolService) {
 	
 	this.init = function() {
-		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_BEGIN);
-		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_BEGIN);
+		dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_BEGIN);
+		dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, dispatcher.PHASE_BEGIN);
 	};
 	
 	this.onPostInit = function(event) {
@@ -44,7 +44,7 @@ function DataReader(remoteService) {
     }
 
 	function getArmyPath(army) {
-		return getSystemPath(_systemState.system) + army.armyPrefix + "/";
+		return getSystemPath(systemState.system) + army.armyPrefix + "/";
 	}
 	
 	function loadfail(filename, response, errortype, message) {
@@ -63,7 +63,7 @@ function DataReader(remoteService) {
 	};
 	
 	this.readTextsSystem = function() {
-		var currentSystem = _systemState.system;
+		var currentSystem = systemState.system;
 		if(currentSystem != null) {
 			this.readTexts(getSystemPath(currentSystem) + "textsystem", $.proxy(_guiState.addTexts, _guiState));
 		}
@@ -115,7 +115,7 @@ function DataReader(remoteService) {
 
         for (var i = 0; i < slots.length; i++) {
             var mySlot = slots[i];
-            _systemState.slots[mySlot.id] = new Slot(mySlot.id, mySlot.name, mySlot.order);
+            systemState.slots[mySlot.id] = new Slot(mySlot.id, mySlot.name, mySlot.order);
         }
         for (var i = 0; i < special.length; i++) {
             var mySpecial = special[i];
@@ -129,9 +129,9 @@ function DataReader(remoteService) {
         }
         system.detachmentTypes = detachmentTypes;
 
-		_systemState.armies = parseArmies(armies);
-		_systemState.extensions = parseArmies(extensions);
-		//$.extend(true, _systemState.armies, _systemState.extensions);
+		systemState.armies = parseArmies(armies);
+		systemState.extensions = parseArmies(extensions);
+		//$.extend(true, systemState.armies, systemState.extensions);
 	};
 
 	function parseArmies(armies) {
@@ -213,17 +213,17 @@ function DataReader(remoteService) {
 			var slotId = obj.sId;
 			var minTaken = coalesce(obj.minTaken, 0);
 			var maxTaken = coalesce(obj.maxTaken, Number.MAX_VALUE);
-			var slotCost = coalesce(obj.slotCost, _systemState.system.defaultSlotCost);
+			var slotCost = coalesce(obj.slotCost, systemState.system.defaultSlotCost);
 			var fillsPool = coalesce(obj.fillsPool, null);
-			fillsPool = parsePools(detachmentDataIndex, fillsPool);
+			fillsPool = poolService.parsePools(detachmentDataIndex, fillsPool);
 			var needsPool = coalesce(obj.needsPool, null);
-			needsPool = parsePools(detachmentDataIndex, needsPool);
+			needsPool = poolService.parsePools(detachmentDataIndex, needsPool);
 			var visible = coalesce(obj.visible, true);
 			
 			var entityslot = new EntitySlot(detachmentDataIndex, armyUnitIndex, entityslotId, entityId, slotId, minTaken, maxTaken, slotCost, fillsPool, needsPool, visible, armyUnitIndex);
 			armyUnit.addEntityslot(entityslot);
 			armyUnit.setEntityCount(entityslot.entityslotId, 0);
-			registerEntityslotForPools(entityslot);
+            poolService.registerEntityslotForPools(entityslot);
 			if(visible) {
 				detachmentData.increaseEntityslotCount(slotId);
 			}
@@ -257,11 +257,11 @@ function DataReader(remoteService) {
 //			detachmentData.allowedAllies.push.apply(detachmentData.allowedAllies, allies);
 //		}
 		
-		traverseDetachmentData(null, checkPoolsAvailable);
+		traverseDetachmentData(poolService, poolService.checkPoolsAvailable);
 
 		if(armyUnit.isExtension()) {
 			var modifications = data.modifications || [];
-			_modificationService.applyModifications(detachmentData, modifications, armyUnit)
+			modificationService.applyModifications(detachmentData, modifications, armyUnit)
 		}
 	};
 	
@@ -294,13 +294,13 @@ function DataReader(remoteService) {
 				var minTaken = coalesce(obj2.minTaken, 0);
 				var maxTaken = coalesce(obj2.maxTaken, 1);
 				var fillsPool = obj2.fillsPool || null;
-				fillsPool = parsePools(detachmentDataIndex, fillsPool);
+				fillsPool = poolService.parsePools(detachmentDataIndex, fillsPool);
 				var needsPool = obj2.needsPool || null;
-				needsPool = parsePools(detachmentDataIndex, needsPool);
+				needsPool = poolService.parsePools(detachmentDataIndex, needsPool);
 				var fillsLocalPool = obj2.fillsLocalPool || null;
-				fillsLocalPool = parsePools(detachmentDataIndex, fillsLocalPool);
+				fillsLocalPool = poolService.parsePools(detachmentDataIndex, fillsLocalPool);
 				var needsLocalPool = obj2.needsLocalPool || null;
-				needsLocalPool = parsePools(detachmentDataIndex, needsLocalPool);
+				needsLocalPool = poolService.parsePools(detachmentDataIndex, needsLocalPool);
 				var option = new Option(optionId, entityId, cost, costPerModel, minTaken, maxTaken, fillsPool, needsPool, fillsLocalPool, needsLocalPool);
 				optionList.options[optionId] = option;
 			}

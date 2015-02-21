@@ -79,12 +79,12 @@ function DetachmentData(detachmentDataIndexParam) {
 		for(var j = 0; j < armyUnit.getSelectionCount(); j++) {
 			var entityslot = armyUnit.getSelection(j);
 			removeEntitySlotLocalIds(entityslot);
-			_armyState.totalPoints -= entityslot.entity.totalCost;
-			_armyState.pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
+			_container.getArmyState().totalPoints -= entityslot.entity.totalCost;
+			_container.getArmyState().pointsPerSlot[entityslot.slotId] -= entityslot.entity.totalCost;
 		}
 		delete armyUnits[armyUnitIndex];
 		armyUnitCount--;
-		_persistence.createStatelink();
+		_container.getPersistence().createStatelink();
 		return extensionId;
 	};
 	

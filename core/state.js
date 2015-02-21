@@ -23,36 +23,36 @@
 /**
  * State is used to compute the current state of constraints in the system.
  */
-function State() {
+function State(dispatcher, systemState, armyState, persistence, poolService) {
 	
 	this.init = function() {
-		_dispatcher.bindEvent("postAddSelection", this, this.onPostAddSelection, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postAddSelection", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postRemoveSelection", this, this.onPostRemoveSelection, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postChangeModelCount", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postSelectOption", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postChangeFocCount", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postInit", this, this.onDefaultEvent, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_ACTION);
-		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postAddSelection", this, this.onPostAddSelection, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postAddSelection", this, this.onDefaultEvent, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postRemoveSelection", this, this.onPostRemoveSelection, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postChangeModelCount", this, this.onDefaultEvent, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postSelectOption", this, this.onDefaultEvent, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postChangeFocCount", this, this.onDefaultEvent, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postInit", this, this.onDefaultEvent, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, dispatcher.PHASE_ACTION);
+		dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, dispatcher.PHASE_ACTION);
 	};
 
 	this.onPostAddSelection = function(event, additionalData) {
-		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
+		var armyUnit = armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
 		this.sortSelections(armyUnit);
 		this.calculateAllSelectionSlotCosts(armyUnit);
 	};
 
 	this.onPostRemoveSelection = function(event, additionalData) {
-		this.calculateAllSelectionSlotCosts(_armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex))
+		this.calculateAllSelectionSlotCosts(armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex))
 		this.onDefaultEvent(event, additionalData);
 	};
 
 	this.sortSelections = function(armyUnit) {
 		var sortedSelections = armyUnit.getSelections().sort(function(a, b) {
-			var slotA = _systemState.slots[a.slotId];
-			var slotB = _systemState.slots[b.slotId];
+			var slotA = systemState.slots[a.slotId];
+			var slotB = systemState.slots[b.slotId];
 			if (slotA.position < slotB.position) {
 				return -1;
 			} else if (slotA.position > slotB.position) {
@@ -75,9 +75,9 @@ function State() {
 	};
 	
 	this.onPostChangeDetachmentType = function(event) {
-		for(var i in _armyState.getDetachments()) {
-			for(var j in _armyState.getDetachmentData(i).getArmyUnits()) {
-				this.sortSelections(_armyState.getArmyUnit(i, j));
+		for(var i in armyState.getDetachments()) {
+			for(var j in armyState.getDetachmentData(i).getArmyUnits()) {
+				this.sortSelections(armyState.getArmyUnit(i, j));
 			}
 		}
 		this.refreshDirtyThings(true);
@@ -94,25 +94,25 @@ function State() {
 	};
 	
 	this.refreshDirtyThings = function(force) {
-		traverseDetachmentData(this, checkDirtyPools); // mark additional entityslots as dirty if affected by pool
+		traverseDetachmentData(this, poolService.checkDirtyPools); // mark additional entityslots as dirty if affected by pool
 		traverseArmyUnit(this, this.calculateDirtyEntityStatesInChooser, { force: force});
 		traverseArmyUnit(this, this.calculateDirtyEntityStatesInSelections, { force: force});
 		
-		_dispatcher.triggerEvent("postStateRefresh");
+		dispatcher.triggerEvent("postStateRefresh");
 	};
 
 	this.calculateDirtyEntityStatesInChooser = function(armyUnit, detachmentData, additionalParams) {
 		for(var i in armyUnit.getEntityslots()) {
 			var entityslot = armyUnit.getEntityslot(i);
 			if(additionalParams.force || entityslot.dirty) {
-				_state.checkEntityslotAvailable(detachmentData, armyUnit, entityslot);
+				this.checkEntityslotAvailable(detachmentData, armyUnit, entityslot);
 			}
 		}
 	};
 
 	this.checkAllEntityslotsAvailable = function(armyUnit, detachmentData) {
 		for(var i in armyUnit.getEntityslots()) {
-			_state.checkEntityslotAvailable(detachmentData, armyUnit, armyUnit.getEntityslot(i));
+			this.checkEntityslotAvailable(detachmentData, armyUnit, armyUnit.getEntityslot(i));
 		}
 	};
 
@@ -157,7 +157,7 @@ function State() {
 		for ( var i = 0; i < armyUnit.getSelectionCount(); i++) {
 			var slotEntry = armyUnit.getSelection(i);
 			if (additionalParams.force || slotEntry.dirty) {
-				_state.calculateEntityState(slotEntry);
+				this.calculateEntityState(slotEntry);
 			}
 		}
 	};
@@ -165,20 +165,20 @@ function State() {
 	this.calculateEntityState = function(entityslot) {
 		var entity = entityslot.entity;
 		var costBefore = (-1) * entity.totalCost;
-		_armyState.addTotalPoints(costBefore);
-		_armyState.addPointsPerSlot(entityslot.slotId, costBefore);
+		armyState.addTotalPoints(costBefore);
+		armyState.addPointsPerSlot(entityslot.slotId, costBefore);
 		calculateOptionState(entityslot, entity, entity);
 		calculateEntityCost(entityslot, entity);
-		_persistence.calculateEntityslotSaveState(entityslot);
-		_armyState.addTotalPoints(entity.totalCost);
-		_armyState.addPointsPerSlot(entityslot.slotId, entity.totalCost);
+		persistence.calculateEntityslotSaveState(entityslot);
+		armyState.addTotalPoints(entity.totalCost);
+		armyState.addPointsPerSlot(entityslot.slotId, entity.totalCost);
 	};
 
 	function calculateOptionState(entityslot, entity, baseEntity) {
 		if (isUndefined(entity.optionLists)) {
 			return;
 		}
-		var entityFromPool = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(entity.entityId);
+		var entityFromPool = armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(entity.entityId);
 		for ( var i in entity.optionLists) {
 			var optionList = entity.optionLists[i];
 			/* we always use the optionList from the entity pool to compare against - this way we have a single source of information which is more easy to modify */
@@ -188,8 +188,8 @@ function State() {
 			for ( var j in optionList.options) {
 				var option = optionList.options[j];
 				resolveOptionMinMax(entity, baseEntity, optionList, option, entityFromPool.optionLists[i].options[j]);
-				resolveOptionPoolAvailable(option);
-				resolveOptionLocalPoolAvailable(option);
+				poolService.resolveOptionPoolAvailable(option);
+				poolService.resolveOptionLocalPoolAvailable(option);
 				totalMinTaken += option.currentMinTaken;
 			}
 			var optionListIsFullByMinTaken = (totalMinTaken >= optionList.currentMaxTaken);
@@ -317,7 +317,7 @@ function State() {
 	}
 
 	function resolveOptionListMinMax(entity, baseEntity, optionList, compareOptionList) {
-		var parentEntity = _armyState.lookupId(optionList.parentEntity);
+		var parentEntity = armyState.lookupId(optionList.parentEntity);
 		optionList.currentMinTaken = resolveMinMax(entity, parentEntity, baseEntity, optionList,
 				null, compareOptionList.minTaken, 0);
 		if(optionList.currentMinTaken < 0) {
@@ -331,7 +331,7 @@ function State() {
 	}
 
 	function resolveOptionMinMax(entity, baseEntity, optionList, option, compareOption) {
-		var parentEntity = _armyState.lookupId(optionList.parentEntity);
+		var parentEntity = armyState.lookupId(optionList.parentEntity);
 		option.currentMinTaken = resolveMinMax(entity, parentEntity, baseEntity, optionList,
 				option, compareOption.minTaken, 0);
 		if(option.currentMinTaken < 0) {
@@ -354,8 +354,8 @@ function State() {
 		} else if (isUndefined(value)) {
 			return defaultValue;
 		} else {
-			var entitySlot = _armyState.lookupId(entity.parentEntityslot);
-			var detachmentData = _armyState.getDetachmentData(entitySlot.detachmentDataIndex);
+			var entitySlot = armyState.lookupId(entity.parentEntityslot);
+			var detachmentData = armyState.getDetachmentData(entitySlot.detachmentDataIndex);
 			var armyUnit = detachmentData.getArmyUnit(entitySlot.armyUnitIndex);
 			var entityCount = armyUnit.getEntityCounts();
 			var pool = detachmentData.getPools();
@@ -374,7 +374,7 @@ function State() {
                 continue;
             }
             for ( var j in optionList.options) {
-                var entityFromPool = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(entity.entityId);
+                var entityFromPool = armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(entity.entityId);
                 var optionFromPool = entityFromPool.optionLists[i].options[j];
                 calculateOptionCost(entityslot, entity, optionList.options[j], optionFromPool, costObj);
             }
@@ -395,7 +395,7 @@ function State() {
 			for ( var i in option.optionLists) {
 				var optionList = option.optionLists[i];
 				for ( var j in optionList.options) {
-                    var entityFromPool = _armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(option.entityId);
+                    var entityFromPool = armyState.getArmyUnit(entityslot.detachmentDataIndex, entityslot.armyUnitIndex).getFromEntityPool(option.entityId);
                     var optionFromPool = entityFromPool.optionLists[i].options[j];
 					calculateOptionCost(entityslot, entity, optionList.options[j], optionFromPool, optionCostObj);
 				}
@@ -438,7 +438,7 @@ function State() {
 
 	this.calculateSelectionSlotCost = function(selection) {
 		var costBefore = selection.currentSlotCost;
-		var armyUnit = _armyState.getArmyUnit(selection.detachmentDataIndex, selection.armyUnitIndex);
+		var armyUnit = armyState.getArmyUnit(selection.detachmentDataIndex, selection.armyUnitIndex);
 		var entityslotFromPool = armyUnit.getEntityslot(selection.entityslotId);
 		if (isNumber(entityslotFromPool.slotCost)) {
 			selection.currentSlotCost = entityslotFromPool.slotCost;

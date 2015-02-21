@@ -22,7 +22,7 @@
 
 function toggleMenu(event) {
 	var menuId = event.data.menuId;
-	var menu = _gui.getElement("#" + menuId);
+	var menu = _container.getGui().getElement("#" + menuId);
 	if(menu.hasClass("invisible")) {
 		showMenu(menuId);
 	} else {
@@ -39,8 +39,9 @@ function showSlotMenu() {
 }
 
 function showMenu(menuId) {
-	var menu = _gui.getElement("#" + menuId);
-	var menuButton = _gui.getElement("#" + menuId + "Button");
+    var gui = _container.getGui();
+	var menu = gui.getElement("#" + menuId);
+	var menuButton = gui.getElement("#" + menuId + "Button");
 	hideAllMenus();
 	var newPosition = menuButton.offset();
 	menu.removeClass("invisible");
@@ -54,8 +55,9 @@ function showMenu(menuId) {
 }
 
 function hideMenu(menuId) {
-	var menu = _gui.getElement("#" + menuId);
-	var menuButton = _gui.getElement("#" + menuId + "Button");
+    var gui = _container.getGui();
+	var menu = gui.getElement("#" + menuId);
+	var menuButton = gui.getElement("#" + menuId + "Button");
 	if(!menu.hasClass("invisible")) {
 		menu.animate({
 	        "top": menuButton.offset().top + menuButton.height() - menu.height()
@@ -67,7 +69,8 @@ function hideMenu(menuId) {
 }
 
 function hideAllMenusIfNotClickedIn(event) {
-	_gui.getElement(".menu").each(function(index, element) {
+    var gui = _container.getGui();
+	gui.getElement(".menu").each(function(index, element) {
 		if (!clickIsInElement(event, element.id)) {
 			hideMenu(element.id);
 		}
@@ -76,22 +79,24 @@ function hideAllMenusIfNotClickedIn(event) {
 }
 
 function hideAllMenus() {
-	_gui.getElement(".menu").addClass("invisible");
+    var gui = _container.getGui();
+	gui.getElement(".menu").addClass("invisible");
 	$(window).unbind(_guiState.clickEvent);
 }
 
 var _currentSlotId = -1;
 
 function showSlot(slotId) {
+    var gui = _container.getGui();
 	if(_guiState.currentContent != "design") {
-		_gui.showFragment("design");
+		gui.showFragment("design");
 	}
 	_currentSlotId = slotId;
 	if(slotId == -1) {
-		_gui.getElement(".containerChild:not(.empty)").removeClass("invisible");
+		gui.getElement(".containerChild:not(.empty)").removeClass("invisible");
 	} else {
-		_gui.getElement(".containerChild").addClass("invisible");
-		_gui.getElement("#slotRow" + slotId).removeClass("invisible");
+		gui.getElement(".containerChild").addClass("invisible");
+		gui.getElement("#slotRow" + slotId).removeClass("invisible");
 	}
 	hideMenu("slotMenu");
 }

@@ -20,23 +20,23 @@
 
 "use strict";
 
-function DesignerGui() {
+function DesignerGui(dispatcher, systemState, armyState, controller, gui) {
 	
 	this.init = function() {
-		_dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddSelection", this, this.onPostAddSelection, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postRemoveSelection", this, this.onPostRemoveSelection, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postPrepareGui", this, this.onPostPrepareGui, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachment, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, _dispatcher.PHASE_STATE);
-		_dispatcher.bindEvent("postChangeUnitsToShow", this, this.onPostChangeUnitsToShow, _dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddSelection", this, this.onPostAddSelection, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postRemoveSelection", this, this.onPostRemoveSelection, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postStateRefresh", this, this.onPostStateRefresh, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postPrepareGui", this, this.onPostPrepareGui, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postResetArmy", this, this.onPostResetArmy, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteDetachment", this, this.onPostDeleteDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postDeleteExtension", this, this.onPostDeleteDetachment, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeDetachmentType", this, this.onPostChangeDetachmentType, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postSelectOption", this, this.onPostSelectOption, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("mainmenu.postChangeSpecialDisplay", this, this.onPostChangeSpecialDisplay, dispatcher.PHASE_STATE);
+		dispatcher.bindEvent("postChangeUnitsToShow", this, this.onPostChangeUnitsToShow, dispatcher.PHASE_STATE);
 	};
 	
 	this.onPostInit = function(event) {
@@ -44,7 +44,7 @@ function DesignerGui() {
 	};
 	
 	this.onPostAddSelection = function(event, additionalData) {
-		var armyUnit = _armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
+		var armyUnit = armyState.getArmyUnit(additionalData.entityslot.detachmentDataIndex, additionalData.entityslot.armyUnitIndex);
 		this.renderEntry(armyUnit, additionalData.entityslot);
 	};
 	
@@ -87,7 +87,7 @@ function DesignerGui() {
 	};
 
 	this.onPostSelectOption = function(event, additionalData) {
-		var option = _armyState.lookupId(additionalData.optionLocalId);
+		var option = armyState.lookupId(additionalData.optionLocalId);
 		if (option.currentMaxTaken > 1) {
 			this.setMultiOptionValues(option.localId, option.currentMinTaken,
 					option.currentMaxTaken, option.currentCount);
@@ -106,7 +106,7 @@ function DesignerGui() {
 	 * Refreshes UI elements.
 	 */
 	this.refreshElements = function() {
-		_gui.getElement("#optionCountOkButton").html(_guiState.getText("ok"));
+		gui.getElement("#optionCountOkButton").html(_guiState.getText("ok"));
 	};
 	
 	/**
@@ -114,13 +114,13 @@ function DesignerGui() {
 	 * Needs only be called on startup when restoring a saved army.
 	 */
 	this.renderSlotEntries = function() {
-		for ( var slotId in _systemState.slots) {
-			this.renderSlotEntriesForSlot(_systemState.slots[slotId]);
+		for ( var slotId in systemState.slots) {
+			this.renderSlotEntriesForSlot(systemState.slots[slotId]);
 		}
 	};
 	
 	this.renderSlotEntriesForSlot = function(slot) {
-		if (_systemState.system == null) {
+		if (systemState.system == null) {
 			return;
 		}
 		traverseArmyUnit(this, this.renderSelectionsForSlot, { slotId: slot.slotId });
@@ -162,10 +162,10 @@ function DesignerGui() {
 	 */
 	this.renderEntry = function(armyUnit, entityslot) {
 		var entity = entityslot.entity;
-		var container = _gui.getElement("#slotentryDesignerList" + entityslot.slotId);
+		var container = gui.getElement("#slotentryDesignerList" + entityslot.slotId);
 		var isCollapsed = entityslot.optionDisplayState == _guiState.OPTION_DISPLAYSTATE.COLLAPSED;
 
-		var entry = li(null, "entry_" + entityslot.localId , "entry", { "data-localid": entityslot.localId, "data-detachmentdataindex": _armyState.getDetachmentData(entityslot.detachmentDataIndex).getDetachmentDataIndex() });
+		var entry = li(null, "entry_" + entityslot.localId , "entry", { "data-localid": entityslot.localId, "data-detachmentdataindex": armyState.getDetachmentData(entityslot.detachmentDataIndex).getDetachmentDataIndex() });
 		var entryContent = div(null, "entryContent_" + entityslot.localId , "entryContent", null);
 		entry.append(entryContent);
 		var optionContainer = table();
@@ -225,8 +225,8 @@ function DesignerGui() {
 		var position = 0;
 		var i = 0;
 
-		for(i in _armyState.getDetachments()) {
-			var detachmentData = _armyState.getDetachmentData(i);
+		for(i in armyState.getDetachments()) {
+			var detachmentData = armyState.getDetachmentData(i);
 			if(detachmentData.getDetachmentDataIndex() == entityslot.detachmentDataIndex) {
 				break;
 			}
@@ -236,7 +236,7 @@ function DesignerGui() {
 			}
 		}
 
-		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+		var detachmentData = armyState.getDetachmentData(entityslot.detachmentDataIndex);
 		for(var i in detachmentData.getArmyUnits()) {
 			var armyUnit = detachmentData.getArmyUnit(i);
 			if(armyUnit.getArmyUnitIndex() == entityslot.armyUnitIndex) {
@@ -261,7 +261,7 @@ function DesignerGui() {
 	}
 
 	this.renderEntryHeader = function(container, entityslot) {
-		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex);
+		var detachmentData = armyState.getDetachmentData(entityslot.detachmentDataIndex);
 		var entity = entityslot.entity;
 		var entryHeader = null;
 		var entityName = detachmentData.getText(entity.entityName);
@@ -279,7 +279,7 @@ function DesignerGui() {
 		}
 		var armyIndexElement = span(detachmentData.getPosition(), null, armyIndexCss);
 		entryHeader.append(armyIndexElement);
-		if(_armyState.getDetachmentCount() < 2) {
+		if(armyState.getDetachmentCount() < 2) {
 			armyIndexElement.addClass("invisible");
 		}
 		var entityNameElement = span(entityName, null, "entryName");
@@ -363,8 +363,8 @@ function DesignerGui() {
 	this.renderOption = function(armyUnit, optionContainer, optionList, option, isCollapsed,
 			isFirstOptionList, isFirstOption, depth, invisible) {
 
-		var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
-		var detachmentData = _armyState.getDetachmentData(parentEntityslot.detachmentDataIndex);
+		var parentEntityslot = armyState.lookupId(option.parentEntityslot);
+		var detachmentData = armyState.getDetachmentData(parentEntityslot.detachmentDataIndex);
 		var optionEntity = armyUnit.getFromEntityPool(option.entityId);
 
 		var cssClasses = "option";
@@ -382,7 +382,7 @@ function DesignerGui() {
 			cssClasses += " selected";
 		}
 		if (invisible || optionList.currentMaxTaken <= 0
-				|| (isCollapsed && !option.selected) || !_gui.checkDisplay(option)) {
+				|| (isCollapsed && !option.selected) || !gui.checkDisplay(option)) {
 			cssClasses += " invisible";
 		}
 		var optionElement  = tr("option_" + option.localId, cssClasses, { "data-localId": option.localId });
@@ -434,7 +434,7 @@ function DesignerGui() {
 			var deleteButton = div("", null, "entryButton deleteButton");
 			if(entityslot.deletable) {
 				deleteButton.on(_guiState.clickEvent, function() {
-					_controller.deleteEntry(entityslot);
+					controller.deleteEntry(entityslot);
 					return false;
 				});
 			} else {
@@ -445,7 +445,7 @@ function DesignerGui() {
 			var cloneButton = div("", null, "entryButton cloneButton");
 			if(entityslot.clonable) {
 				cloneButton.on(_guiState.clickEvent, function() {
-					_controller.cloneEntry(entityslot);
+					controller.cloneEntry(entityslot);
 					return false;
 				});
 			} else {
@@ -542,7 +542,7 @@ function DesignerGui() {
 
 	this.refreshEntryHeader = function(armyUnit, container, entityslot) {
 
-		var detachmentData = _armyState.getDetachmentData(entityslot.detachmentDataIndex)
+		var detachmentData = armyState.getDetachmentData(entityslot.detachmentDataIndex)
 		var entity = entityslot.entity;
 		var entryHeader = null;
 		var entityName = detachmentData.getText(entity.entityName);
@@ -553,7 +553,7 @@ function DesignerGui() {
 		entryHeader = container.find(".entryHeader");
 		var armyIndexElement = entryHeader.find(".entryArmyIndex");
 		armyIndexElement.html(detachmentData.getPosition());
-		if(_armyState.getDetachmentCount() > 1) {
+		if(armyState.getDetachmentCount() > 1) {
 			armyIndexElement.removeClass("invisible");
 		} else {
 			armyIndexElement.addClass("invisible");
@@ -626,8 +626,8 @@ function DesignerGui() {
 	this.refreshOption = function(armyUnit, optionContainer, optionList, option, isCollapsed,
 			isFirstOptionList, isFirstOption, depth, invisible) {
 
-		var parentEntityslot = _armyState.lookupId(option.parentEntityslot);
-		var detachmentData = _armyState.getDetachmentData(parentEntityslot.detachmentDataIndex);
+		var parentEntityslot = armyState.lookupId(option.parentEntityslot);
+		var detachmentData = armyState.getDetachmentData(parentEntityslot.detachmentDataIndex);
 		var optionEntity = armyUnit.getFromEntityPool(option.entityId);
 		var cssClasses = "option";
 		if (isFirstOption && !isFirstOptionList) {
@@ -644,7 +644,7 @@ function DesignerGui() {
 			cssClasses += " selected";
 		}
 		if (invisible || optionList.currentMaxTaken <= 0
-				|| (isCollapsed && !option.selected) || (!option.selected && !_gui.checkDisplay(optionEntity))) {
+				|| (isCollapsed && !option.selected) || (!option.selected && !gui.checkDisplay(optionEntity))) {
 			cssClasses += " invisible";
 		}
 		var optionElement = optionContainer.find("#option_" + option.localId);
@@ -714,7 +714,7 @@ function DesignerGui() {
 		if (!wasClick(event)) {
 			return false;
 		}
-		_controller.setModelCount(event.data.entityslot,
+		controller.setModelCount(event.data.entityslot,
 				event.data.entityslot.entity.currentCount + event.data.count);
 	};
 
@@ -723,7 +723,7 @@ function DesignerGui() {
 		if (!wasClick(event)) {
 			return false;
 		}
-		_controller.setModelCount(event.data.entityslot, event.data.count);
+		controller.setModelCount(event.data.entityslot, event.data.count);
 	};
 	
 	this.clickOption = function(optionLocalId) {
@@ -732,13 +732,13 @@ function DesignerGui() {
 //			// handled by others (i.e. sliding
 //			// left/right)
 //		}
-		var option = _armyState.lookupId(optionLocalId);
+		var option = armyState.lookupId(optionLocalId);
 
 		if (option.disabled
 				|| option.poolAvailable < 1
 				|| option.localPoolAvailable < 1
 				|| (option.currentMaxTaken == 0 && !option.selected)
-				|| _armyState.lookupId(option.parentEntityslot).optionDisplayState == _guiState.OPTION_DISPLAYSTATE.COLLAPSED) {
+				|| armyState.lookupId(option.parentEntityslot).optionDisplayState == _guiState.OPTION_DISPLAYSTATE.COLLAPSED) {
 			return false;
 		}
 
@@ -746,13 +746,13 @@ function DesignerGui() {
 			this.prepareMultiOption(optionLocalId, option.currentMinTaken,
 					option.currentMaxTaken, option.currentCount);
 		} else {
-			_controller.selectOption(optionLocalId, 1);
+			controller.selectOption(optionLocalId, 1);
 		}
 		return false;
 	};
 	
 	this.removeSlotEntry = function(entityslotLocalId) {
-		_gui.getElement("#entry_" + entityslotLocalId).remove();
+		gui.getElement("#entry_" + entityslotLocalId).remove();
 	};
 	
 	this.removeAllSlotEntries = function() {
@@ -763,7 +763,7 @@ function DesignerGui() {
 		entityslot.optionDisplayState = _guiState.OPTION_DISPLAYSTATE.EXPANDED;
 		this.refreshEntry(armyUnit, entityslot);
 
-		var entryContent = _gui.getElement("#entryContent_" + entityslot.localId);
+		var entryContent = gui.getElement("#entryContent_" + entityslot.localId);
 
 		entryContent.unbind(_guiState.clickEvent);
 	};
@@ -772,7 +772,7 @@ function DesignerGui() {
 		entityslot.optionDisplayState = _guiState.OPTION_DISPLAYSTATE.COLLAPSED;
 		this.refreshEntry(armyUnit, entityslot);
 
-		var entryContent = _gui.getElement("#entryContent_" + entityslot.localId);
+		var entryContent = gui.getElement("#entryContent_" + entityslot.localId);
 
 		// entryContent.unbind(_guiState.clickEvent);
 		entryContent.on(_guiState.clickEvent, function(event) {
@@ -786,7 +786,7 @@ function DesignerGui() {
 	this.removeInvalidEntries = function() {
 		$(".entry").each(function(index, element) {
 			var localId = element.dataset.localid;
-			if(_armyState.lookupId(localId) == null) {
+			if(armyState.lookupId(localId) == null) {
 				element.remove();
 			}
 		});
@@ -805,10 +805,10 @@ function DesignerGui() {
 			return;
 		}
 
-		_gui.closeMenu("optionCountChooser");
+		gui.closeMenu("optionCountChooser");
 
-		var optionElement = _gui.getElement("#option_" + optionLocalId);
-		var optionCountChooser = _gui.getElement("#optionCountChooser");
+		var optionElement = gui.getElement("#option_" + optionLocalId);
+		var optionCountChooser = gui.getElement("#optionCountChooser");
 		var parent = tr("optionCountChooserParent", null, {
 			style : "line-height: 0"
 		});
@@ -824,12 +824,12 @@ function DesignerGui() {
 		}, 'fast');
 
 		// set event after the current event so that it is not called automatically
-		window.setTimeout("_gui.addCheckCloseEvent('optionCountChooser')", 1);
+		window.setTimeout("gui.addCheckCloseEvent('optionCountChooser')", 1);
 	};
 
 	this.setMultiOptionValues = function(optionLocalId, minTaken, maxTaken,
 			currentCount) {
-		var optionCountChooser = _gui.getElement("#optionCountChooser");
+		var optionCountChooser = gui.getElement("#optionCountChooser");
 		optionCountChooser.find("#optionCount").html(
 				currentCount + "/" + maxTaken);
 		var minButton = optionCountChooser.find("#optionCountMinButton");
@@ -849,14 +849,14 @@ function DesignerGui() {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.selectOption(optionLocalId, minTaken);
+				controller.selectOption(optionLocalId, minTaken);
 			});
 			lessButton.html("&lsaquo;");
 			lessButton.on(_guiState.clickEvent, function(event) {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.selectOption(optionLocalId, currentCount - 1);
+				controller.selectOption(optionLocalId, currentCount - 1);
 			});
 		} else {
 			minButton.html("&nbsp;");
@@ -869,14 +869,14 @@ function DesignerGui() {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.selectOption(optionLocalId, currentCount + 1);
+				controller.selectOption(optionLocalId, currentCount + 1);
 			});
 			maxButton.html("&raquo;");
 			maxButton.on(_guiState.clickEvent, function(event) {
 				if (!wasClick(event)) {
 					return false;
 				}
-				_controller.selectOption(optionLocalId, maxTaken);
+				controller.selectOption(optionLocalId, maxTaken);
 			});
 		} else {
 			moreButton.html("&nbsp;");
@@ -887,14 +887,14 @@ function DesignerGui() {
 			if (!wasClick(event)) {
 				return false;
 			}
-			_gui.closeMenu("optionCountChooser");
-			// _gui.getElement("#optionCountChooser").css("display", "none");
+			gui.closeMenu("optionCountChooser");
+			// gui.getElement("#optionCountChooser").css("display", "none");
 			okButton.unbind(_guiState.clickEvent);
 		});
 	};
 
 	this.highlightActiveDetachment = function(unitsToShow) {
-		var designContainer = _gui.getElement(".designContainer");
+		var designContainer = gui.getElement(".designContainer");
 		designContainer.find("li[data-detachmentdataindex!='" + unitsToShow + "']").find(".entryHeader").addClass("commonHighlightInactive");
 		designContainer.find("li[data-detachmentdataindex='" + unitsToShow + "']").find(".entryHeader").removeClass("commonHighlightInactive");
 	}

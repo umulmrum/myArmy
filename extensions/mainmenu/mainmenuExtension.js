@@ -20,22 +20,26 @@
 
 "use strict";
 
-function MainmenuExtension() {
+function MainmenuExtension(dispatcher, gui) {
 	
 	this.init = function(extensionManager) {
-		
-		var mainmenuGui = new MainmenuGui();
+
+        var systemState = _container.getSystemState();
+        var armyState = _container.getArmyState();
+        var controller = _container.getController();
+
+		var mainmenuGui = new MainmenuGui(dispatcher, systemState, armyState, controller, gui);
 		mainmenuGui.init();
 		
 		extensionManager.addContainer("mainmenuContainer", getContainerContent());
 		extensionManager.addContainer("creditsContainer", "");
 		
-		addEvents();
+		addEvents(controller);
 		
 		extensionManager.addMenuButton("mainmenuButton", function() {
-			_gui.showFragment("mainmenu");
+			gui.showFragment("mainmenu");
 		});
-	}
+	};
 	
 	function getContainerContent() {
 		return '<span id="armyHeading" class="slotHeadingContainer"></span> \
@@ -70,35 +74,35 @@ function MainmenuExtension() {
 	</div>';
 	}
 	
-	function addEvents() {
-		_gui.getElement("#systemSelect").on("change", function() {
-			_controller.changeSystem(this.value);
+	function addEvents(controller) {
+		gui.getElement("#systemSelect").on("change", { controller: controller }, function() {
+			controller.changeSystem(this.value);
 		});
-		_gui.getElement("#armySelect").on("change", function() {
-			_controller.addDetachment(this.value);
+		gui.getElement("#armySelect").on("change", { controller: controller }, function() {
+			controller.addDetachment(this.value);
 		});
-		_gui.getElement("#resetButton").on(_guiState.clickEvent, function() {
+		gui.getElement("#resetButton").on(_guiState.clickEvent, { controller: controller }, function() {
 			if(!confirm(_guiState.getText("message.confirmAllSelectionsDelete"))) {
 				return;
 			}
-			_controller.resetArmylist();
+			controller.resetArmylist();
 		});
-		_gui.getElement("#deleteAllDetachmentsButton").on(_guiState.clickEvent, function() {
+		gui.getElement("#deleteAllDetachmentsButton").on(_guiState.clickEvent, { controller: controller }, function() {
 			if(!confirm(_guiState.getText("message.confirmAllDetachmentsDelete"))) {
 				return;
 			}
-			_controller.deleteAllDetachments();
+			controller.deleteAllDetachments();
 		});
-		_gui.getElement("#creditsButton").on(_guiState.clickEvent, function() {
-			_gui.showFragment("credits");
+		gui.getElement("#creditsButton").on(_guiState.clickEvent, function() {
+			gui.showFragment("credits");
 		});
-		_gui.getElement("#downloadButton").on(_guiState.clickEvent, function() {
+		gui.getElement("#downloadButton").on(_guiState.clickEvent, function() {
 			window.open(_options.core.downloadBaseUri + _guiState.lang + _options.core.downloadPath);
 		});
-		_gui.getElement("#forumButton").on(_guiState.clickEvent, function() {
+		gui.getElement("#forumButton").on(_guiState.clickEvent, function() {
 			window.open("http://www.gw-fanworld.net/forumdisplay.php/398-myArmy");
 		});
-		_gui.getElement("#fileLoader").on("change", _gui.loadFile);
+		gui.getElement("#fileLoader").on("change", gui.loadFile);
 	}
 }
 

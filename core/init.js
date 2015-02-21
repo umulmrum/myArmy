@@ -20,21 +20,10 @@
 
 "use strict";
 
-var _dispatcher = null;
-var _state = null;
-var _remoteService = null;
-var _dataReader = null;
-var _modificationService = null;
-var _dataStore = null;
+var _container = null;
+
 var _systems = []; // all game systems
-var _systemState = null;
-var _armyState = null;
-var _persistence = null;
-var _controller = null;
 var _guiState = null;
-var _gui = null;
-var _textService = null;
-var _extensionManager = null;
 
 /**
  * init() initializes the system. It is called when the system is initially loaded or when a restart is required (which
@@ -43,57 +32,47 @@ var _extensionManager = null;
  */
 function init() {
 
-	initVars();
-	_dispatcher.deactivateEvents();
-	_gui.startLongRunningProcess();
+    _guiState = new GuiState();
+    var container = initContainer();
+    var dispatcher = container.getDispatcher();
+    var dataReader = container.getDataReader();
+    var systemState = container.getSystemState();
+    var armyState = container.getArmyState();
+    var controller = container.getController();
+    var extensionManager = container.getExtensionManager();
+    var gui = container.getGui();
+
+    dispatcher.triggerEvent("preLongRunningProcess");
+	dispatcher.deactivateEvents();
 	initDevice();
 	// After this point the event system is initialized.
 	// Do not register events (jQuery or myArmy) before this comment.
-	_extensionManager.reset();
-	_gui.onResizeContainer();
-	_extensionManager.initExtensions();
-	_dataReader.readSystems();
-	initUserState();
+	extensionManager.reset();
+	gui.onResizeContainer();
+	extensionManager.initExtensions();
+	dataReader.readSystems();
+	initUserState(container.getDataStore(), container.getPersistence());
     
-    if(_systemState.system == null) {
-    	_controller.changeSystem(1); // set directly as long as only 1 system is supported ...
+    if(systemState.system == null) {
+    	controller.changeSystem(1); // set directly as long as only 1 system is supported ...
     }
 	
     // TODO decouple
-	if(_armyState.getDetachmentCount() > 0) {
+	if(armyState.getDetachmentCount() > 0) {
 		_guiState.currentContent = "design";
 	} else {
 		_guiState.currentContent = "mainmenu";
 	}
 
-	_dispatcher.activateEvents();
-	_dispatcher.triggerEvent("postInit");
+	dispatcher.activateEvents();
+	dispatcher.triggerEvent("postInit");
+    dispatcher.triggerEvent("postLongRunningProcess");
 }
 
-function initVars() {
-	_dispatcher = new Dispatcher();
-	_state = new State();
-	_state.init();
-	_dataStore = new DataStore();
-	_remoteService = new RemoteService();
-	if(_options.core.cacheRemoteFiles && _dataStore.isLocalStorageAvailable()) {
-		_remoteService = new CachedRemoteService(_remoteService, _dataStore);
-	}
-	_remoteService.init();
-	_dataReader = new DataReader(_remoteService);
-	_dataReader.init();
-	_systemState = new SystemState();
-	_armyState = new ArmyState();
-	_persistence = new Persistence();
-	_persistence.init();
-	_modificationService = new ModificationService(_dataReader);
-	_controller = new Controller(_modificationService);
-	_guiState = new GuiState();
-	_gui = new Gui();
-	_gui.init();
-	_textService = new TextService();
-	_textService.init();
-	_extensionManager = new ExtensionManager();
+function initContainer() {
+    _container = new Container();
+    _container.init();
+    return _container;
 }
 
 /**
@@ -150,11 +129,11 @@ function initDevice() {
 //	}
 }
 
-function initUserState() {
-	var lang = _dataStore.readCookieValue("myArmy.language");
+function initUserState(dataStore, persistence) {
+	var lang = dataStore.readCookieValue("myArmy.language");
 	if (lang != null) {
 		_guiState.lang = lang;
 	}
 	
-    _persistence.restoreState();	
+    persistence.restoreState();
 }

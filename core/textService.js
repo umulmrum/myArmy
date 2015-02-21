@@ -1,11 +1,11 @@
 "use strict";
 
-function TextService() {
+function TextService(dispatcher, armyState) {
 
     this.init = function() {
-        _dispatcher.bindEvent("postInit", this, this.onPostInit, _dispatcher.PHASE_STATE);
-        _dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachmentAction, _dispatcher.PHASE_ACTION);
-        _dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, _dispatcher.PHASE_STATE);
+        dispatcher.bindEvent("postInit", this, this.onPostInit, dispatcher.PHASE_STATE);
+        dispatcher.bindEvent("postAddDetachment", this, this.onPostAddDetachmentAction, dispatcher.PHASE_ACTION);
+        dispatcher.bindEvent("postChangeLanguage", this, this.onPostChangeLanguage, dispatcher.PHASE_STATE);
     };
 
     this.onPostInit = function() {
@@ -27,8 +27,8 @@ function TextService() {
 
 
     this.refreshAllDetachmentTexts = function() {
-        for(var i in _armyState.getDetachments()) {
-            var detachmentData = _armyState.getDetachmentData(i);
+        for(var i in armyState.getDetachments()) {
+            var detachmentData = armyState.getDetachmentData(i);
             this.addCommonTextsToDetachment(detachmentData);
         }
     };

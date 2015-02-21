@@ -20,26 +20,29 @@
 
 "use strict";
 
-function DesignerExtension() {
+function DesignerExtension(dispatcher, gui) {
 	
 	this.init = function(extensionManager) {
-		
-		var chooserGui = new ChooserGui();
+
+        var systemState = _container.getSystemState();
+        var armyState = _container.getArmyState();
+        var controller = _container.getController();
+		var chooserGui = new ChooserGui(dispatcher, systemState, armyState, controller, gui);
 		chooserGui.init();
 		
-		var designerGui = new DesignerGui();
+		var designerGui = new DesignerGui(dispatcher, systemState, armyState, controller, gui);
 		designerGui.init();
 		
 		extensionManager.addContainer("designContainer", "");
 		
 		extensionManager.addMenuButton("designButton", function() {
-			_gui.showFragment("design");
+			gui.showFragment("design");
 		});
 		
-		buildOptionCountChooser();
-	}
+		buildOptionCountChooser(gui);
+	};
 	
-	function buildOptionCountChooser() {
+	function buildOptionCountChooser(gui) {
 		var chooser = 
 	'<div id="optionCountChooser" class="popup option"> \
 		<span id="optionCountMinButton" class="incDecButton">&lt;&lt;</span> \
@@ -49,6 +52,6 @@ function DesignerExtension() {
 		<span id="optionCountMaxButton" class="incDecButton">&gt;&gt;</span> \
 		<span id="optionCountOkButton" class="incDecButton"></span> \
 	</div>';
-		_gui.getElement("body").append(chooser);
+		gui.getElement("body").append(chooser);
 	}
 }

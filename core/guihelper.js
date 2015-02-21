@@ -35,7 +35,7 @@ function clickIsInElement(event, elementToCheckId) {
 
 function closeIfClickedElsewhere(event) {
 	if(!clickIsInElement(event, event.data.elementId)) {
-		_gui.getElement("#" + event.data.elementId).css("display", "none");
+		_container.getGui().getElement("#" + event.data.elementId).css("display", "none");
 	}
 }
 

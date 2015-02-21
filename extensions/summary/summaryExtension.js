@@ -20,21 +20,24 @@
 
 "use strict";
 
-function SummaryExtension() {
+function SummaryExtension(dispatcher, gui) {
 	
 	this.init = function(extensionManager) {
-		
+
+        var systemState = _container.getSystemState();
+        var armyState = _container.getArmyState();
+
 		extensionManager.addContainer("summaryContainer", getContainerContent());
 		extensionManager.addExtraContainer("printContainer");
 		extensionManager.addExtraContainer("saveContainer");
 		
 		extensionManager.addMenuButton("summaryButton", function() {
-			_gui.showFragment("summary");
+			gui.showFragment("summary");
 		});
 
-		var summaryGui = new SummaryGui();
+		var summaryGui = new SummaryGui(dispatcher, systemState, armyState, gui);
 		summaryGui.init();
-	}
+	};
 	
 	function getContainerContent() {
 		return '<div class="summary1"> \

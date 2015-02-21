@@ -24,7 +24,7 @@
  * ArmyState() manages all current army data.
  * It holds data for each detachment as well as aggregate information (e.g. total points). 
  */
-function ArmyState() {
+function ArmyState(systemState) {
 	
 	this.pointsPerSlot = {}; // the current points values per slot
 
@@ -53,8 +53,8 @@ function ArmyState() {
 	};
 	
 	this.resetPointsPerSlot = function() {
-		for(var i in _systemState.slots) {
-			var slotId = _systemState.slots[i].slotId;
+		for(var i in systemState.slots) {
+			var slotId = systemState.slots[i].slotId;
 			this.pointsPerSlot[slotId] = 0;
 		}
 	};
@@ -67,7 +67,7 @@ function ArmyState() {
 		detachmentCount++;
 		maxDetachmentIndex++;
 		setDetachmentPositions();
-		detachment.setDetachmentTypes($.extend(true, {}, _systemState.system.detachmentTypes));
+		detachment.setDetachmentTypes($.extend(true, {}, systemState.system.detachmentTypes));
 
 		return detachment;
 	};
@@ -81,7 +81,7 @@ function ArmyState() {
 		detachmentCount--;
 		setDetachmentPositions();
 
-		_persistence.createStatelink();
+		_container.getPersistence().createStatelink();
 	};
 
 	function setDetachmentPositions() {
