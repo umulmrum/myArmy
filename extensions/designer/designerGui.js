@@ -824,7 +824,7 @@ function DesignerGui(dispatcher, systemState, armyState, controller, gui) {
 		}, 'fast');
 
 		// set event after the current event so that it is not called automatically
-		window.setTimeout("gui.addCheckCloseEvent('optionCountChooser')", 1);
+		window.setTimeout("_container.getGui().addCheckCloseEvent('optionCountChooser')", 1);
 	};
 
 	this.setMultiOptionValues = function(optionLocalId, minTaken, maxTaken,
